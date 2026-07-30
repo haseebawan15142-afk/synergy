@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 52" role="img" aria-labelledby="logoTitle">
+  <title id="logoTitle">Synergy Computers (Pvt) Ltd</title>
+  <text
+    x="2"
+    y="35"
+    font-family="Arial Black, Arial, sans-serif"
+    font-size="26"
+    font-weight="900"
+    fill="#357C3C"
+    letter-spacing="-1"
+  >
+    SCL
+  </text>
+  <text
+    x="72"
+    y="33"
+    font-family="Segoe UI, system-ui, Arial, sans-serif"
+    font-size="27"
+    font-weight="700"
+    fill="#0D0D0D"
+  >
+    SYNERGY
+  </text>
+  <text
+    x="72"
+    y="46"
+    font-family="Segoe UI, system-ui, Arial, sans-serif"
+    font-size="7.6"
+    font-weight="400"
+    letter-spacing="0.16em"
+    fill="#5C6670"
+  >
+    COMPUTERS (PVT) LTD
+  </text>
+</svg>
