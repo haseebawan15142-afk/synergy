@@ -51,7 +51,25 @@
   }
 
   body {
-    @apply min-w-0 overflow-x-hidden bg-surface text-ink-body antialiased transition-colors duration-300;
+    @apply flex min-h-screen min-w-0 flex-col overflow-x-hidden bg-surface text-ink-body antialiased transition-colors duration-300;
+  }
+
+  img,
+  picture,
+  video,
+  canvas,
+  svg {
+    display: block;
+    max-width: 100%;
+  }
+
+  button,
+  a,
+  [role="button"],
+  input,
+  textarea,
+  select {
+    touch-action: manipulation;
   }
 
   ::selection {
@@ -66,10 +84,14 @@
 
   .section-y {
     @apply py-12 sm:py-16 lg:py-20 xl:py-24;
+    content-visibility: auto;
+    contain-intrinsic-size: auto 520px;
   }
 
   .section-y-tight {
     @apply py-10 sm:py-12 lg:py-16;
+    content-visibility: auto;
+    contain-intrinsic-size: auto 420px;
   }
 
   .text-hero {
@@ -198,6 +220,22 @@
   .dark .glass-panel {
     @apply border-white/10 bg-slate-900/45 text-ink-body;
   }
+
+  .prose {
+    @apply max-w-none;
+  }
+
+  .prose :where(table) {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .prose :where(pre) {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 }
 
 @keyframes gradientFlow {
@@ -270,6 +308,26 @@
   }
 }
 
+@media (max-width: 768px) {
+  .glass-card,
+  .glass-panel {
+    backdrop-filter: blur(12px);
+  }
+
+  .mesh-float {
+    animation: none;
+  }
+
+  .aurora-blob {
+    filter: blur(48px);
+    opacity: 0.28;
+  }
+
+  .hero-spotlight {
+    display: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -281,5 +339,16 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .section-y,
+  .section-y-tight {
+    content-visibility: visible;
+  }
+}
+
+@media (hover: none) {
+  .group:hover {
+    transform: none;
   }
 }

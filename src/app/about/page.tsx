@@ -13,7 +13,7 @@ export default function AboutPage() {
         title="Driving excellence through technology"
         description="Synergy Computers (Pvt.) Ltd — Pakistan's premium IT solutions provider since the early days of the country's IT industry."
       />
-      <div className="prose prose-neutral mx-auto max-w-3xl px-4 py-12 sm:px-6 lg:px-8">
+      <div className="prose prose-neutral page-container max-w-3xl section-y-tight !py-12">
         <p>
           With more than 40 years of experience, we serve clients in banking and finance, power
           generation, healthcare, education, hospitality, utilities, and multinational corporations

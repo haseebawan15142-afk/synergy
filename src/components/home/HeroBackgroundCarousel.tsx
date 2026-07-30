@@ -11,8 +11,15 @@ import {
 export function HeroBackgroundCarousel() {
   const [index, setIndex] = useState(0);
   const reduce = useReducedMotion();
+  const [lite, setLite] = useState(true);
   const { scrollY } = useScroll();
-  const parallaxY = useTransform(scrollY, [0, 400], [0, reduce ? 0 : 32]);
+  const parallaxY = useTransform(scrollY, [0, 400], [0, reduce || lite ? 0 : 32]);
+
+  useEffect(() => {
+    const coarse = window.matchMedia("(pointer: coarse)").matches;
+    const narrow = window.matchMedia("(max-width: 768px)").matches;
+    setLite(coarse || narrow);
+  }, []);
 
   useEffect(() => {
     if (heroSlides.length <= 1) return;
@@ -33,6 +40,18 @@ export function HeroBackgroundCarousel() {
       {heroSlides.map((slide, i) => {
         const offset = (i - index) * 100;
         const isActive = i === index;
+        const imgProps = {
+          src: slide.src,
+          alt: "",
+          className: isActive && !reduce && !lite
+            ? "h-[108%] w-full object-cover object-center"
+            : "h-full w-full object-cover object-center",
+          draggable: false as const,
+          decoding: "async" as const,
+          fetchPriority: (isActive ? "high" : "low") as "high" | "low",
+          loading: (isActive ? "eager" : "lazy") as "eager" | "lazy",
+        };
+
         return (
           <div
             key={slide.src}
@@ -43,26 +62,14 @@ export function HeroBackgroundCarousel() {
               zIndex: isActive ? 2 : 1,
             }}
           >
-            {isActive && !reduce ? (
+            {isActive && !reduce && !lite ? (
               <motion.div className="h-full w-full" style={{ y: parallaxY }}>
                 {/* eslint-disable-next-line @next/next/no-img-element -- full-bleed slide carousel */}
-                <img
-                  src={slide.src}
-                  alt=""
-                  className="h-[108%] w-full object-cover object-center"
-                  draggable={false}
-                  decoding="async"
-                />
+                <img {...imgProps} />
               </motion.div>
             ) : (
               /* eslint-disable-next-line @next/next/no-img-element -- full-bleed slide carousel */
-              <img
-                src={slide.src}
-                alt=""
-                className="h-full w-full object-cover object-center"
-                draggable={false}
-                decoding="async"
-              />
+              <img {...imgProps} />
             )}
           </div>
         );

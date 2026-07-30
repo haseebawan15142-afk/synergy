@@ -19,13 +19,17 @@ export function GsapScrollEffects() {
 
     gsap.registerPlugin(ScrollTrigger);
 
+    const mobile = window.matchMedia("(max-width: 768px)").matches;
+    const blurAmount = mobile ? "blur(8px)" : "blur(16px)";
+    const blurOffset = mobile ? 20 : 32;
+
     const blurEls = gsap.utils.toArray<HTMLElement>("[data-gsap-blur]");
     blurEls.forEach((el) => {
       gsap.from(el, {
         opacity: 0,
-        filter: "blur(16px)",
-        y: 32,
-        duration: 1.1,
+        filter: blurAmount,
+        y: blurOffset,
+        duration: mobile ? 0.75 : 1.1,
         ease: "power3.out",
         immediateRender: false,
         scrollTrigger: {
@@ -36,19 +40,21 @@ export function GsapScrollEffects() {
       });
     });
 
-    const parallaxEls = gsap.utils.toArray<HTMLElement>("[data-gsap-parallax]");
-    parallaxEls.forEach((el) => {
-      gsap.to(el, {
-        y: -36,
-        ease: "none",
-        scrollTrigger: {
-          trigger: el,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: 1.4,
-        },
+    if (!mobile) {
+      const parallaxEls = gsap.utils.toArray<HTMLElement>("[data-gsap-parallax]");
+      parallaxEls.forEach((el) => {
+        gsap.to(el, {
+          y: -36,
+          ease: "none",
+          scrollTrigger: {
+            trigger: el,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: 1.4,
+          },
+        });
       });
-    });
+    }
 
     const cards = gsap.utils.toArray<HTMLElement>("[data-gsap-rise]");
     cards.forEach((el, i) => {

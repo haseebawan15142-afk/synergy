@@ -103,8 +103,10 @@ export function ChatWidget() {
 
       <div
         className={cn(
-          "fixed bottom-4 right-4 z-[70] flex flex-col pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:bottom-6 sm:right-6",
-          open ? "w-[min(100vw-1.5rem,24rem)]" : "w-auto",
+          "fixed bottom-4 z-[70] flex flex-col pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:bottom-6",
+          open
+            ? "inset-x-[max(0.75rem,env(safe-area-inset-left))] sm:inset-x-auto sm:right-6 sm:w-[min(100vw-1.5rem,24rem)]"
+            : "right-[max(1rem,env(safe-area-inset-right))] w-auto sm:right-6",
         )}
       >
         <AnimatePresence initial={false}>

@@ -21,6 +21,9 @@ export function HeroExperienceLayer({ children, backdrop, className }: HeroExper
     const section = sectionRef.current;
     if (!section) return;
 
+    const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    if (!finePointer) return;
+
     const onMove = (e: MouseEvent) => {
       const rect = section.getBoundingClientRect();
       const x = e.clientX - rect.left;
@@ -53,15 +56,21 @@ export function HeroExperienceLayer({ children, backdrop, className }: HeroExper
     };
   }, [reduce]);
 
+  const enableSpotlight = !reduce;
+
   return (
     <section ref={sectionRef} className={cn("relative overflow-hidden", className)}>
       {backdrop}
-      {!reduce ? (
-        <div ref={spotRef} className="hero-spotlight pointer-events-none absolute inset-0 z-[3]" aria-hidden />
+      {enableSpotlight ? (
+        <div
+          ref={spotRef}
+          className="hero-spotlight pointer-events-none absolute inset-0 z-[3] hidden lg:block"
+          aria-hidden
+        />
       ) : null}
       <div
         ref={contentRef}
-        className="relative z-10 transition-[transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-transform"
+        className="relative z-10 lg:transition-[transform] lg:duration-500 lg:ease-[cubic-bezier(0.22,1,0.36,1)] lg:will-change-transform"
       >
         {children}
       </div>

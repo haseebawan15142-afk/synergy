@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { blogPosts, getBlogPost } from "@/lib/content/blog-posts";
@@ -36,11 +37,17 @@ export default async function BlogPostPage({ params }: Props) {
   return (
     <>
       <PageHeader title={post.title} description={post.date ? `Published ${post.date}` : undefined} />
-      <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
+      <div className="page-container max-w-3xl section-y-tight !py-10">
         {image ? (
-          <div className="mb-8 overflow-hidden rounded-2xl border border-border/80 shadow-card">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={image} alt={post.title} className="w-full object-cover" />
+          <div className="relative mb-8 aspect-[16/10] overflow-hidden rounded-2xl border border-border/80 shadow-card sm:aspect-[2/1]">
+            <Image
+              src={image}
+              alt={post.title}
+              fill
+              priority
+              sizes="(max-width: 768px) 100vw, 768px"
+              className="object-cover"
+            />
           </div>
         ) : null}
         <span className="mb-6 inline-flex rounded-full bg-synergy-muted px-3 py-1 text-xs font-bold uppercase tracking-wider text-synergy-dark">

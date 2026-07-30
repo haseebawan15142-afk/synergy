@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 import type { BlogPostMeta } from "@/lib/content/blog-posts";
@@ -26,17 +27,21 @@ export function BlogPostCard({ post, compact }: BlogPostCardProps) {
           href={`/resources/${post.slug}`}
           className="relative block aspect-[16/10] overflow-hidden bg-surface-muted"
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <motion.img
-            src={image}
-            alt={post.title}
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-            loading="lazy"
+          <motion.div
+            className="relative h-full w-full"
             initial={reduce ? false : "hidden"}
             whileInView="visible"
             viewport={viewportOnce}
             variants={fadeIn}
-          />
+          >
+            <Image
+              src={image}
+              alt={post.title}
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              className="object-cover transition duration-500 group-hover:scale-105"
+            />
+          </motion.div>
           <div className="absolute inset-0 bg-gradient-to-t from-ink/40 via-transparent to-transparent opacity-60" />
         </Link>
       ) : null}
@@ -57,7 +62,7 @@ export function BlogPostCard({ post, compact }: BlogPostCardProps) {
         ) : null}
         <Link
           href={`/resources/${post.slug}`}
-          className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-synergy transition group-hover:gap-2"
+          className="mt-4 inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-synergy transition group-hover:gap-2"
         >
           Read more <span aria-hidden>→</span>
         </Link>
