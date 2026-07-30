@@ -2,19 +2,19 @@
 export const heroSlidesGenerated = [
   {
     "src": "/images/hero/ai-and-cloud-technology-visuals.jpg",
-    "alt": "AI and cloud technology visuals"
+    "alt": "ai and cloud technology visuals"
   },
   {
     "src": "/images/hero/artificial-intelligence.jpg",
-    "alt": "Artificial Intelligence"
+    "alt": "artificial intelligence"
   },
   {
     "src": "/images/hero/business-professionals-discussing-technology.jpg",
-    "alt": "Business professionals discussing technology"
+    "alt": "business professionals discussing technology"
   },
   {
     "src": "/images/hero/digital-brain-graphics.jpg",
-    "alt": "Digital brain graphics"
+    "alt": "digital brain graphics"
   },
   {
     "src": "/images/hero/enterprise-image.jpg",
@@ -22,18 +22,18 @@ export const heroSlidesGenerated = [
   },
   {
     "src": "/images/hero/executive-meeting-with-digital-screens.jpg",
-    "alt": "Executive meeting with digital screens"
+    "alt": "executive meeting with digital screens"
   },
   {
     "src": "/images/hero/large-server-room-with-engineers.jpg",
-    "alt": "Large server room with engineers"
+    "alt": "large server room with engineers"
   },
   {
     "src": "/images/hero/machine-learning.jpg",
-    "alt": "Machine Learning"
+    "alt": "machine learning"
   },
   {
     "src": "/images/hero/modern-digital-workspace.jpg",
-    "alt": "Modern digital workspace"
+    "alt": "modern digital workspace"
   }
 ] as const;

@@ -13,13 +13,8 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Environment
 
-Copy `.env.example` to `.env.local` and set SMTP variables when ready for contact form email.
+Copy `.env.example` to `.env.local` and set `GROQ_API_KEY` for the AI chatbot. Add SMTP variables when ready for contact form email.
 
-## Assets
+## Deploy
 
-- Source: `.cursor/assets/`
-- Public: `public/brand/`, `public/images/partners/`
-
-## Docs
-
-Planning and content live in `.cursor/docs/` and `.cursor/rules/`.
+Push to GitHub — Vercel deploys automatically from the connected repository.

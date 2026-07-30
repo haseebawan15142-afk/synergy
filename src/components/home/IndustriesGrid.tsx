@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { industries } from "@/lib/content/industries";
+import { GsapParallax } from "@/components/effects/GsapParallax";
 import { Button } from "@/components/ui/Button";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Reveal } from "@/components/motion/Reveal";
@@ -44,7 +45,7 @@ export function IndustriesGrid() {
 export function CtaBand() {
   return (
     <Reveal as="section" className="page-container section-y-tight mb-12 sm:mb-16">
-        <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl" data-gsap-parallax>
+        <GsapParallax className="relative overflow-hidden rounded-2xl sm:rounded-3xl">
         <div className="absolute inset-0 bg-gradient-dark" aria-hidden />
         <div
           className="absolute inset-0 bg-gradient-to-r from-synergy/30 via-transparent to-accent/20"
@@ -69,7 +70,7 @@ export function CtaBand() {
             </a>
           </div>
         </div>
-      </div>
+      </GsapParallax>
     </Reveal>
   );
 }

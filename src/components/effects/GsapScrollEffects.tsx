@@ -23,65 +23,58 @@ export function GsapScrollEffects() {
     const blurAmount = mobile ? "blur(8px)" : "blur(16px)";
     const blurOffset = mobile ? 20 : 32;
 
-    const blurEls = gsap.utils.toArray<HTMLElement>("[data-gsap-blur]");
-    blurEls.forEach((el) => {
-      gsap.from(el, {
-        opacity: 0,
-        filter: blurAmount,
-        y: blurOffset,
-        duration: mobile ? 0.75 : 1.1,
-        ease: "power3.out",
-        immediateRender: false,
-        scrollTrigger: {
-          trigger: el,
-          start: "top 92%",
-          once: true,
-        },
-      });
-    });
+    let ctx: gsap.Context | undefined;
 
-    if (!mobile) {
-      const parallaxEls = gsap.utils.toArray<HTMLElement>("[data-gsap-parallax]");
-      parallaxEls.forEach((el) => {
-        gsap.to(el, {
-          y: -36,
-          ease: "none",
-          scrollTrigger: {
-            trigger: el,
-            start: "top bottom",
-            end: "bottom top",
-            scrub: 1.4,
-          },
+    const frame = requestAnimationFrame(() => {
+      ctx = gsap.context(() => {
+        const blurEls = gsap.utils.toArray<HTMLElement>("[data-gsap-blur]");
+        blurEls.forEach((el) => {
+          gsap.from(el, {
+            opacity: 0,
+            filter: blurAmount,
+            y: blurOffset,
+            duration: mobile ? 0.75 : 1.1,
+            ease: "power3.out",
+            immediateRender: false,
+            scrollTrigger: {
+              trigger: el,
+              start: "top 92%",
+              once: true,
+            },
+          });
+        });
+
+        const cards = gsap.utils.toArray<HTMLElement>("[data-gsap-rise]");
+        cards.forEach((el, i) => {
+          gsap.from(el, {
+            opacity: 0,
+            y: 40,
+            duration: 0.95,
+            delay: (i % 3) * 0.06,
+            ease: "power2.out",
+            immediateRender: false,
+            scrollTrigger: {
+              trigger: el,
+              start: "top 92%",
+              once: true,
+            },
+          });
         });
       });
-    }
 
-    const cards = gsap.utils.toArray<HTMLElement>("[data-gsap-rise]");
-    cards.forEach((el, i) => {
-      gsap.from(el, {
-        opacity: 0,
-        y: 40,
-        duration: 0.95,
-        delay: (i % 3) * 0.06,
-        ease: "power2.out",
-        immediateRender: false,
-        scrollTrigger: {
-          trigger: el,
-          start: "top 92%",
-          once: true,
-        },
-      });
+      refreshScrollTriggers();
     });
 
-    refreshScrollTriggers();
     window.addEventListener("load", refreshScrollTriggers);
     window.addEventListener("orientationchange", refreshScrollTriggers);
     window.addEventListener("resize", refreshScrollTriggers);
 
     return () => {
+      cancelAnimationFrame(frame);
       window.removeEventListener("load", refreshScrollTriggers);
       window.removeEventListener("orientationchange", refreshScrollTriggers);
       window.removeEventListener("resize", refreshScrollTriggers);
+      ctx?.revert();
       ScrollTrigger.getAll().forEach((t) => t.kill());
     };
   }, [reduce]);
