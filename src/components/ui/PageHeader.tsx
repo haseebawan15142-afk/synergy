@@ -34,7 +34,7 @@ export function PageHeader({ title, description, className }: PageHeaderProps) {
           {title}
         </PremiumTitle>
         {description ? (
-          <p className="mt-4 max-w-2xl text-base leading-relaxed text-ink-body sm:mt-5 sm:text-lg" data-gsap-blur>
+          <p className="mt-4 max-w-2xl text-base leading-relaxed text-ink-body sm:mt-5 sm:text-lg">
             {description}
           </p>
         ) : null}

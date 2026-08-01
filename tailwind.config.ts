@@ -64,6 +64,7 @@ const config: Config = {
         "gradient-flow": "gradientFlow 7s ease-in-out infinite",
         "aurora-drift": "auroraDrift 18s ease-in-out infinite",
         "shimmer-pass": "shimmerPass 4.5s ease-in-out infinite",
+        "partner-ticker": "partnerTicker 45s linear infinite",
       },
       keyframes: {
         fadeUp: {
@@ -87,6 +88,10 @@ const config: Config = {
           "0%": { transform: "translateX(-120%) skewX(-12deg)", opacity: "0" },
           "45%": { opacity: "0.55" },
           "100%": { transform: "translateX(220%) skewX(-12deg)", opacity: "0" },
+        },
+        partnerTicker: {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-50%)" },
         },
       },
     },

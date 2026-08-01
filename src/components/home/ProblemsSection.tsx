@@ -1,12 +1,11 @@
+import Image from "next/image";
 import Link from "next/link";
-import {
-  isServiceIconKey,
-  ServiceCategoryIcon,
-} from "@/components/icons/ServiceCategoryIcons";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { problemCards } from "@/lib/content/problems";
+import { services } from "@/lib/content/services";
 import { Reveal } from "@/components/motion/Reveal";
-import { MotionCard } from "@/components/motion/MotionCard";
+
+const serviceImages = Object.fromEntries(services.map((s) => [s.slug, s.image])) as Record<string, string>;
 
 export function ProblemsSection() {
   return (
@@ -22,40 +21,49 @@ export function ProblemsSection() {
             className="mb-10 sm:mb-12"
           />
         </Reveal>
-        <ul className="grid gap-4 sm:grid-cols-2 sm:gap-5">
-          {problemCards.map((card) => (
-            <li key={card.serviceSlug}>
-              <MotionCard className="h-full">
-                <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border/80 bg-surface-elevated p-5 shadow-soft transition hover:-translate-y-0.5 hover:border-synergy/30 hover:shadow-card sm:p-6">
-                  <div
-                    className="absolute left-0 top-0 h-1 w-full bg-gradient-brand opacity-80 transition group-hover:opacity-100"
-                    aria-hidden
-                  />
-                  <div className="flex items-start gap-3 sm:gap-4">
-                    {isServiceIconKey(card.serviceSlug) ? (
+
+        <ul className="grid gap-6 sm:grid-cols-2 lg:gap-7 xl:grid-cols-3">
+          {problemCards.map((card) => {
+            const image = serviceImages[card.serviceSlug];
+            return (
+              <li key={card.serviceSlug} className="flex">
+                <article className="group flex h-full w-full flex-col overflow-hidden rounded-xl border border-slate-800 bg-slate-950 shadow-soft transition hover:border-slate-700 hover:shadow-card">
+                  {image ? (
+                    <Link
+                      href={`/services/${card.serviceSlug}`}
+                      className="relative block aspect-[16/10] overflow-hidden"
+                    >
+                      <Image
+                        src={image}
+                        alt={card.label}
+                        fill
+                        sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
+                        className="object-cover transition duration-500 group-hover:scale-[1.03]"
+                      />
                       <div
-                        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-synergy-muted to-accent-soft text-synergy sm:h-14 sm:w-14"
+                        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent"
                         aria-hidden
-                      >
-                        <ServiceCategoryIcon name={card.serviceSlug} className="h-6 w-6 sm:h-7 sm:w-7" />
-                      </div>
-                    ) : null}
-                    <div className="min-w-0 flex-1">
-                      <span className="text-xs font-bold uppercase tracking-wider text-synergy">{card.label}</span>
-                      <h3 className="mt-2 text-base font-semibold text-ink sm:text-lg">{card.problem}</h3>
-                    </div>
+                      />
+                      <span className="absolute left-4 top-4 rounded-md bg-surface-elevated/95 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-synergy shadow-sm">
+                        {card.label}
+                      </span>
+                    </Link>
+                  ) : null}
+
+                  <div className="flex flex-1 flex-col bg-slate-950 p-5 sm:p-6">
+                    <h3 className="text-base font-semibold text-white sm:text-lg">{card.problem}</h3>
+                    <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-300">{card.solution}</p>
+                    <Link
+                      href={`/services/${card.serviceSlug}`}
+                      className="mt-5 inline-flex min-h-10 items-center text-sm font-medium text-synergy-light transition hover:text-white"
+                    >
+                      Learn more
+                    </Link>
                   </div>
-                  <p className="mt-4 flex-1 text-sm leading-relaxed text-ink-body">{card.solution}</p>
-                  <Link
-                    href={`/services/${card.serviceSlug}`}
-                    className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-synergy transition group-hover:gap-2"
-                  >
-                    Learn more <span aria-hidden>→</span>
-                  </Link>
-                </div>
-              </MotionCard>
-            </li>
-          ))}
+                </article>
+              </li>
+            );
+          })}
         </ul>
       </div>
     </section>

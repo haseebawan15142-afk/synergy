@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
+import { DynatracePartnerSection } from "@/components/partners/DynatracePartnerSection";
 import { PageHeader } from "@/components/ui/PageHeader";
-
 import { PartnersLogoCarousel } from "@/components/partners/PartnersLogoCarousel";
 
 
@@ -29,7 +29,7 @@ export default function PartnersPage() {
         description="Strategic alliances with global technology leaders."
 
       />
-
+      <DynatracePartnerSection />
       <PartnersLogoCarousel
 
         className="border-t-0"

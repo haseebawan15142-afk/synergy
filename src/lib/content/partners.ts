@@ -6,7 +6,7 @@ export type Partner = {
 
 export const partners: Partner[] = [
   { name: "Veritas", logo: "/images/partners/veritas.jpg", href: "https://www.veritas.com/" },
-  { name: "Dynatrace", logo: "/images/partners/dynatrace.jpg", href: "https://www.dynatrace.com/" },
+  { name: "Dynatrace", logo: "/brand/dynatrace/wordmark.svg", href: "https://www.dynatrace.com/" },
   { name: "Utimaco", logo: "/images/partners/utimaco.jpg", href: "https://utimaco.com/" },
   { name: "Oracle", logo: "/images/partners/oracle.jpg", href: "https://www.oracle.com/" },
   { name: "NetApp", logo: "/images/partners/netapp.jpg", href: "https://www.netapp.com/" },

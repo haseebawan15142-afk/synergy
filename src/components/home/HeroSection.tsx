@@ -1,4 +1,4 @@
-import { HeroBackgroundCarousel } from "@/components/home/HeroBackgroundCarousel";
+import { HeroVideoBackground } from "@/components/home/HeroVideoBackground";
 import { HeroSectionContent } from "@/components/home/HeroSectionContent";
 import { HeroExperienceLayer } from "@/components/effects/HeroExperienceLayer";
 
@@ -8,14 +8,14 @@ export function HeroSection() {
       className="min-h-[min(100svh,820px)] border-b border-border/40 sm:min-h-[min(88vh,780px)]"
       backdrop={
         <>
-          <div className="absolute inset-0 bg-grid-subtle opacity-40" aria-hidden />
-          <HeroBackgroundCarousel />
+          <div className="absolute inset-0 bg-grid-subtle opacity-20" aria-hidden />
+          <HeroVideoBackground />
           <div
-            className="absolute inset-0 z-[2] bg-gradient-to-r from-ink/90 via-ink/75 to-ink/40 lg:to-transparent"
+            className="absolute inset-0 z-[2] bg-gradient-to-r from-ink/92 via-ink/78 to-ink/45 lg:to-ink/25"
             aria-hidden
           />
           <div
-            className="absolute inset-0 z-[2] bg-gradient-to-t from-ink/60 via-transparent to-transparent lg:hidden"
+            className="absolute inset-0 z-[2] bg-gradient-to-t from-ink/70 via-ink/20 to-transparent"
             aria-hidden
           />
         </>

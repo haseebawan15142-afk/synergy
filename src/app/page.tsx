@@ -1,3 +1,6 @@
+import { ClientSuccess } from "@/components/home/ClientSuccess";
+import { PartnerTicker } from "@/components/home/PartnerTicker";
+import { SolutionsGrid } from "@/components/home/SolutionsGrid";
 import { CtaBand, IndustriesGrid } from "@/components/home/IndustriesGrid";
 import { HeroSection } from "@/components/home/HeroSection";
 import { PartnersStrip } from "@/components/home/PartnersStrip";
@@ -14,7 +17,10 @@ export default function HomePage() {
       <PartnersStrip />
       <StorySection />
       <ProblemsSection />
+      <SolutionsGrid />
       <ServicesGrid />
+      <PartnerTicker />
+      <ClientSuccess />
       <RecentUpdatesSection />
       <PartnersTeaser />
       <IndustriesGrid />

@@ -39,7 +39,6 @@ export function SectionHeading({
             "mt-3 text-sm leading-relaxed text-ink-body sm:text-base",
             centered && "mx-auto",
           )}
-          data-gsap-blur
         >
           {description}
         </p>

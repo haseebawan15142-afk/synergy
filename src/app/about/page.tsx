@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { CeoMessageSection } from "@/components/about/CeoMessageSection";
 import { PageHeader } from "@/components/ui/PageHeader";
 
 export const metadata: Metadata = {
@@ -13,6 +14,7 @@ export default function AboutPage() {
         title="Driving excellence through technology"
         description="Synergy Computers (Pvt.) Ltd — Pakistan's premium IT solutions provider since the early days of the country's IT industry."
       />
+      <CeoMessageSection />
       <div className="prose prose-neutral page-container max-w-3xl section-y-tight !py-12">
         <p>
           With more than 40 years of experience, we serve clients in banking and finance, power
