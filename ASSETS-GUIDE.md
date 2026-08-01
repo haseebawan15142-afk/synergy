@@ -194,6 +194,24 @@ These Mixkit/stock files were deleted. Only your Downloads clips are on the land
 
 ---
 
+## 10. Performance — compress videos & images
+
+After adding or replacing large media, run:
+
+```bash
+npm run optimize:videos   # H.264 720p MP4 + poster JPG (hero + CEO)
+npm run optimize:images   # Compress public/images/blog + hero
+```
+
+**Hero videos** (`public/videos/hero/`): used only on the homepage hero. Mobile/slow connections get a static poster instead of video (`HeroVideoBackground.tsx`).
+
+**CEO video** (`public/videos/my-ceo-video.mp4`): click-to-play on About page, `preload="none"`.
+
+**Config for hero rotation:** `src/lib/content/hero-videos.ts`  
+**Timing / fade:** `heroVideoIntervalMs`, `heroVideoTransitionMs` in the same file.
+
+---
+
 ## Folder tree
 
 ```

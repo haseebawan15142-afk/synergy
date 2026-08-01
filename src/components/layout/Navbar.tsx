@@ -38,7 +38,7 @@ export function Navbar() {
   }, [pathname]);
 
   const headerClass = cn(
-    "sticky top-0 z-50 border-b shadow-soft backdrop-blur-xl transition-colors duration-300",
+    "sticky top-0 z-50 border-b shadow-soft backdrop-blur-md transition-colors duration-300 lg:backdrop-blur-xl",
     scrolled
       ? "border-border/80 bg-surface-elevated/95"
       : "border-border/60 bg-surface-elevated/80",

@@ -1,6 +1,23 @@
+"use client";
+
+import dynamic from "next/dynamic";
 import { ceoMessage } from "@/lib/content/ceo-message";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Reveal } from "@/components/motion/Reveal";
+
+const CeoVideoPlayer = dynamic(
+  () => import("@/components/about/CeoVideoPlayer").then((m) => m.CeoVideoPlayer),
+  {
+    ssr: false,
+    loading: () => (
+      <div
+        className="aspect-video w-full bg-slate-900 bg-cover bg-center"
+        style={{ backgroundImage: `url(${ceoMessage.posterSrc})` }}
+        aria-hidden
+      />
+    ),
+  },
+);
 
 export function CeoMessageSection() {
   return (
@@ -20,22 +37,8 @@ export function CeoMessageSection() {
           <Reveal variant="fadeUp">
             <div className="overflow-hidden rounded-xl border border-border/80 bg-surface-elevated shadow-soft">
               <div className="relative aspect-video bg-slate-900">
-                <video
-                  className="h-full w-full object-cover"
-                  controls
-                  playsInline
-                  preload="metadata"
-                  poster={ceoMessage.posterSrc}
-                  aria-label={`Video message from ${ceoMessage.name}`}
-                >
-                  <source src={ceoMessage.videoSrc} type="video/mp4" />
-                  Your browser does not support embedded video.
-                </video>
+                <CeoVideoPlayer />
               </div>
-              <p className="border-t border-border/70 px-4 py-3 text-xs text-ink-muted">
-                
-                <code className="rounded bg-surface-muted px-1 py-0.5 text-[11px]">public/videos/</code>
-              </p>
             </div>
           </Reveal>
 

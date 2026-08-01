@@ -5,12 +5,15 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useReducedMotion } from "framer-motion";
 
-function refreshScrollTriggers() {
-  if (typeof window === "undefined") return;
-  requestAnimationFrame(() => ScrollTrigger.refresh());
+function debounce<T extends (...args: never[]) => void>(fn: T, ms: number) {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  return (...args: Parameters<T>) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), ms);
+  };
 }
 
-/** Site-wide GSAP ScrollTrigger reveals (blur-to-focus, parallax layers). */
+/** Desktop-only GSAP ScrollTrigger reveals — skipped on mobile to save CPU. */
 export function GsapScrollEffects() {
   const reduce = useReducedMotion();
 
@@ -19,21 +22,18 @@ export function GsapScrollEffects() {
 
     gsap.registerPlugin(ScrollTrigger);
 
-    const mobile = window.matchMedia("(max-width: 768px)").matches;
-    const blurAmount = mobile ? "blur(8px)" : "blur(16px)";
-    const blurOffset = mobile ? 20 : 32;
+    const mm = gsap.matchMedia();
+    let debouncedRefresh: (() => void) | undefined;
 
-    let ctx: gsap.Context | undefined;
-
-    const frame = requestAnimationFrame(() => {
-      ctx = gsap.context(() => {
+    mm.add("(min-width: 769px)", () => {
+      const ctx = gsap.context(() => {
         const blurEls = gsap.utils.toArray<HTMLElement>("[data-gsap-blur]");
         blurEls.forEach((el) => {
           gsap.from(el, {
             opacity: 0,
-            filter: blurAmount,
-            y: blurOffset,
-            duration: mobile ? 0.75 : 1.1,
+            filter: "blur(16px)",
+            y: 32,
+            duration: 1.1,
             ease: "power3.out",
             immediateRender: false,
             scrollTrigger: {
@@ -62,21 +62,22 @@ export function GsapScrollEffects() {
         });
       });
 
-      refreshScrollTriggers();
+      debouncedRefresh = debounce(() => ScrollTrigger.refresh(), 250);
+      window.addEventListener("load", debouncedRefresh);
+      window.addEventListener("orientationchange", debouncedRefresh);
+      window.addEventListener("resize", debouncedRefresh);
+
+      return () => {
+        if (debouncedRefresh) {
+          window.removeEventListener("load", debouncedRefresh);
+          window.removeEventListener("orientationchange", debouncedRefresh);
+          window.removeEventListener("resize", debouncedRefresh);
+        }
+        ctx.revert();
+      };
     });
 
-    window.addEventListener("load", refreshScrollTriggers);
-    window.addEventListener("orientationchange", refreshScrollTriggers);
-    window.addEventListener("resize", refreshScrollTriggers);
-
-    return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener("load", refreshScrollTriggers);
-      window.removeEventListener("orientationchange", refreshScrollTriggers);
-      window.removeEventListener("resize", refreshScrollTriggers);
-      ctx?.revert();
-      ScrollTrigger.getAll().forEach((t) => t.kill());
-    };
+    return () => mm.revert();
   }, [reduce]);
 
   return null;

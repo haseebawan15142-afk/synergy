@@ -44,7 +44,7 @@ export function IndustriesGrid() {
 
 export function CtaBand() {
   return (
-    <Reveal as="section" className="page-container section-y-tight mb-12 sm:mb-16">
+    <section className="page-container section-y-tight mb-12 sm:mb-16">
         <GsapParallax className="relative overflow-hidden rounded-2xl sm:rounded-3xl">
         <div className="absolute inset-0 bg-gradient-dark" aria-hidden />
         <div
@@ -71,6 +71,6 @@ export function CtaBand() {
           </div>
         </div>
       </GsapParallax>
-    </Reveal>
+    </section>
   );
 }

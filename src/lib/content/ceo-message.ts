@@ -10,7 +10,7 @@ export const ceoMessage = {
    */
   videoSrc: "/videos/my-ceo-video.mp4",
   /** Thumbnail shown before play — optional poster in public/videos/ */
-  posterSrc: "/videos/ceo-message-demo-poster.jpg",
+  posterSrc: "/videos/my-ceo-video-poster.jpg",
   quote:
     "For more than four decades, Synergy has stood beside Pakistan's leading enterprises — helping them secure, modernize, and run critical technology with confidence.",
   body: [
