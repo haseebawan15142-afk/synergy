@@ -1,0 +1,35 @@
+{
+  "name": "synergy-computer-website",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "sync:hero": "node scripts/sync-hero-images.mjs",
+    "sync:blogs": "node scripts/sync-blogs-from-legacy.mjs",
+    "sync:blog-images": "node scripts/sync-blog-images.mjs",
+    "scrape:blogs": "node scripts/scrape-blog-bodies.mjs",
+    "dev": "node scripts/sync-hero-images.mjs && next dev",
+    "build": "node scripts/sync-hero-images.mjs && next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@cursor/sdk": "^1.0.26",
+    "framer-motion": "^12.43.0",
+    "gsap": "^3.15.0",
+    "next": "^15.1.0",
+    "next-themes": "^0.4.6",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9.16.0",
+    "eslint-config-next": "^15.1.0",
+    "postcss": "^8.4.49",
+    "tailwindcss": "^3.4.16",
+    "typescript": "^5.7.2"
+  }
+}

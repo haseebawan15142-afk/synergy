@@ -21,7 +21,30 @@ export const siteConfig = {
     { label: "Services", href: "/services" },
     { label: "Industries", href: "/industries" },
     { label: "Partners", href: "/partners" },
-    { label: "About", href: "/about" },
+    {
+      label: "About",
+      href: "/about",
+      children: [
+        {
+          label: "Who We Are",
+          href: "/about#who-we-are",
+          description: "Our story, vision, and mission since the early days of Pakistan's IT industry.",
+          icon: "building",
+        },
+        {
+          label: "Our Leadership",
+          href: "/about#leadership",
+          description: "Meet the team steering Synergy's strategy and client relationships.",
+          icon: "users",
+        },
+        {
+          label: "Our Accomplishments",
+          href: "/about#accomplishments",
+          description: "Milestones, certifications, and recognitions earned over 40+ years.",
+          icon: "award",
+        },
+      ],
+    },
     { label: "Resources", href: "/resources" },
   ],
 } as const;

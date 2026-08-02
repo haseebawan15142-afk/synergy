@@ -4,8 +4,10 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { ChevronDown } from "lucide-react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { NavLinkMotion } from "@/components/motion/NavLinkMotion";
+import { NavDropdown } from "@/components/layout/NavDropdown";
 import { ThemeSelector } from "@/components/theme/ThemeToggle";
 import { siteConfig } from "@/lib/content/site";
 import { Button } from "@/components/ui/Button";
@@ -16,6 +18,7 @@ import { fadeUp } from "@/lib/motion/variants";
 export function Navbar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [mobileSubOpen, setMobileSubOpen] = useState<string | null>(null);
   const pathname = usePathname();
   const reduce = useReducedMotion();
 
@@ -61,6 +64,17 @@ export function Navbar() {
         <nav className="hidden items-center gap-0.5 lg:flex" aria-label="Primary">
           {siteConfig.nav.map((item) => {
             const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+            if ("children" in item && item.children?.length) {
+              return (
+                <NavDropdown
+                  key={item.href}
+                  label={item.label}
+                  href={item.href}
+                  items={item.children}
+                  active={active}
+                />
+              );
+            }
             return (
               <NavLinkMotion
                 key={item.href}
@@ -131,20 +145,64 @@ export function Navbar() {
               >
                 {siteConfig.nav.map((item) => {
                   const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+                  const hasChildren = "children" in item && !!item.children?.length;
+                  const subOpen = mobileSubOpen === item.href;
                   return (
                     <motion.div key={item.href} variants={reduce ? undefined : fadeUp}>
-                      <Link
-                        href={item.href}
-                        className={cn(
-                          "block rounded-xl px-3 py-3.5 text-base font-medium transition",
-                          active
-                            ? "bg-synergy-muted text-synergy-dark dark:text-synergy-glow"
-                            : "text-ink-body hover:bg-surface-muted hover:text-ink",
-                        )}
-                        onClick={() => setOpen(false)}
-                      >
-                        {item.label}
-                      </Link>
+                      <div className="flex items-center">
+                        <Link
+                          href={item.href}
+                          className={cn(
+                            "block flex-1 rounded-xl px-3 py-3.5 text-base font-medium transition",
+                            active
+                              ? "bg-synergy-muted text-synergy-dark dark:text-synergy-glow"
+                              : "text-ink-body hover:bg-surface-muted hover:text-ink",
+                          )}
+                          onClick={() => setOpen(false)}
+                        >
+                          {item.label}
+                        </Link>
+                        {hasChildren ? (
+                          <button
+                            type="button"
+                            aria-expanded={subOpen}
+                            aria-label={`Toggle ${item.label} submenu`}
+                            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-ink-body hover:bg-surface-muted hover:text-ink"
+                            onClick={() => setMobileSubOpen(subOpen ? null : item.href)}
+                          >
+                            <ChevronDown
+                              className={cn("h-4 w-4 transition-transform", subOpen && "rotate-180")}
+                              aria-hidden
+                            />
+                          </button>
+                        ) : null}
+                      </div>
+                      {hasChildren ? (
+                        <AnimatePresence initial={false}>
+                          {subOpen ? (
+                            <motion.div
+                              initial={reduce ? false : { height: 0, opacity: 0 }}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: motionDurations.reveal, ease: motionEase }}
+                              className="overflow-hidden pl-3"
+                            >
+                              <div className="flex flex-col gap-0.5 border-l border-border/60 pl-3 py-1">
+                                {item.children!.map((child) => (
+                                  <Link
+                                    key={child.href}
+                                    href={child.href}
+                                    className="rounded-lg px-3 py-2.5 text-sm font-medium text-ink-body transition hover:bg-surface-muted hover:text-ink"
+                                    onClick={() => setOpen(false)}
+                                  >
+                                    {child.label}
+                                  </Link>
+                                ))}
+                              </div>
+                            </motion.div>
+                          ) : null}
+                        </AnimatePresence>
+                      ) : null}
                     </motion.div>
                   );
                 })}
