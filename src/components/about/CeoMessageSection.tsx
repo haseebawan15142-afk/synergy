@@ -21,7 +21,10 @@ const CeoVideoPlayer = dynamic(
 
 export function CeoMessageSection() {
   return (
-    <section className="border-y border-border/60 bg-surface-muted/60 section-y" aria-labelledby="ceo-message-heading">
+    <section
+      className="scroll-mt-24 border-y border-border/60 bg-surface-muted/60 section-y"
+      aria-labelledby="ceo-message-heading"
+    >
       <div className="page-container">
         <Reveal>
           <SectionHeading

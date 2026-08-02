@@ -7,9 +7,10 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { NavLinkMotion } from "@/components/motion/NavLinkMotion";
-import { NavDropdown } from "@/components/layout/NavDropdown";
+import { MegaMenu } from "@/components/layout/MegaMenu";
 import { ThemeSelector } from "@/components/theme/ThemeToggle";
 import { siteConfig } from "@/lib/content/site";
+import { navMegaMenus } from "@/lib/content/nav-menus";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
 import { motionDurations, motionEase } from "@/lib/motion/transitions";
@@ -62,19 +63,24 @@ export function Navbar() {
         </motion.div>
 
         <nav className="hidden items-center gap-0.5 lg:flex" aria-label="Primary">
-          {siteConfig.nav.map((item) => {
+          {siteConfig.nav.map((item, index) => {
             const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
-            if ("children" in item && item.children?.length) {
+            const menu = navMegaMenus[item.href];
+
+            if (menu) {
+              const align = index === 0 ? "left" : index === siteConfig.nav.length - 1 ? "right" : "center";
               return (
-                <NavDropdown
+                <MegaMenu
                   key={item.href}
                   label={item.label}
                   href={item.href}
-                  items={item.children}
+                  menu={menu}
                   active={active}
+                  align={align}
                 />
               );
             }
+
             return (
               <NavLinkMotion
                 key={item.href}
@@ -145,8 +151,14 @@ export function Navbar() {
               >
                 {siteConfig.nav.map((item) => {
                   const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
-                  const hasChildren = "children" in item && !!item.children?.length;
+                  const menu = navMegaMenus[item.href];
                   const subOpen = mobileSubOpen === item.href;
+                  const flatLinks = menu
+                    ? menu.columns
+                        .flatMap((c) => c.links)
+                        .filter((l, i, arr) => arr.findIndex((x) => x.href === l.href) === i)
+                    : [];
+
                   return (
                     <motion.div key={item.href} variants={reduce ? undefined : fadeUp}>
                       <div className="flex items-center">
@@ -162,7 +174,7 @@ export function Navbar() {
                         >
                           {item.label}
                         </Link>
-                        {hasChildren ? (
+                        {menu ? (
                           <button
                             type="button"
                             aria-expanded={subOpen}
@@ -177,7 +189,7 @@ export function Navbar() {
                           </button>
                         ) : null}
                       </div>
-                      {hasChildren ? (
+                      {menu ? (
                         <AnimatePresence initial={false}>
                           {subOpen ? (
                             <motion.div
@@ -188,14 +200,21 @@ export function Navbar() {
                               className="overflow-hidden pl-3"
                             >
                               <div className="flex flex-col gap-0.5 border-l border-border/60 pl-3 py-1">
-                                {item.children!.map((child) => (
+                                <Link
+                                  href={menu.featured.href}
+                                  className="rounded-lg px-3 py-2.5 text-sm font-semibold text-synergy transition hover:bg-surface-muted"
+                                  onClick={() => setOpen(false)}
+                                >
+                                  {menu.featured.title}
+                                </Link>
+                                {flatLinks.map((link) => (
                                   <Link
-                                    key={child.href}
-                                    href={child.href}
+                                    key={link.href}
+                                    href={link.href}
                                     className="rounded-lg px-3 py-2.5 text-sm font-medium text-ink-body transition hover:bg-surface-muted hover:text-ink"
                                     onClick={() => setOpen(false)}
                                   >
-                                    {child.label}
+                                    {link.label}
                                   </Link>
                                 ))}
                               </div>

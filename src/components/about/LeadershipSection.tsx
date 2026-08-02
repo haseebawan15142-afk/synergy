@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { leadershipTeam } from "@/lib/content/leadership";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Reveal } from "@/components/motion/Reveal";
@@ -32,11 +31,10 @@ export function LeadershipSection() {
             <Reveal key={member.name} variant="fadeUp" delay={index * 0.06}>
               <div className="flex h-full flex-col items-center rounded-xl border border-border/70 bg-surface-elevated p-6 text-center shadow-soft transition hover:border-synergy/40 hover:shadow-card">
                 {member.photoSrc ? (
-                  <Image
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
                     src={member.photoSrc}
                     alt={member.name}
-                    width={80}
-                    height={80}
                     className="h-20 w-20 rounded-full object-cover"
                   />
                 ) : (
