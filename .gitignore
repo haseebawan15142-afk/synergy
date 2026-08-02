@@ -5,3 +5,6 @@
 .env*.local
 *.tsbuildinfo
 next-env.d.ts
+
+# Accidental nested project copy — do not deploy
+/synergy_computer_website/
