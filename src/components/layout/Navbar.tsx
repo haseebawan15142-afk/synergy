@@ -140,10 +140,10 @@ export function Navbar() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: motionDurations.reveal, ease: motionEase }}
-              className="fixed inset-x-0 top-[3.25rem] z-[56] max-h-[calc(100dvh-3.25rem)] overflow-y-auto border-t border-border/60 bg-surface-elevated/98 shadow-card backdrop-blur-xl sm:top-[3.5rem] sm:max-h-[calc(100dvh-3.5rem)] lg:hidden"
+              className="fixed inset-x-0 top-[3.25rem] z-[56] max-h-[calc(100dvh-3.25rem)] overflow-y-auto border-t border-border bg-surface-elevated shadow-card sm:top-[3.5rem] sm:max-h-[calc(100dvh-3.5rem)] lg:hidden"
             >
               <motion.nav
-                className="page-container flex flex-col gap-0.5 py-4 pb-8"
+                className="page-container flex flex-col divide-y divide-border overflow-hidden rounded-2xl border border-border py-0 pb-0 mt-3 mb-4"
                 aria-label="Mobile"
                 variants={reduce ? undefined : { visible: { transition: { staggerChildren: 0.04 } } }}
                 initial="hidden"
@@ -160,15 +160,19 @@ export function Navbar() {
                     : [];
 
                   return (
-                    <motion.div key={item.href} variants={reduce ? undefined : fadeUp}>
+                    <motion.div
+                      key={item.href}
+                      variants={reduce ? undefined : fadeUp}
+                      className="bg-surface-elevated"
+                    >
                       <div className="flex items-center">
                         <Link
                           href={item.href}
                           className={cn(
-                            "block flex-1 rounded-xl px-3 py-3.5 text-base font-medium transition",
+                            "block flex-1 px-4 py-4 text-base font-semibold transition",
                             active
                               ? "bg-synergy-muted text-synergy-dark dark:text-synergy-glow"
-                              : "text-ink-body hover:bg-surface-muted hover:text-ink",
+                              : "text-ink hover:bg-surface-muted",
                           )}
                           onClick={() => setOpen(false)}
                         >
@@ -179,7 +183,10 @@ export function Navbar() {
                             type="button"
                             aria-expanded={subOpen}
                             aria-label={`Toggle ${item.label} submenu`}
-                            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-ink-body hover:bg-surface-muted hover:text-ink"
+                            className={cn(
+                              "flex h-full min-h-[3.25rem] w-14 shrink-0 items-center justify-center border-l border-border text-ink-body transition hover:bg-surface-muted hover:text-ink",
+                              subOpen && "bg-surface-muted text-ink",
+                            )}
                             onClick={() => setMobileSubOpen(subOpen ? null : item.href)}
                           >
                             <ChevronDown
@@ -197,12 +204,12 @@ export function Navbar() {
                               animate={{ height: "auto", opacity: 1 }}
                               exit={{ height: 0, opacity: 0 }}
                               transition={{ duration: motionDurations.reveal, ease: motionEase }}
-                              className="overflow-hidden pl-3"
+                              className="overflow-hidden border-t border-border bg-surface-muted/70"
                             >
-                              <div className="flex flex-col gap-0.5 border-l border-border/60 pl-3 py-1">
+                              <div className="divide-y divide-border/70">
                                 <Link
                                   href={menu.featured.href}
-                                  className="rounded-lg px-3 py-2.5 text-sm font-semibold text-synergy transition hover:bg-surface-muted"
+                                  className="block px-5 py-3 text-sm font-bold text-synergy transition hover:bg-surface-elevated"
                                   onClick={() => setOpen(false)}
                                 >
                                   {menu.featured.title}
@@ -211,7 +218,7 @@ export function Navbar() {
                                   <Link
                                     key={link.href}
                                     href={link.href}
-                                    className="rounded-lg px-3 py-2.5 text-sm font-medium text-ink-body transition hover:bg-surface-muted hover:text-ink"
+                                    className="block px-5 py-3 text-sm font-medium text-ink transition hover:bg-surface-elevated"
                                     onClick={() => setOpen(false)}
                                   >
                                     {link.label}
@@ -225,13 +232,15 @@ export function Navbar() {
                     </motion.div>
                   );
                 })}
-                <div className="mt-4 border-t border-border/60 pt-4">
+              </motion.nav>
+              <div className="page-container pb-8">
+                <div className="border-t border-border pt-4">
                   <ThemeSelector variant="pills" />
                 </div>
                 <Button href="/contact" className="mt-4 w-full sm:max-w-xs">
                   Contact us
                 </Button>
-              </motion.nav>
+              </div>
             </motion.div>
           </>
         ) : null}
