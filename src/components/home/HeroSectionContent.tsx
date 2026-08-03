@@ -3,42 +3,30 @@
 import { PremiumTitle } from "@/components/effects/PremiumTitle";
 import { motion, useReducedMotion } from "framer-motion";
 import { Button } from "@/components/ui/Button";
-import { heroItem, imageReveal, staggerContainer } from "@/lib/motion/variants";
+import { heroItem, staggerContainer } from "@/lib/motion/variants";
 import { siteConfig } from "@/lib/content/site";
-import { AnimatedCounter } from "@/components/motion/AnimatedCounter";
 
 const trustPoints = ["Enterprise SLAs", "Karachi HQ + branches", "Global vendor partners"];
-
-const stats = [
-  { value: "40+", label: "Years" },
-  { value: "300+", label: "Clients" },
-  { value: "200+", label: "Specialists" },
-  { value: "24×7", label: "Support" },
-];
 
 export function HeroSectionContent() {
   const reduce = useReducedMotion();
 
   if (reduce) {
     return (
-      <div className="relative z-10 page-container grid items-center gap-10 py-12 sm:gap-12 sm:py-16 lg:grid-cols-12 lg:py-24">
+      <div className="relative z-10 page-container py-12 sm:py-16 lg:py-24">
         <HeroCopy />
-        <HeroPanel animateCounters={false} />
       </div>
     );
   }
 
   return (
     <motion.div
-      className="relative z-10 page-container grid items-center gap-10 py-12 sm:gap-12 sm:py-16 lg:grid-cols-12 lg:py-24"
+      className="relative z-10 page-container py-12 sm:py-16 lg:py-24"
       initial="hidden"
       animate="visible"
       variants={staggerContainer}
     >
-      <motion.div
-        className="text-center lg:col-span-7 lg:text-left"
-        variants={staggerContainer}
-      >
+      <motion.div className="mx-auto max-w-3xl text-center lg:mx-0 lg:max-w-2xl lg:text-left" variants={staggerContainer}>
         <motion.span
           variants={heroItem}
           className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-synergy-glow backdrop-blur-sm"
@@ -93,17 +81,13 @@ export function HeroSectionContent() {
           ))}
         </motion.ul>
       </motion.div>
-
-      <motion.div className="hidden lg:col-span-5 lg:block" variants={imageReveal}>
-        <HeroPanel animateCounters />
-      </motion.div>
     </motion.div>
   );
 }
 
 function HeroCopy() {
   return (
-    <div className="text-center lg:col-span-7 lg:text-left">
+    <div className="mx-auto max-w-3xl text-center lg:mx-0 lg:max-w-2xl lg:text-left">
       <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-wider text-synergy-glow backdrop-blur-sm sm:px-4 sm:text-xs">
         <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-synergy-light animate-pulse" />
         Technology partner · Pakistan
@@ -143,28 +127,6 @@ function HeroCopy() {
           </li>
         ))}
       </ul>
-    </div>
-  );
-}
-
-function HeroPanel({ animateCounters }: { animateCounters?: boolean }) {
-  return (
-    <div className="glass-panel animate-float rounded-3xl p-6 shadow-glow">
-      <p className="text-xs font-bold uppercase tracking-widest text-synergy">At a glance</p>
-      <dl className="mt-4 grid grid-cols-2 gap-4">
-        {stats.map((item) => (
-          <div key={item.label} className="glass-card rounded-2xl bg-surface-muted/50 p-4">
-            <dt className="text-2xl font-bold text-ink">
-              {animateCounters ? <AnimatedCounter value={item.value} /> : item.value}
-            </dt>
-            <dd className="text-sm text-ink-muted">{item.label}</dd>
-          </div>
-        ))}
-      </dl>
-      <p className="mt-5 text-sm leading-relaxed text-ink-body">
-        Infrastructure, security, cloud, and managed services — delivered with the same logo and
-        values you trust, in a experience built for today.
-      </p>
     </div>
   );
 }

@@ -45,6 +45,7 @@ export const siteConfig = {
         },
       ],
     },
+    { label: "Careers", href: "/careers" },
     { label: "Resources", href: "/resources" },
   ],
 } as const;
