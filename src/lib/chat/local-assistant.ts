@@ -1,5 +1,13 @@
+import {
+  accomplishmentStats,
+  milestones,
+} from "@/lib/content/accomplishments";
+import { caseStudies } from "@/lib/content/case-studies";
+import { ceoMessage } from "@/lib/content/ceo-message";
+import { dynatracePartner } from "@/lib/content/dynatrace-partner";
 import { problemCards } from "@/lib/content/problems";
 import { industries } from "@/lib/content/industries";
+import { leadershipTeam } from "@/lib/content/leadership";
 import { partners } from "@/lib/content/partners";
 import { services } from "@/lib/content/services";
 import { siteConfig } from "@/lib/content/site";
@@ -228,10 +236,77 @@ export function replyFromLocalKnowledge(userMessage: string): LocalReply {
     };
   }
 
+  if (
+    includesAny(q, [
+      "leadership",
+      "leader",
+      "leaders",
+      "ceo",
+      "coo",
+      "cto",
+      "management",
+      "executive",
+      "executives",
+      "team",
+      "who is the ceo",
+      "who leads",
+      "head of sales",
+    ]) ||
+    leadershipTeam.some((m) => q.includes(m.name.toLowerCase()))
+  ) {
+    const lines = leadershipTeam.map((m) => `• ${m.name} — ${m.title}\n  ${m.bio}`);
+    return {
+      matched: true,
+      reply: `Our leadership team at ${siteConfig.legalName}:\n\n${lines.join("\n\n")}\n\nMore: /about#leadership`,
+    };
+  }
+
+  if (includesAny(q, ["ceo message", "message from", "vision", "mission", "quote"])) {
+    return {
+      matched: true,
+      reply: `Message from our ${ceoMessage.role} (${ceoMessage.name}):\n\n"${ceoMessage.quote}"\n\n${ceoMessage.body.join("\n\n")}\n\nWatch / read more: /about`,
+    };
+  }
+
+  if (
+    includesAny(q, [
+      "accomplishment",
+      "accomplishments",
+      "milestone",
+      "milestones",
+      "certification",
+      "certifications",
+      "track record",
+      "achievement",
+    ])
+  ) {
+    const stats = accomplishmentStats.map((s) => `• ${s.value} ${s.label}`).join("\n");
+    const ms = milestones.map((m) => `• ${m.year}: ${m.title} — ${m.description}`).join("\n");
+    return {
+      matched: true,
+      reply: `Synergy accomplishments:\n\n${stats}\n\nKey milestones:\n${ms}\n\nMore: /about#accomplishments`,
+    };
+  }
+
+  if (includesAny(q, ["case study", "case studies", "client success", "success stor"])) {
+    const lines = caseStudies.map((c) => `• ${c.client}: ${c.headline}`);
+    return {
+      matched: true,
+      reply: `Selected client outcomes:\n\n${lines.join("\n")}\n\nDetails on the homepage Client Success section, or ask about a specific industry.`,
+    };
+  }
+
+  if (includesAny(q, ["dynatrace", "observability", "exclusive partner"])) {
+    return {
+      matched: true,
+      reply: `${dynatracePartner.headline}\n\n${dynatracePartner.subheadline}\n\n${dynatracePartner.description}\n\nMore: /partners`,
+    };
+  }
+
   if (includesAny(q, ["about", "who are", "history", "years", "experience", "founded", "legacy"])) {
     return {
       matched: true,
-      reply: `${siteConfig.legalName} has served Pakistan for over 40 years as an enterprise IT solutions provider — hardware, applications, integration, and 24×7 maintenance.\n\n300+ enterprise clients | 200+ specialists | HQ Karachi.\n\nMore: /about`,
+      reply: `${siteConfig.legalName} has served Pakistan for over 40 years as an enterprise IT solutions provider — hardware, applications, integration, and 24×7 maintenance.\n\nLeadership: /about#leadership\nAccomplishments: /about#accomplishments\nServices: /services`,
     };
   }
 
