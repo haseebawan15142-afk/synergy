@@ -1,49 +1,45 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useReducedMotion } from "framer-motion";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
+import { cn } from "@/lib/cn";
 
 type GsapParallaxProps = {
   className?: string;
   children: ReactNode;
 };
 
-/** Client-only parallax wrapper — avoids React hydration mismatches from GSAP inline transforms. */
+/**
+ * Light scroll parallax (formerly GSAP ScrollTrigger).
+ * Desktop-only — skipped on coarse/narrow viewports to match prior behavior.
+ */
 export function GsapParallax({ className, children }: GsapParallaxProps) {
   const ref = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
+  const [enabled, setEnabled] = useState(false);
 
   useEffect(() => {
-    if (reduce) return;
-    const el = ref.current;
-    if (!el) return;
-
     const mobile = window.matchMedia("(max-width: 768px)").matches;
-    if (mobile) return;
-
-    gsap.registerPlugin(ScrollTrigger);
-
-    const ctx = gsap.context(() => {
-      gsap.to(el, {
-        y: -36,
-        ease: "none",
-        scrollTrigger: {
-          trigger: el,
-          start: "top bottom",
-          end: "bottom top",
-          scrub: 1.4,
-        },
-      });
-    }, el);
-
-    return () => ctx.revert();
+    setEnabled(!reduce && !mobile);
   }, [reduce]);
 
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"],
+  });
+  const y = useTransform(scrollYProgress, [0, 1], [0, -36]);
+
+  if (!enabled) {
+    return (
+      <div ref={ref} className={className}>
+        {children}
+      </div>
+    );
+  }
+
   return (
-    <div ref={ref} className={className}>
+    <motion.div ref={ref} style={{ y }} className={cn(className)}>
       {children}
-    </div>
+    </motion.div>
   );
 }

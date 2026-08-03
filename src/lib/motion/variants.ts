@@ -18,15 +18,6 @@ export const fadeIn: Variants = {
   },
 };
 
-export const fadeUpSoft: Variants = {
-  hidden: { opacity: 0, y: 14 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: motionDurations.page, ease: motionEase },
-  },
-};
-
 export const scaleIn: Variants = {
   hidden: { opacity: 0, scale: 0.98 },
   visible: {
@@ -76,15 +67,6 @@ export const heroItem: Variants = {
     opacity: 1,
     y: 0,
     transition: { duration: motionDurations.reveal, ease: motionEase },
-  },
-};
-
-export const imageReveal: Variants = {
-  hidden: { opacity: 0, scale: 1.03 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: { duration: 0.55, ease: motionEase },
   },
 };
 

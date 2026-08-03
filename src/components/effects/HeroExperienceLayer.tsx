@@ -24,10 +24,19 @@ export function HeroExperienceLayer({ children, backdrop, className }: HeroExper
     const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
     if (!finePointer) return;
 
-    const onMove = (e: MouseEvent) => {
+    let rafId = 0;
+    let pendingX = 0;
+    let pendingY = 0;
+    let hasPending = false;
+
+    const applyFrame = () => {
+      rafId = 0;
+      if (!hasPending) return;
+      hasPending = false;
+
       const rect = section.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+      const x = pendingX - rect.left;
+      const y = pendingY - rect.top;
       const px = (x / rect.width - 0.5) * 2;
       const py = (y / rect.height - 0.5) * 2;
 
@@ -41,7 +50,21 @@ export function HeroExperienceLayer({ children, backdrop, className }: HeroExper
       }
     };
 
+    const onMove = (e: MouseEvent) => {
+      pendingX = e.clientX;
+      pendingY = e.clientY;
+      hasPending = true;
+      if (rafId === 0) {
+        rafId = window.requestAnimationFrame(applyFrame);
+      }
+    };
+
     const onLeave = () => {
+      hasPending = false;
+      if (rafId !== 0) {
+        window.cancelAnimationFrame(rafId);
+        rafId = 0;
+      }
       if (contentRef.current) {
         contentRef.current.style.transform =
           "perspective(1400px) rotateX(0deg) rotateY(0deg) translateZ(0)";
@@ -53,6 +76,7 @@ export function HeroExperienceLayer({ children, backdrop, className }: HeroExper
     return () => {
       section.removeEventListener("mousemove", onMove);
       section.removeEventListener("mouseleave", onLeave);
+      if (rafId !== 0) window.cancelAnimationFrame(rafId);
     };
   }, [reduce]);
 

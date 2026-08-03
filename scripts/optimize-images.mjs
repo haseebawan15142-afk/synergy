@@ -1,5 +1,9 @@
 /**
- * Batch compress images in public/images/blog and public/images/hero.
+ * Resize + re-encode public images to actual max display widths.
+ * Blog cards: sizes="…33vw" / detail: sizes="…768px" → store @ 1280px (≈1.5–2x).
+ * Optional hero stills in public/images/hero: full-bleed ≤1920 → store @ 1600px.
+ *
+ * Writes WebP (primary) + AVIF siblings; updates blog-images.generated.ts.
  * Run: npm run optimize:images
  */
 import fs from "node:fs";
@@ -8,18 +12,14 @@ import { fileURLToPath } from "node:url";
 import sharp from "sharp";
 
 const root = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
-const targets = [
-  path.join(root, "public", "images", "blog"),
-  path.join(root, "public", "images", "hero"),
-];
 
-const MAX_WIDTH = 1600;
-const JPEG_QUALITY = 78;
-const WEBP_QUALITY = 78;
-const PNG_QUALITY = 80;
-const MAX_BYTES = 150 * 1024;
+const SOURCE_EXT = new Set([".jpg", ".jpeg", ".png", ".webp", ".jfif", ".avif"]);
 
-const IMAGE_EXT = new Set([".jpg", ".jpeg", ".png", ".webp"]);
+/** @type {Record<string, { maxWidth: number, webpQuality: number, avifQuality: number }>} */
+const PROFILES = {
+  blog: { maxWidth: 1280, webpQuality: 72, avifQuality: 55 },
+  hero: { maxWidth: 1600, webpQuality: 70, avifQuality: 50 },
+};
 
 function walk(dir) {
   if (!fs.existsSync(dir)) return [];
@@ -27,7 +27,7 @@ function walk(dir) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) out.push(...walk(full));
-    else if (IMAGE_EXT.has(path.extname(entry.name).toLowerCase())) out.push(full);
+    else if (SOURCE_EXT.has(path.extname(entry.name).toLowerCase())) out.push(full);
   }
   return out;
 }
@@ -36,70 +36,145 @@ function kb(bytes) {
   return `${(bytes / 1024).toFixed(0)} KB`;
 }
 
-async function encodeToBuffer(filePath, ext) {
-  const meta = await sharp(filePath, { failOn: "none" }).rotate().metadata();
-  let pipeline = sharp(filePath, { failOn: "none" }).rotate();
-  if ((meta.width ?? 0) > MAX_WIDTH) {
-    pipeline = pipeline.resize({ width: MAX_WIDTH, withoutEnlargement: true });
-  }
-
-  if (ext === ".webp") {
-    return pipeline.webp({ quality: WEBP_QUALITY, effort: 4 }).toBuffer();
-  }
-  if (ext === ".png") {
-    return pipeline.png({ quality: PNG_QUALITY, compressionLevel: 9 }).toBuffer();
-  }
-  return pipeline.jpeg({ quality: JPEG_QUALITY, mozjpeg: true }).toBuffer();
+function baseName(filePath) {
+  return path.basename(filePath, path.extname(filePath));
 }
 
-async function optimizeImage(filePath) {
-  const before = fs.statSync(filePath).size;
-  const ext = path.extname(filePath).toLowerCase();
+/**
+ * @param {string[]} files
+ */
+function groupByBasename(files) {
+  /** @type {Map<string, string[]>} */
+  const groups = new Map();
+  for (const file of files) {
+    const key = baseName(file).toLowerCase();
+    const list = groups.get(key) ?? [];
+    list.push(file);
+    groups.set(key, list);
+  }
+  return groups;
+}
 
-  try {
-    let buffer = await encodeToBuffer(filePath, ext);
+function writeAtomic(filePath, buffer) {
+  const tmp = `${filePath}.${process.pid}.tmp`;
+  fs.writeFileSync(tmp, buffer);
+  fs.renameSync(tmp, filePath);
+}
 
-    if (buffer.length > MAX_BYTES && (ext === ".jpg" || ext === ".jpeg" || ext === ".webp")) {
-      let quality = ext === ".webp" ? WEBP_QUALITY : JPEG_QUALITY;
-      while (buffer.length > MAX_BYTES && quality >= 55) {
-        quality -= 5;
-        let pipeline = sharp(filePath, { failOn: "none" }).rotate();
-        buffer =
-          ext === ".webp"
-            ? await pipeline.webp({ quality, effort: 4 }).toBuffer()
-            : await pipeline.jpeg({ quality, mozjpeg: true }).toBuffer();
-      }
+/**
+ * @param {string} sourcePath
+ * @param {string} outDir
+ * @param {string} name
+ * @param {{ maxWidth: number, webpQuality: number, avifQuality: number }} profile
+ * @param {string[]} allVariants
+ */
+async function encodeVariants(sourcePath, outDir, name, profile, allVariants) {
+  const before = allVariants.reduce((sum, f) => sum + fs.statSync(f).size, 0);
+  // Read into memory so Windows can overwrite the same path as the source
+  const input = fs.readFileSync(sourcePath);
+  const pipeline = sharp(input, { failOn: "none", animated: false }).rotate().resize({
+    width: profile.maxWidth,
+    withoutEnlargement: true,
+  });
+
+  const webpPath = path.join(outDir, `${name}.webp`);
+  const avifPath = path.join(outDir, `${name}.avif`);
+
+  const [webpBuf, avifBuf] = await Promise.all([
+    pipeline.clone().webp({ quality: profile.webpQuality, effort: 5 }).toBuffer(),
+    pipeline.clone().avif({ quality: profile.avifQuality, effort: 4 }).toBuffer(),
+  ]);
+
+  writeAtomic(webpPath, webpBuf);
+  writeAtomic(avifPath, avifBuf);
+
+  for (const file of allVariants) {
+    const ext = path.extname(file).toLowerCase();
+    if (ext !== ".webp" && ext !== ".avif" && fs.existsSync(file)) {
+      fs.unlinkSync(file);
     }
-
-    fs.writeFileSync(filePath, buffer);
-    const after = buffer.length;
-    console.log(`  ${path.relative(root, filePath)}: ${kb(before)} → ${kb(after)}`);
-    return { before, after };
-  } catch (error) {
-    console.warn(`  skip ${path.relative(root, filePath)}: ${error instanceof Error ? error.message : error}`);
-    return { before, after: before };
   }
+
+  console.log(
+    `  ${name}: ${kb(before)} → webp ${kb(webpBuf.length)} + avif ${kb(avifBuf.length)} (≤${profile.maxWidth}w)`,
+  );
+  return { before, after: webpBuf.length + avifBuf.length, webpPath };
 }
 
-let totalBefore = 0;
-let totalAfter = 0;
-let count = 0;
-
-for (const dir of targets) {
+async function optimizeDirectory(relDir, profileKey) {
+  const dir = path.join(root, relDir);
+  const profile = PROFILES[profileKey];
   const files = walk(dir);
   if (!files.length) {
-    console.log(`[optimize-images] no images in ${path.relative(root, dir)}`);
-    continue;
+    console.log(`[optimize-images] no images in ${relDir}`);
+    return { before: 0, after: 0, count: 0, webpFiles: [] };
   }
-  console.log(`\n[optimize-images] ${path.relative(root, dir)} (${files.length} files)`);
-  for (const file of files) {
-    const result = await optimizeImage(file);
-    totalBefore += result.before;
-    totalAfter += result.after;
-    count += 1;
+
+  console.log(`\n[optimize-images] ${relDir} (${files.length} sources → ${profile.maxWidth}px max)`);
+  const groups = groupByBasename(files);
+  let before = 0;
+  let after = 0;
+  let count = 0;
+  /** @type {string[]} */
+  const webpFiles = [];
+
+  for (const [name, variants] of groups) {
+    variants.sort((a, b) => fs.statSync(b).size - fs.statSync(a).size);
+    const source = variants[0];
+
+    try {
+      const result = await encodeVariants(source, dir, name, profile, variants);
+      before += result.before;
+      after += result.after;
+      count += 1;
+      webpFiles.push(result.webpPath);
+    } catch (error) {
+      console.warn(
+        `  skip ${name}: ${error instanceof Error ? error.message : error}`,
+      );
+    }
   }
+
+  return { before, after, count, webpFiles };
 }
 
+function writeBlogImagesGenerated(webpFiles) {
+  const entries = webpFiles
+    .map((file) => {
+      const slug = baseName(file);
+      return `  ${JSON.stringify(slug)}: ${JSON.stringify(`/images/blog/${slug}.webp`)}`;
+    })
+    .sort((a, b) => a.localeCompare(b));
+
+  const out = path.join(root, "src", "lib", "content", "blog-images.generated.ts");
+  const body = `/* Auto-generated by scripts/optimize-images.mjs — ${entries.length} images */
+export const blogImagesGenerated: Record<string, string> = {
+${entries.join(",\n")},
+};
+`;
+  fs.writeFileSync(out, body);
+  console.log(`\n[optimize-images] wrote ${path.relative(root, out)} (${entries.length} entries)`);
+}
+
+function updateCategoryFallbacks() {
+  const file = path.join(root, "src", "lib", "content", "blog-images.ts");
+  let src = fs.readFileSync(file, "utf8");
+  src = src.replace(/\/images\/blog\/([^"']+)\.(png|jpg|jpeg|jfif|webp|avif)/gi, "/images/blog/$1.webp");
+  fs.writeFileSync(file, src);
+}
+
+const blog = await optimizeDirectory("public/images/blog", "blog");
+if (blog.webpFiles.length) {
+  writeBlogImagesGenerated(blog.webpFiles);
+  updateCategoryFallbacks();
+}
+
+const hero = await optimizeDirectory("public/images/hero", "hero");
+
+const totalBefore = blog.before + hero.before;
+const totalAfter = blog.after + hero.after;
+const totalCount = blog.count + hero.count;
+
 console.log(
-  `\n[optimize-images] ${count} files — ${(totalBefore / 1024 / 1024).toFixed(1)} MB → ${(totalAfter / 1024 / 1024).toFixed(1)} MB`,
+  `\n[optimize-images] ${totalCount} images — ${(totalBefore / 1024 / 1024).toFixed(1)} MB → ${(totalAfter / 1024 / 1024).toFixed(1)} MB`,
 );

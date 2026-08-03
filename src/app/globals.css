@@ -178,39 +178,66 @@
     animation: meshFloat 22s ease-in-out infinite;
   }
 
+  /* Soft radial gradients instead of 80px live blur — far cheaper under hero video */
   .aurora-blob {
     position: absolute;
     border-radius: 9999px;
-    filter: blur(80px);
-    opacity: 0.45;
-    animation: auroraDrift 20s ease-in-out infinite;
+    filter: none;
+    opacity: 0.55;
+    animation: auroraDrift 28s ease-in-out infinite;
     will-change: transform;
+    transform: translateZ(0);
   }
 
   .aurora-blob-a {
-    width: min(55vw, 520px);
-    height: min(55vw, 520px);
+    width: min(50vw, 480px);
+    height: min(50vw, 480px);
     left: -8%;
     top: 8%;
-    background: rgb(74 222 128 / 0.35);
+    background: radial-gradient(
+      circle at 40% 40%,
+      rgb(74 222 128 / 0.32) 0%,
+      rgb(74 222 128 / 0.08) 55%,
+      transparent 72%
+    );
   }
 
   .aurora-blob-b {
-    width: min(48vw, 460px);
-    height: min(48vw, 460px);
+    width: min(44vw, 420px);
+    height: min(44vw, 420px);
     right: -6%;
     top: 22%;
-    background: rgb(20 184 166 / 0.28);
+    background: radial-gradient(
+      circle at 50% 45%,
+      rgb(20 184 166 / 0.26) 0%,
+      rgb(20 184 166 / 0.06) 55%,
+      transparent 72%
+    );
     animation-delay: -6s;
   }
 
   .aurora-blob-c {
-    width: min(42vw, 400px);
-    height: min(42vw, 400px);
+    width: min(38vw, 360px);
+    height: min(38vw, 360px);
     left: 32%;
     bottom: -8%;
-    background: rgb(53 124 60 / 0.22);
+    background: radial-gradient(
+      circle at 45% 50%,
+      rgb(53 124 60 / 0.2) 0%,
+      rgb(53 124 60 / 0.05) 55%,
+      transparent 72%
+    );
     animation-delay: -12s;
+  }
+
+  /* Belt-and-suspenders: never paint aurora over an active hero video decode */
+  html[data-hero-video="1"] .aurora-blob {
+    display: none !important;
+    animation: none !important;
+  }
+
+  html[data-hero-video="1"] .mesh-float {
+    animation: none;
   }
 
   .glass-panel {
@@ -319,8 +346,9 @@
   }
 
   .aurora-blob {
-    filter: blur(48px);
-    opacity: 0.28;
+    filter: none;
+    opacity: 0.22;
+    animation: none;
   }
 
   .hero-spotlight {

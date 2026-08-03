@@ -1,9 +1,7 @@
 "use client";
 
-import { createElement, useEffect, useRef, type ElementType, type ReactNode } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useReducedMotion } from "framer-motion";
+import { createElement, type ElementType, type ReactNode } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import { cn } from "@/lib/cn";
 
 type PremiumTitleProps = {
@@ -15,6 +13,20 @@ type PremiumTitleProps = {
   id?: string;
 };
 
+const motionByTag = {
+  h1: motion.h1,
+  h2: motion.h2,
+  h3: motion.h3,
+  h4: motion.h4,
+  h5: motion.h5,
+  h6: motion.h6,
+  p: motion.p,
+  div: motion.div,
+  span: motion.span,
+} as const;
+
+type MotionTag = keyof typeof motionByTag;
+
 export function PremiumTitle({
   as: Tag = "h2",
   className,
@@ -23,54 +35,37 @@ export function PremiumTitle({
   variant = "section",
   id,
 }: PremiumTitleProps) {
-  const ref = useRef<HTMLElement>(null);
   const reduce = useReducedMotion();
+  const classes = cn(
+    "font-display tracking-tight",
+    shimmer && !reduce && "heading-shimmer",
+    className,
+  );
 
-  useEffect(() => {
-    if (reduce || !ref.current) return;
-    const el = ref.current;
+  if (reduce) {
+    return createElement(Tag, { id, className: classes }, children);
+  }
 
-    if (variant === "hero") {
-      gsap.fromTo(
-        el,
-        { opacity: 0, filter: "blur(16px)", y: 24 },
-        { opacity: 1, filter: "blur(0px)", y: 0, duration: 1.05, ease: "power3.out", delay: 0.08 },
-      );
-      return;
-    }
+  const tagKey = (typeof Tag === "string" ? Tag : "h2") as MotionTag;
+  const MotionTag = motionByTag[tagKey] ?? motion.h2;
+  const blurFrom = variant === "hero" ? "blur(16px)" : "blur(14px)";
+  const yFrom = variant === "hero" ? 24 : 28;
 
-    gsap.registerPlugin(ScrollTrigger);
-    const tween = gsap.from(el, {
-      opacity: 0,
-      filter: "blur(14px)",
-      y: 28,
-      duration: 1.05,
-      ease: "power3.out",
-      immediateRender: false,
-      scrollTrigger: {
-        trigger: el,
-        start: "top 92%",
-        once: true,
-      },
-    });
-
-    return () => {
-      tween.scrollTrigger?.kill();
-      tween.kill();
-    };
-  }, [reduce, variant]);
-
-  return createElement(
-    Tag,
-    {
-      ref: ref as never,
-      id,
-      className: cn(
-        "font-display tracking-tight",
-        shimmer && !reduce && "heading-shimmer",
-        className,
-      ),
-    },
-    children,
+  return (
+    <MotionTag
+      id={id}
+      className={classes}
+      initial={{ opacity: 0, filter: blurFrom, y: yFrom }}
+      animate={variant === "hero" ? { opacity: 1, filter: "blur(0px)", y: 0 } : undefined}
+      whileInView={variant === "section" ? { opacity: 1, filter: "blur(0px)", y: 0 } : undefined}
+      viewport={variant === "section" ? { once: true, amount: 0.08, margin: "0px 0px -8% 0px" } : undefined}
+      transition={{
+        duration: 1.05,
+        ease: [0.22, 1, 0.36, 1],
+        delay: variant === "hero" ? 0.08 : 0,
+      }}
+    >
+      {children}
+    </MotionTag>
   );
 }

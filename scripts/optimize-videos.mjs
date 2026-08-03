@@ -1,5 +1,6 @@
 /**
- * Re-encode hero + CEO videos for web delivery (H.264 MP4 + optional VP9 WebM + poster JPG).
+ * Re-encode hero + CEO videos for web delivery (H.264 MP4 + VP9 WebM + poster JPG).
+ * Forces 30fps, 720p max, no audio, +faststart.
  * Run: npm run optimize:videos
  */
 import { execFileSync } from "node:child_process";
@@ -24,7 +25,16 @@ function run(args) {
   execFileSync(ffmpeg, args, { stdio: "inherit" });
 }
 
-function optimizeVideo(inputPath, outDir, baseName, crf = 30) {
+/**
+ * @param {string} inputPath
+ * @param {string} outDir
+ * @param {string} baseName
+ * @param {{ crf?: number, keepWebm?: boolean }} [opts]
+ */
+function optimizeVideo(inputPath, outDir, baseName, opts = {}) {
+  const crf = opts.crf ?? 31;
+  const keepWebm = opts.keepWebm ?? true;
+
   if (!fs.existsSync(inputPath)) {
     console.warn(`[optimize-videos] skip missing: ${inputPath}`);
     return;
@@ -36,16 +46,23 @@ function optimizeVideo(inputPath, outDir, baseName, crf = 30) {
   const outWebm = path.join(outDir, `${baseName}.webm`);
   const outPoster = path.join(outDir, `${baseName}-poster.jpg`);
 
-  console.log(`\n[optimize-videos] ${baseName} (${mb(before)})`);
+  console.log(`\n[optimize-videos] ${baseName} (${mb(before)}) → 30fps / 720p / CRF ${crf}`);
 
+  // H.264 MP4 — consistent 30fps, capped height, no audio, streaming-friendly
   run([
     "-y",
     "-i",
     inputPath,
     "-vf",
-    "scale=-2:720",
+    "scale=-2:720:force_original_aspect_ratio=decrease",
+    "-r",
+    "30",
     "-c:v",
     "libx264",
+    "-profile:v",
+    "main",
+    "-pix_fmt",
+    "yuv420p",
     "-crf",
     String(crf),
     "-preset",
@@ -61,16 +78,21 @@ function optimizeVideo(inputPath, outDir, baseName, crf = 30) {
   const mp4Size = fs.statSync(outMp4).size;
   console.log(`  mp4: ${mb(mp4Size)} (was ${mb(before)})`);
 
+  // VP9 WebM — same frame rate / resolution constraints for Chrome/Firefox
   run([
     "-y",
     "-i",
     outMp4,
+    "-r",
+    "30",
     "-c:v",
     "libvpx-vp9",
     "-crf",
-    "38",
+    "36",
     "-b:v",
     "0",
+    "-row-mt",
+    "1",
     "-deadline",
     "good",
     "-cpu-used",
@@ -79,11 +101,14 @@ function optimizeVideo(inputPath, outDir, baseName, crf = 30) {
     outWebm,
   ]);
 
-  if (fs.existsSync(outWebm) && fs.statSync(outWebm).size >= mp4Size) {
-    fs.unlinkSync(outWebm);
-    console.log("  webm: skipped (larger than mp4)");
-  } else if (fs.existsSync(outWebm)) {
-    console.log(`  webm: ${mb(fs.statSync(outWebm).size)}`);
+  if (fs.existsSync(outWebm)) {
+    const webmSize = fs.statSync(outWebm).size;
+    if (!keepWebm && webmSize >= mp4Size) {
+      fs.unlinkSync(outWebm);
+      console.log("  webm: skipped (larger than mp4)");
+    } else {
+      console.log(`  webm: ${mb(webmSize)}`);
+    }
   }
 
   run(["-y", "-i", outMp4, "-ss", "00:00:00.5", "-vframes", "1", "-q:v", "4", outPoster]);
@@ -95,12 +120,19 @@ const videosDir = path.join(root, "public", "videos");
 
 fs.mkdirSync(heroDir, { recursive: true });
 
-optimizeVideo(path.join(heroDir, "landing-01.mp4"), heroDir, "landing-01", 32);
-
-for (const name of ["landing-02", "landing-03", "landing-04"]) {
-  optimizeVideo(path.join(heroDir, `${name}.mp4`), heroDir, name);
+// Hero clips: always ship WebM for cheaper decode on Chromium/Firefox
+for (const [name, crf] of [
+  ["landing-01", 32],
+  ["landing-02", 31],
+  ["landing-03", 31],
+  ["landing-04", 31],
+]) {
+  optimizeVideo(path.join(heroDir, `${name}.mp4`), heroDir, name, { crf, keepWebm: true });
 }
 
-optimizeVideo(path.join(videosDir, "my-ceo-video.mp4"), videosDir, "my-ceo-video");
+optimizeVideo(path.join(videosDir, "my-ceo-video.mp4"), videosDir, "my-ceo-video", {
+  crf: 31,
+  keepWebm: false,
+});
 
 console.log("\n[optimize-videos] done");

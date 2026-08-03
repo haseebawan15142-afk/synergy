@@ -202,8 +202,3 @@ export function ThemeSelector({ className, variant = "dropdown" }: ThemeSelector
     </div>
   );
 }
-
-/** Quick light/dark flip — kept for optional use */
-export function ThemeToggle(props: ThemeSelectorProps) {
-  return <ThemeSelector {...props} />;
-}
