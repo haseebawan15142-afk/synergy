@@ -50,7 +50,7 @@ export function Navbar() {
 
   return (
     <header className={headerClass}>
-      <div className="page-container flex items-center justify-between gap-2 py-2.5 sm:gap-3 sm:py-3">
+      <div className="page-container relative flex items-center justify-between gap-2 py-2.5 sm:gap-3 sm:py-3">
         <motion.div
           initial={reduce ? false : { opacity: 0.92 }}
           animate={{ opacity: 1 }}
@@ -63,12 +63,11 @@ export function Navbar() {
         </motion.div>
 
         <nav className="hidden items-center gap-0.5 lg:flex" aria-label="Primary">
-          {siteConfig.nav.map((item, index) => {
+          {siteConfig.nav.map((item) => {
             const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
             const menu = navMegaMenus[item.href];
 
             if (menu) {
-              const align = index === 0 ? "left" : index === siteConfig.nav.length - 1 ? "right" : "center";
               return (
                 <MegaMenu
                   key={item.href}
@@ -76,7 +75,6 @@ export function Navbar() {
                   href={item.href}
                   menu={menu}
                   active={active}
-                  align={align}
                 />
               );
             }
