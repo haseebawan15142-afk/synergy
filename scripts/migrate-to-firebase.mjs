@@ -1,8 +1,10 @@
 /**
- * Migrate local content modules into Firestore.
+ * Seed local content modules into Firestore (admin-safe by default).
  * Requires Admin SDK env vars (same as admin:seed).
  *
- * Usage: npm run cms:migrate
+ * Usage:
+ *   npm run cms:migrate           → only create missing docs (never overwrite admin edits)
+ *   npm run cms:migrate -- --force → overwrite existing docs with seed data
  */
 
 import { readFileSync, existsSync } from "node:fs";
@@ -53,12 +55,28 @@ if (!getApps().length) {
 }
 
 const db = getFirestore();
+const force = process.argv.includes("--force") || process.env.FORCE_MIGRATE === "1";
+let created = 0;
+let skipped = 0;
 
+/**
+ * By default only writes when the doc is missing so admin CMS edits are never
+ * clobbered by seed data (leadership photos/names, partners, etc.).
+ */
 async function upsert(col, id, data) {
-  await db
-    .collection(col)
-    .doc(id)
-    .set({ ...data, updatedAt: FieldValue.serverTimestamp(), migratedAt: FieldValue.serverTimestamp() }, { merge: true });
+  const ref = db.collection(col).doc(id);
+  if (!force) {
+    const existing = await ref.get();
+    if (existing.exists) {
+      skipped += 1;
+      return;
+    }
+  }
+  await ref.set(
+    { ...data, updatedAt: FieldValue.serverTimestamp(), migratedAt: FieldValue.serverTimestamp() },
+    { merge: true },
+  );
+  created += 1;
 }
 
 async function loadTsModule(relPath) {
@@ -76,7 +94,11 @@ async function loadTsModule(relPath) {
 }
 
 async function main() {
-  console.log("Migrating content to Firestore…");
+  console.log(
+    force
+      ? "Migrating content to Firestore… (FORCE — will overwrite existing docs)"
+      : "Seeding content to Firestore… (admin-safe — skips docs that already exist)",
+  );
 
   // Inline migration from duplicated source-of-truth structures (keeps script runnable without jiti)
   const { services } = await import(pathToFileURL(resolve(root, "scripts/migrate-data/services.mjs")).href);
@@ -131,11 +153,18 @@ async function main() {
   console.log(`✓ careers (${jobs.length})`);
 
   for (const [i, p] of partners.entries()) {
-    const id = p.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+    const id = p.slug || p.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
     await upsert("partners", id, {
       name: p.name,
+      slug: id,
       logoUrl: p.logo,
       website: p.href,
+      heroImageUrl: p.heroImageUrl || "",
+      taglines: p.taglines || [],
+      shortDescription: p.shortDescription || "",
+      overview: p.overview || "",
+      keySolutions: p.keySolutions || [],
+      category: p.category || "",
       sortOrder: i,
       featured: true,
       active: true,
@@ -189,11 +218,16 @@ async function main() {
 
   await db.collection("activities").add({
     type: "cms.migrate",
-    message: "Content migration completed",
+    message: force
+      ? "Content migration completed (force overwrite)"
+      : "Content seed completed (skipped existing docs)",
     createdAt: FieldValue.serverTimestamp(),
   });
 
-  console.log("\nDone. Public site will prefer Firestore when collections are non-empty.");
+  console.log(`\nDone. Created ${created}, skipped ${skipped} existing.`);
+  if (!force && skipped > 0) {
+    console.log("Admin edits were preserved. Use `npm run cms:migrate -- --force` only if you intend to reset seed data.");
+  }
 }
 
 main().catch((err) => {

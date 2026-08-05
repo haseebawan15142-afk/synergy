@@ -1,11 +1,11 @@
+/** Slim top bar instead of a full-page skeleton (feels snappier on navigation). */
 export default function Loading() {
   return (
-    <div className="page-container section-y-tight animate-pulse" aria-hidden>
-      <div className="mx-auto max-w-3xl space-y-4">
-        <div className="h-8 w-2/3 rounded-lg bg-surface-muted" />
-        <div className="h-4 w-full rounded bg-surface-muted" />
-        <div className="h-4 w-5/6 rounded bg-surface-muted" />
-      </div>
+    <div
+      className="pointer-events-none fixed inset-x-0 top-0 z-[60] h-0.5 overflow-hidden bg-transparent"
+      aria-hidden
+    >
+      <div className="h-full w-1/3 animate-pulse bg-synergy" />
     </div>
   );
 }

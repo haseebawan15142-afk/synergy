@@ -1,8 +1,8 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { pageTransition } from "@/lib/motion/variants";
 
+/** Fast page enter — avoid long opacity-0 states that feel like loading. */
 export default function Template({ children }: { children: React.ReactNode }) {
   const reduce = useReducedMotion();
 
@@ -12,10 +12,9 @@ export default function Template({ children }: { children: React.ReactNode }) {
 
   return (
     <motion.div
-      initial="hidden"
-      animate="visible"
-      variants={pageTransition}
-      style={{ willChange: "opacity, transform" }}
+      initial={{ opacity: 0.96 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.12, ease: "easeOut" }}
     >
       {children}
     </motion.div>

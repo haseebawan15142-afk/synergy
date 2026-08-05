@@ -1,17 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-/** Load a CMS list with a local fallback as the initial value (no flash of empty). */
+/**
+ * Show local fallback immediately for fast first paint, then swap to CMS
+ * data when Firestore responds (cached after the first fetch).
+ */
 export function useCmsList<T>(fallback: T[], loader: () => Promise<T[]>) {
   const [items, setItems] = useState<T[]>(fallback);
+  const fallbackRef = useRef(fallback);
+  fallbackRef.current = fallback;
 
   useEffect(() => {
     let cancelled = false;
     loader()
       .then((next) => {
-        // Only swap when CMS returns a usable non-empty list (avoids flicker to junk data).
-        if (!cancelled && Array.isArray(next) && next.length > 0) {
+        if (cancelled) return;
+        if (Array.isArray(next) && next.length > 0) {
           setItems(next);
         }
       })

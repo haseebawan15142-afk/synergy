@@ -2,10 +2,15 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
-import { partners as localPartners, type Partner } from "@/lib/content/partners";
+import {
+  partnerDetailPath,
+  partners as localPartners,
+  type Partner,
+} from "@/lib/content/partners";
 import { fetchPartners } from "@/lib/cms/public";
 import { useCmsList } from "@/hooks/useCmsList";
 import { cn } from "@/lib/cn";
+import Link from "next/link";
 
 type PartnersLogoCarouselProps = {
   title?: string;
@@ -141,10 +146,8 @@ export function PartnersLogoCarousel({
                   className="flex shrink-0 items-center justify-center px-3 sm:px-4"
                   style={{ width: `${itemWidth}%` }}
                 >
-                  <a
-                    href={p.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  <Link
+                    href={partnerDetailPath(p)}
                     className="flex h-14 w-full max-w-[160px] items-center justify-center opacity-90 transition hover:opacity-100 sm:h-16"
                   >
                     <Image
@@ -154,7 +157,7 @@ export function PartnersLogoCarousel({
                       height={64}
                       className="max-h-12 w-auto max-w-full object-contain sm:max-h-14"
                     />
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>

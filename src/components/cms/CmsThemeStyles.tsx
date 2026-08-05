@@ -11,28 +11,43 @@ function toCssVar(key: string) {
 export function CmsThemeStyles() {
   useEffect(() => {
     let cancelled = false;
-    fetchThemeTokens()
-      .then((theme) => {
-        if (cancelled) return;
-        const root = document.documentElement;
-        (Object.entries(theme) as [string, string | boolean][]).forEach(([key, value]) => {
-          if (typeof value === "string") {
-            root.style.setProperty(toCssVar(key), value);
+    let idleId: number | undefined;
+    let timeoutId: number | undefined;
+
+    const run = () => {
+      fetchThemeTokens()
+        .then((theme) => {
+          if (cancelled) return;
+          const root = document.documentElement;
+          (Object.entries(theme) as [string, string | boolean][]).forEach(([key, value]) => {
+            if (typeof value === "string") {
+              root.style.setProperty(toCssVar(key), value);
+            }
+          });
+          if (theme.primary) {
+            root.style.setProperty("--color-synergy", theme.primary);
           }
+          if (theme.accent) {
+            root.style.setProperty("--color-accent", theme.accent);
+          }
+        })
+        .catch(() => {
+          /* keep design-token defaults */
         });
-        // Map primary into existing brand token when set
-        if (theme.primary) {
-          root.style.setProperty("--color-synergy", theme.primary);
-        }
-        if (theme.accent) {
-          root.style.setProperty("--color-accent", theme.accent);
-        }
-      })
-      .catch(() => {
-        /* keep design-token defaults */
-      });
+    };
+
+    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+      idleId = window.requestIdleCallback(run, { timeout: 2000 });
+    } else {
+      timeoutId = window.setTimeout(run, 400);
+    }
+
     return () => {
       cancelled = true;
+      if (idleId !== undefined && "cancelIdleCallback" in window) {
+        window.cancelIdleCallback(idleId);
+      }
+      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
     };
   }, []);
 

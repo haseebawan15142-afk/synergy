@@ -1,6 +1,6 @@
 import { services } from "@/lib/content/services";
 import { industries } from "@/lib/content/industries";
-import { partners } from "@/lib/content/partners";
+import { partnerDetailPath, partners } from "@/lib/content/partners";
 import { dynatracePartner } from "@/lib/content/dynatrace-partner";
 import { blogCategories, getRecentBlogPosts } from "@/lib/content/blog-posts";
 
@@ -101,11 +101,11 @@ export const navMegaMenus: Record<string, MegaMenuConfig> = {
     columns: [
       {
         heading: "Technology principals",
-        links: partnersLeft.map((p) => ({ label: p.name, href: p.href })),
+        links: partnersLeft.map((p) => ({ label: p.name, href: partnerDetailPath(p) })),
       },
       {
         heading: "\u00A0",
-        links: partnersRight.map((p) => ({ label: p.name, href: p.href })),
+        links: partnersRight.map((p) => ({ label: p.name, href: partnerDetailPath(p) })),
       },
     ],
   },

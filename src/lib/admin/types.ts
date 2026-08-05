@@ -100,6 +100,25 @@ export type ServiceDoc = {
   updatedAt?: TimestampLike;
 };
 
+export type PartnerDoc = {
+  id?: string;
+  name: string;
+  slug: string;
+  logoUrl?: string;
+  website?: string;
+  heroImageUrl?: string;
+  taglines?: string[];
+  shortDescription?: string;
+  overview?: string;
+  keySolutions?: string[];
+  category?: string;
+  sortOrder: number;
+  featured: boolean;
+  active: boolean;
+  createdAt?: TimestampLike;
+  updatedAt?: TimestampLike;
+};
+
 export type TestimonialDoc = {
   id?: string;
   name: string;

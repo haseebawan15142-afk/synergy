@@ -28,7 +28,7 @@ export type CrudRecord = { id?: string; [key: string]: unknown };
 export type CrudField = {
   key: string;
   label: string;
-  type?: "text" | "textarea" | "number" | "select" | "checkbox" | "media" | "date";
+  type?: "text" | "textarea" | "number" | "select" | "checkbox" | "media" | "date" | "list";
   options?: string[];
   folder?: string;
   required?: boolean;
@@ -36,6 +36,22 @@ export type CrudField = {
 
 const toLabel = (value: unknown) =>
   Array.isArray(value) ? value.join(", ") : value === undefined || value === null ? "" : String(value);
+
+/** One item per line in the admin textarea → trimmed string[]. */
+export function parseListField(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.map((item) => String(item).trim()).filter(Boolean);
+  }
+  return String(value ?? "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
+function listFieldText(value: unknown) {
+  if (Array.isArray(value)) return value.map(String).join("\n");
+  return value === undefined || value === null ? "" : String(value);
+}
 
 export function CrudManager<T extends CrudRecord>({
   title,
@@ -94,6 +110,12 @@ export function CrudManager<T extends CrudRecord>({
       const existingId = typeof data.id === "string" ? data.id : undefined;
       const payload = { ...data } as CrudRecord;
       delete payload.id;
+
+      for (const field of fields) {
+        if (field.type === "list") {
+          payload[field.key] = parseListField(payload[field.key]);
+        }
+      }
 
       // Auto-fill slug from title/name when empty
       if (!payload.slug && (payload.title || payload.name)) {
@@ -163,12 +185,68 @@ export function CrudManager<T extends CrudRecord>({
             <div className="flex items-center justify-between"><h2 className="font-semibold">{form.id ? `Edit ${title.slice(0, -1)}` : `New ${title.slice(0, -1)}`}</h2><SecondaryButton type="button" onClick={() => setForm(null)}>Cancel</SecondaryButton></div>
             <div className="grid gap-4 md:grid-cols-2">
               {fields.map((field) => (
-                <Field key={field.key} label={field.label} className={field.type === "textarea" ? "md:col-span-2" : undefined}>
-                  {field.type === "media" ? <MediaUrlField label={field.label} value={toLabel(form[field.key])} folder={field.folder} onChange={(value) => update(field.key, value)} /> :
-                  field.type === "textarea" ? <textarea className={inputClass} rows={4} value={toLabel(form[field.key])} onChange={(event) => update(field.key, event.target.value)} required={field.required} /> :
-                  field.type === "checkbox" ? <input type="checkbox" className="h-4 w-4" checked={Boolean(form[field.key])} onChange={(event) => update(field.key, event.target.checked)} /> :
-                  field.type === "select" ? <select className={inputClass} value={toLabel(form[field.key])} onChange={(event) => update(field.key, event.target.value)}>{field.options?.map((option) => <option key={option} value={option}>{option}</option>)}</select> :
-                  <input type={field.type === "number" ? "number" : field.type === "date" ? "date" : "text"} className={inputClass} value={toLabel(form[field.key])} onChange={(event) => update(field.key, field.type === "number" ? Number(event.target.value) : event.target.value)} required={field.required} />}
+                <Field
+                  key={field.key}
+                  label={field.label}
+                  className={field.type === "textarea" || field.type === "list" ? "md:col-span-2" : undefined}
+                >
+                  {field.type === "media" ? (
+                    <MediaUrlField
+                      label={field.label}
+                      value={toLabel(form[field.key])}
+                      folder={field.folder}
+                      onChange={(value) => update(field.key, value)}
+                    />
+                  ) : field.type === "list" ? (
+                    <textarea
+                      className={inputClass}
+                      rows={4}
+                      value={listFieldText(form[field.key])}
+                      onChange={(event) => update(field.key, event.target.value)}
+                      required={field.required}
+                      placeholder="One item per line"
+                    />
+                  ) : field.type === "textarea" ? (
+                    <textarea
+                      className={inputClass}
+                      rows={4}
+                      value={toLabel(form[field.key])}
+                      onChange={(event) => update(field.key, event.target.value)}
+                      required={field.required}
+                    />
+                  ) : field.type === "checkbox" ? (
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4"
+                      checked={Boolean(form[field.key])}
+                      onChange={(event) => update(field.key, event.target.checked)}
+                    />
+                  ) : field.type === "select" ? (
+                    <select
+                      className={inputClass}
+                      value={toLabel(form[field.key])}
+                      onChange={(event) => update(field.key, event.target.value)}
+                    >
+                      {field.options?.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type={field.type === "number" ? "number" : field.type === "date" ? "date" : "text"}
+                      className={inputClass}
+                      value={toLabel(form[field.key])}
+                      onChange={(event) =>
+                        update(
+                          field.key,
+                          field.type === "number" ? Number(event.target.value) : event.target.value,
+                        )
+                      }
+                      required={field.required}
+                    />
+                  )}
                 </Field>
               ))}
             </div>

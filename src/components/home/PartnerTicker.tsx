@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { partners } from "@/lib/content/partners";
+import { partnerDetailPath, partners } from "@/lib/content/partners";
 import { cn } from "@/lib/cn";
 
 type CloudBrand = {
@@ -81,9 +81,7 @@ function TickerLogo({ item }: { item: TickerItem }) {
   if (item.kind === "partner") {
     return (
       <Link
-        href={item.href}
-        target="_blank"
-        rel="noopener noreferrer"
+        href={partnerDetailPath(item)}
         className="group flex h-16 w-40 shrink-0 items-center justify-center px-4 sm:h-20 sm:w-44"
         aria-label={item.name}
       >

@@ -1,11 +1,11 @@
 export const motionEase = [0.25, 0.1, 0.25, 1] as const;
 
 export const motionDurations = {
-  page: 0.42,
-  reveal: 0.48,
-  hover: 0.18,
-  press: 0.15,
-  stagger: 0.08,
+  page: 0.16,
+  reveal: 0.32,
+  hover: 0.16,
+  press: 0.12,
+  stagger: 0.05,
 } as const;
 
 export const viewportOnce = {
