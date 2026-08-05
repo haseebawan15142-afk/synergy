@@ -306,7 +306,18 @@ export async function fetchPartners(): Promise<Partner[]> {
         .filter((p): p is PartnerRow => p !== null)
         .sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name));
 
-      return rows.map(({ sortOrder: _sortOrder, ...partner }) => withPartnerFallbacks(partner));
+      const fromCms = rows.map(({ sortOrder: _sortOrder, ...partner }) =>
+        withPartnerFallbacks(partner),
+      );
+      const cmsSlugs = new Set(
+        fromCms.map((p) => (p.slug || slugifyPartnerName(p.name)).toLowerCase()),
+      );
+      // Keep CMS order, then append local-only partners (e.g. Company Profile 2026 additions).
+      const localOnly = localPartners
+        .map(withPartnerFallbacks)
+        .filter((p) => !cmsSlugs.has((p.slug || slugifyPartnerName(p.name)).toLowerCase()));
+
+      return [...fromCms, ...localOnly];
     } catch {
       return localPartners.map(withPartnerFallbacks);
     }
