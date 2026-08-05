@@ -11,6 +11,7 @@ import { leadershipTeam } from "@/lib/content/leadership";
 import { partners } from "@/lib/content/partners";
 import { services } from "@/lib/content/services";
 import { siteConfig } from "@/lib/content/site";
+import { boardOfDirectors, companyProfileMeta, officeLocationsDetailed } from "@/lib/content/company-profile";
 
 export type LocalReply = {
   reply: string;
@@ -78,7 +79,7 @@ export function replyFromLocalKnowledge(userMessage: string): LocalReply {
   ) {
     return {
       matched: true,
-      reply: `${siteConfig.legalName} is Pakistan's enterprise IT solutions provider with 40+ years of experience.\n\nWe deliver:\n• Infrastructure & networking\n• Data backup & recovery\n• Microsoft 365 & cloud\n• Managed IT & 24×7 support\n• On-site engineering\n\nHQ: ${siteConfig.address.city}. Branches: Lahore, Islamabad, Gilgit.\n\nLearn more: /about | Services: /services`,
+      reply: `${siteConfig.legalName} has been a trusted technology partner in Pakistan since ${companyProfileMeta.foundedYear}, with ${companyProfileMeta.teamSizeLabel} professionals.\n\nWe deliver:\n• Infrastructure solutions\n• Enterprise applications\n• Support, maintenance & SLAs\n• System integration\n\nOffices: Karachi (HQ), Islamabad, Lahore, Gilgit, plus Middle East (Ras Al Khaimah).\n\nLearn more: /about | Services: /services`,
     };
   }
 
@@ -232,7 +233,12 @@ export function replyFromLocalKnowledge(userMessage: string): LocalReply {
   ) {
     return {
       matched: true,
-      reply: `Contact ${siteConfig.name}\n\n• Email: ${siteConfig.email}\n• Phone: ${siteConfig.phones.join(", ")}\n• Head office: ${siteConfig.address.line}, ${siteConfig.address.city}, ${siteConfig.address.country}\n\nBranches: Lahore, Islamabad, Gilgit.\n\nOnline form: /contact — we provide quotes tailored to your project.`,
+      reply: `Contact ${siteConfig.name}\n\n• Email: ${siteConfig.email}\n• Phone: ${siteConfig.phones.join(", ")}\n• Fax: ${siteConfig.fax}\n• Head office: ${siteConfig.address.line}, ${siteConfig.address.city}, ${siteConfig.address.country}\n\nNationwide offices: ${officeLocationsDetailed
+        .filter((o) => o.country === "Pakistan")
+        .map((o) => o.city)
+        .join(", ")}.\nMiddle East: Ras Al Khaimah (synergy-me.ae).\n\nBoard (Company Profile 2026): ${boardOfDirectors
+        .map((m) => `${m.name} (${m.title})`)
+        .join("; ")}.\n\nOnline form: /contact`,
     };
   }
 

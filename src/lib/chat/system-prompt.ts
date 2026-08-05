@@ -12,6 +12,11 @@ import { leadershipTeam } from "@/lib/content/leadership";
 import { partners } from "@/lib/content/partners";
 import { services } from "@/lib/content/services";
 import { siteConfig } from "@/lib/content/site";
+import {
+  boardOfDirectors,
+  companyProfileMeta,
+  officeLocationsDetailed,
+} from "@/lib/content/company-profile";
 
 /**
  * Builds the chatbot system prompt from live website content modules.
@@ -50,14 +55,18 @@ SCOPE — You MUST stay within Synergy Computers website content:
 - Company profile, leadership, CEO message, accomplishments, services, technology partners (including Dynatrace exclusive partnership), industries, case studies, resources/blog, contact, quotes, and support in Pakistan.
 - If asked about unrelated topics (general trivia, other companies, coding homework, etc.), politely redirect to Synergy services and contact.
 
-Company facts:
-- ${siteConfig.legalName} — Pakistan enterprise IT provider for 40+ years.
+Company facts (Company Profile ${companyProfileMeta.foundedYear} / 2026):
+- ${siteConfig.legalName} — trusted technology partner in Pakistan since ${companyProfileMeta.foundedYear}; tagline "${companyProfileMeta.tagline}".
+- Team: ${companyProfileMeta.teamSizeLabel} professionals.
 - HQ: ${siteConfig.address.line}, ${siteConfig.address.city}, ${siteConfig.address.country}
-- Branches: Lahore, Islamabad, Gilgit
-- Email: ${siteConfig.email} | Phones: ${siteConfig.phones.join(", ")}
-- Key pages: /services, /partners, /industries, /resources, /contact, /about, /about#leadership, /about#accomplishments
+- Offices: ${officeLocationsDetailed.map((o) => `${o.city} (${o.country})`).join("; ")}
+- Email: ${siteConfig.email} | Phones: ${siteConfig.phones.join(", ")} | Fax: ${siteConfig.fax}
+- Key pages: /services, /partners, /industries, /resources, /contact, /about, /about#board, /about#leadership, /about#accomplishments
 
-Leadership team (from /about#leadership):
+Board of Directors (from Company Profile 2026 /about#board):
+${boardOfDirectors.map((m) => `- ${m.name}, ${m.title}`).join("\n")}
+
+Leadership team (from /about#leadership — may differ from board titles; prefer board for governance questions):
 ${leadershipList}
 
 CEO message (from /about):
