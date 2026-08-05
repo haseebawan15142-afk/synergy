@@ -1,0 +1,7 @@
+"use client";
+import { useEffect, useState } from "react";
+import { listCollection } from "@/lib/admin/crud";
+import { COLLECTIONS } from "@/lib/firebase/collections";
+import { AdminPageSkeleton } from "@/components/admin/AdminSkeleton";
+import { AdminPageHeader, Card } from "@/components/admin/ui";
+export function AnalyticsView(){const [counts,setCounts]=useState<Record<string,number>|null>(null);useEffect(()=>{Promise.all([COLLECTIONS.blogs,COLLECTIONS.messages,COLLECTIONS.newsletter,COLLECTIONS.services].map(async key=>[key,(await listCollection<{id?:string}>(key)).length] as const)).then(rows=>setCounts(Object.fromEntries(rows))).catch(()=>setCounts({}))},[]);if(!counts)return <AdminPageSkeleton/>;return <div className="space-y-6"><AdminPageHeader title="Analytics" description="CMS content and engagement totals."/><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{Object.entries(counts).map(([name,count])=><Card key={name}><p className="text-sm capitalize text-zinc-500">{name}</p><p className="mt-2 text-3xl font-semibold">{count}</p><div className="mt-4 h-2 rounded bg-zinc-200"><div className="h-2 rounded bg-zinc-900" style={{width:`${Math.min(100,Math.max(8,count*8))}%`}}/></div></Card>)}</div><Card><h2 className="font-semibold">Visitor analytics</h2><p className="mt-2 text-sm text-zinc-500">No visitor analytics documents are available yet. Connect a web analytics provider or write daily analytics documents to display traffic here.</p></Card></div>}

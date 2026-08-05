@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BrandLogo } from "@/components/brand/BrandLogo";
+import { NewsletterForm } from "@/components/newsletter/NewsletterForm";
 import { siteConfig } from "@/lib/content/site";
 
 export function Footer() {
@@ -24,6 +25,13 @@ export function Footer() {
               {siteConfig.email}
             </a>
           </p>
+          <div className="mt-6 max-w-md">
+            <h3 className="text-xs font-bold uppercase tracking-widest text-synergy-light">
+              Newsletter
+            </h3>
+            <p className="mt-2 text-sm text-slate-400">Get updates on IT insights and company news.</p>
+            <NewsletterForm className="mt-3" />
+          </div>
         </div>
 
         <div>

@@ -13,7 +13,7 @@ export const caseStudies: CaseStudy[] = [
   {
     slug: "multinational-bank-data-resilience",
     client: "Leading Multinational Bank",
-    image: "/images/case-studies/multinational-bank-data-resilience.jpg",
+    image: "/images/case-studies/multinational-bank-data-resilience.webp",
     industry: "Banking and finance",
     headline: "Cut recovery time by 62% with enterprise-grade data protection",
     summary:
@@ -32,7 +32,7 @@ export const caseStudies: CaseStudy[] = [
   {
     slug: "healthcare-network-modernization",
     client: "Regional Healthcare Network",
-    image: "/images/case-studies/healthcare-network-modernization.jpg",
+    image: "/images/case-studies/healthcare-network-modernization.webp",
     industry: "Healthcare",
     headline: "Unified 18 clinics onto a secure, always-on IT platform",
     summary:
@@ -51,7 +51,7 @@ export const caseStudies: CaseStudy[] = [
   {
     slug: "power-utility-infrastructure",
     client: "National Power Utility",
-    image: "/images/case-studies/power-utility-infrastructure.jpg",
+    image: "/images/case-studies/power-utility-infrastructure.webp",
     industry: "Power & utilities",
     headline: "Modernized core infrastructure for mission-critical OT/IT convergence",
     summary:

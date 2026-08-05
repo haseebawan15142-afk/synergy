@@ -5,28 +5,28 @@ export type Partner = {
 };
 
 export const partners: Partner[] = [
-  { name: "Veritas", logo: "/images/partners/veritas.jpg", href: "https://www.veritas.com/" },
+  { name: "Veritas", logo: "/images/partners/veritas.webp", href: "https://www.veritas.com/" },
   { name: "Dynatrace", logo: "/brand/dynatrace/wordmark.svg", href: "https://www.dynatrace.com/" },
-  { name: "Utimaco", logo: "/images/partners/utimaco.jpg", href: "https://utimaco.com/" },
-  { name: "Oracle", logo: "/images/partners/oracle.jpg", href: "https://www.oracle.com/" },
-  { name: "NetApp", logo: "/images/partners/netapp.jpg", href: "https://www.netapp.com/" },
+  { name: "Utimaco", logo: "/images/partners/utimaco.webp", href: "https://utimaco.com/" },
+  { name: "Oracle", logo: "/images/partners/oracle.webp", href: "https://www.oracle.com/" },
+  { name: "NetApp", logo: "/images/partners/netapp.webp", href: "https://www.netapp.com/" },
   {
     name: "Hitachi Vantara",
-    logo: "/images/partners/hitachi-vantara.jpg",
+    logo: "/images/partners/hitachi-vantara.webp",
     href: "https://www.hitachivantara.com/",
   },
-  { name: "Infor", logo: "/images/partners/infor.jpg", href: "https://www.infor.com/" },
-  { name: "Dell Technologies", logo: "/images/partners/dell.jpg", href: "https://www.dell.com/" },
-  { name: "DDN", logo: "/images/partners/ddn.jpg", href: "https://www.ddn.com/" },
-  { name: "Convene", logo: "/images/partners/convene.jpg", href: "https://www.azeusconvene.com/" },
+  { name: "Infor", logo: "/images/partners/infor.webp", href: "https://www.infor.com/" },
+  { name: "Dell Technologies", logo: "/images/partners/dell.webp", href: "https://www.dell.com/" },
+  { name: "DDN", logo: "/images/partners/ddn.webp", href: "https://www.ddn.com/" },
+  { name: "Convene", logo: "/images/partners/convene.webp", href: "https://www.azeusconvene.com/" },
   {
     name: "Innovative",
-    logo: "/images/partners/innovative.jpg",
+    logo: "/images/partners/innovative.webp",
     href: "https://www.crimsonlogic.com/",
   },
   {
     name: "Automation Anywhere",
-    logo: "/images/partners/automation-anywhere.jpg",
+    logo: "/images/partners/automation-anywhere.webp",
     href: "https://www.automationanywhere.com/",
   },
 ];

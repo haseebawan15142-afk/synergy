@@ -1,8 +1,8 @@
 "use client";
 
-import { PremiumTitle } from "@/components/effects/PremiumTitle";
 import { motion, useReducedMotion } from "framer-motion";
 import { Button } from "@/components/ui/Button";
+import { HeroTextRotator } from "@/components/home/HeroTextRotator";
 import { heroItem, staggerContainer } from "@/lib/motion/variants";
 import { siteConfig } from "@/lib/content/site";
 
@@ -26,24 +26,19 @@ export function HeroSectionContent() {
       animate="visible"
       variants={staggerContainer}
     >
-      <motion.div className="mx-auto max-w-3xl text-center lg:mx-0 lg:max-w-2xl lg:text-left" variants={staggerContainer}>
+      <motion.div
+        className="mx-auto max-w-3xl text-center lg:mx-0 lg:max-w-2xl lg:text-left"
+        variants={staggerContainer}
+      >
         <motion.span
           variants={heroItem}
           className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-synergy-glow backdrop-blur-sm"
         >
           <span className="h-1.5 w-1.5 rounded-full bg-synergy-light animate-pulse" />
-          Technology partner · Pakistan
+          {siteConfig.name}
         </motion.span>
-        <motion.div variants={heroItem}>
-          <PremiumTitle
-            as="h1"
-            id="hero-heading"
-            variant="hero"
-            className="text-hero mt-5 font-bold text-white sm:mt-6"
-          >
-            Modern IT that scales with{" "}
-            <span className="text-gradient-live">your ambition</span>
-          </PremiumTitle>
+        <motion.div variants={heroItem} className="mt-5 sm:mt-6">
+          <HeroTextRotator />
         </motion.div>
         <motion.p
           variants={heroItem}
@@ -90,17 +85,11 @@ function HeroCopy() {
     <div className="mx-auto max-w-3xl text-center lg:mx-0 lg:max-w-2xl lg:text-left">
       <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-[0.65rem] font-semibold uppercase tracking-wider text-synergy-glow backdrop-blur-sm sm:px-4 sm:text-xs">
         <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-synergy-light animate-pulse" />
-        Technology partner · Pakistan
+        {siteConfig.name}
       </span>
-      <PremiumTitle
-        as="h1"
-        id="hero-heading"
-        variant="hero"
-        shimmer={false}
-        className="text-hero mt-5 font-bold text-white sm:mt-6"
-      >
-        Modern IT that scales with <span className="text-gradient-live">your ambition</span>
-      </PremiumTitle>
+      <div className="mt-5 sm:mt-6">
+        <HeroTextRotator />
+      </div>
       <p className="mx-auto mt-5 max-w-xl text-base leading-relaxed text-slate-200 sm:mt-6 sm:text-lg lg:mx-0">
         {siteConfig.description}
       </p>

@@ -2,7 +2,9 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
-import { partners, type Partner } from "@/lib/content/partners";
+import { partners as localPartners, type Partner } from "@/lib/content/partners";
+import { fetchPartners } from "@/lib/cms/public";
+import { useCmsList } from "@/hooks/useCmsList";
 import { cn } from "@/lib/cn";
 
 type PartnersLogoCarouselProps = {
@@ -62,9 +64,12 @@ function Chevron({ direction }: { direction: "left" | "right" }) {
 
 export function PartnersLogoCarousel({
   title = "Trusted by enterprise customers and technology partners",
-  items = partners,
+  items: itemsProp,
   className,
 }: PartnersLogoCarouselProps) {
+  const loader = useCallback(() => fetchPartners(), []);
+  const cmsItems = useCmsList(localPartners, loader);
+  const items = itemsProp ?? cmsItems;
   const visibleCount = useVisibleCount();
   const [index, setIndex] = useState(0);
 

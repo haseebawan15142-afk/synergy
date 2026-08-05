@@ -1,8 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
-import { ClientEffects } from "@/components/layout/ClientEffects";
-import { Footer } from "@/components/layout/Footer";
-import { Navbar } from "@/components/layout/Navbar";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { siteConfig } from "@/lib/content/site";
 import "./globals.css";
@@ -46,12 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" className={`${inter.variable} ${spaceGrotesk.variable}`} suppressHydrationWarning>
       <body className="min-h-screen font-sans antialiased">
-        <ThemeProvider>
-          <Navbar />
-          <main className="min-w-0 flex-1">{children}</main>
-          <Footer />
-          <ClientEffects />
-        </ThemeProvider>
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

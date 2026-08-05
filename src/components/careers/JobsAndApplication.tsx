@@ -1,9 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Briefcase, MapPin, Send, CheckCircle2 } from "lucide-react";
-import { jobOpenings, jobDepartments, jobLocations } from "@/lib/content/careers";
+import { jobOpenings as localJobs } from "@/lib/content/careers";
+import { fetchOpenJobs } from "@/lib/cms/public";
+import { useCmsList } from "@/hooks/useCmsList";
 import { siteConfig } from "@/lib/content/site";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Reveal } from "@/components/motion/Reveal";
@@ -45,6 +47,16 @@ export function JobsAndApplication() {
   const [location, setLocation] = useState<string>("All");
   const [position, setPosition] = useState<string>("General Application");
   const [sent, setSent] = useState(false);
+  const jobsLoader = useCallback(() => fetchOpenJobs(), []);
+  const jobOpenings = useCmsList([...localJobs], jobsLoader);
+  const jobDepartments = useMemo(
+    () => ["All", ...Array.from(new Set(jobOpenings.map((j) => j.department)))],
+    [jobOpenings],
+  );
+  const jobLocations = useMemo(
+    () => ["All", ...Array.from(new Set(jobOpenings.map((j) => j.location)))],
+    [jobOpenings],
+  );
 
   const filtered = useMemo(
     () =>
@@ -53,7 +65,7 @@ export function JobsAndApplication() {
           (department === "All" || job.department === department) &&
           (location === "All" || job.location === location),
       ),
-    [department, location],
+    [department, location, jobOpenings],
   );
 
   const selectPosition = (title: string) => {

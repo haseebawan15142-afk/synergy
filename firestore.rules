@@ -1,0 +1,157 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return isSignedIn()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isPublished() {
+      return resource.data.status == 'published';
+    }
+
+    function isActive() {
+      return !('active' in resource.data) || resource.data.active == true;
+    }
+
+    // Admin user profiles
+    match /users/{userId} {
+      allow read: if isAdmin() || (isSignedIn() && request.auth.uid == userId);
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Site settings / theme / navigation / SEO — public read, admin write
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /theme/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /navigation/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /seo/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Public content collections
+    match /blogs/{id} {
+      allow read: if isAdmin() || isPublished();
+      allow write: if isAdmin();
+    }
+
+    match /categories/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /tags/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /leadership/{id} {
+      allow read: if isAdmin() || isActive();
+      allow write: if isAdmin();
+    }
+
+    match /alumni/{id} {
+      allow read: if isAdmin() || isActive();
+      allow write: if isAdmin();
+    }
+
+    match /services/{id} {
+      allow read: if isAdmin() || isPublished() || isActive();
+      allow write: if isAdmin();
+    }
+
+    match /industries/{id} {
+      allow read: if isAdmin() || isPublished() || isActive();
+      allow write: if isAdmin();
+    }
+
+    match /partners/{id} {
+      allow read: if isAdmin() || isActive();
+      allow write: if isAdmin();
+    }
+
+    match /clients/{id} {
+      allow read: if isAdmin() || isActive();
+      allow write: if isAdmin();
+    }
+
+    match /caseStudies/{id} {
+      allow read: if isAdmin() || isPublished();
+      allow write: if isAdmin();
+    }
+
+    match /testimonials/{id} {
+      allow read: if isAdmin() || isActive();
+      allow write: if isAdmin();
+    }
+
+    match /gallery/{id} {
+      allow read: if isAdmin() || isActive();
+      allow write: if isAdmin();
+    }
+
+    match /galleryAlbums/{id} {
+      allow read: if isAdmin() || isActive();
+      allow write: if isAdmin();
+    }
+
+    match /careers/{id} {
+      allow read: if isAdmin() || resource.data.status == 'open' || isPublished();
+      allow write: if isAdmin();
+    }
+
+    match /events/{id} {
+      allow read: if isAdmin() || isPublished() || isActive();
+      allow write: if isAdmin();
+    }
+
+    match /faq/{id} {
+      allow read: if isAdmin() || isActive();
+      allow write: if isAdmin();
+    }
+
+    match /media/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Private admin collections
+    match /messages/{id} {
+      allow read, update, delete: if isAdmin();
+      allow create: if true; // public contact form (Phase 5)
+    }
+
+    match /newsletter/{id} {
+      allow read, update, delete: if isAdmin();
+      allow create: if true; // public subscribe (Phase 5)
+    }
+
+    match /analytics/{document=**} {
+      allow read, write: if isAdmin();
+    }
+
+    match /auditLogs/{id} {
+      allow read, write: if isAdmin();
+    }
+
+    match /activities/{id} {
+      allow read, write: if isAdmin();
+    }
+  }
+}

@@ -1,5 +1,5 @@
 /** Careers hero background — replace file in `public/images/careers/` or change this path */
-export const careersHeroBackground = "/images/careers/hero-background.png";
+export const careersHeroBackground = "/images/careers/hero-background.webp";
 
 export type CareerTrack = {
   title: string;

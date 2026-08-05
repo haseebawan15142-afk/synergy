@@ -10,15 +10,15 @@ export const dynatracePartner = {
     "https://www.linkedin.com/posts/synergy-computers_ai-observability-autonomousoperations-activity-7488123616576991232-pac2",
   gallery: [
     {
-      src: "/images/dynatrace/innovate-singapore-01.jpg",
+      src: "/images/dynatrace/innovate-singapore-01.webp",
       alt: "Synergy Computers team with Dynatrace leadership at Innovate Singapore 2026",
     },
     {
-      src: "/images/dynatrace/innovate-singapore-02.jpg",
+      src: "/images/dynatrace/innovate-singapore-02.webp",
       alt: "Synergy and Dynatrace partnership at Innovate Singapore 2026",
     },
     {
-      src: "/images/dynatrace/innovate-singapore-03.jpg",
+      src: "/images/dynatrace/innovate-singapore-03.webp",
       alt: "Synergy Computers representatives at Dynatrace Innovate Singapore 2026",
     },
   ],

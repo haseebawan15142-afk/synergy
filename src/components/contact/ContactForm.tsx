@@ -2,9 +2,12 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { Button } from "@/components/ui/Button";
 import { fadeUp } from "@/lib/motion/variants";
 import { motionDurations, motionEase } from "@/lib/motion/transitions";
+import { getFirebaseDb } from "@/lib/firebase/client";
+import { COLLECTIONS } from "@/lib/firebase/collections";
 
 const inputClass =
   "mt-2 w-full rounded-xl border border-border bg-surface-elevated px-4 py-3 text-ink shadow-soft transition focus:border-synergy focus:outline-none focus:ring-2 focus:ring-synergy/20";
@@ -13,13 +16,34 @@ export function ContactForm() {
   const reduce = useReducedMotion();
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 900));
-    setLoading(false);
-    setSent(true);
+    setError(null);
+    const form = e.currentTarget;
+    const data = new FormData(form);
+    const name = String(data.get("name") || "").trim();
+    const email = String(data.get("email") || "").trim();
+    const message = String(data.get("message") || "").trim();
+
+    try {
+      await addDoc(collection(getFirebaseDb(), COLLECTIONS.messages), {
+        name,
+        email,
+        message,
+        status: "unread",
+        replyStatus: "none",
+        createdAt: serverTimestamp(),
+      });
+      setSent(true);
+      form.reset();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not send message. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -48,18 +72,26 @@ export function ContactForm() {
             </motion.div>
             <p className="mt-4 text-lg font-semibold text-ink">Message received</p>
             <p className="mt-2 text-sm text-ink-muted">
-              We&apos;ll connect this form to email (SMTP) soon. Your details were not sent yet.
+              Thanks — your message was saved. Our team will get back to you shortly.
             </p>
           </motion.div>
         ) : (
           <motion.div key="fields" initial={false} animate={{ opacity: 1 }}>
             <p className="text-sm text-ink-muted">
-              Form submission will be connected to email (SMTP) in a later step.
+              Send a message and we&apos;ll respond as soon as we can.
             </p>
+            {error ? (
+              <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">
+                {error}
+              </p>
+            ) : null}
             <div className="mt-6 space-y-5">
               {(["name", "email", "message"] as const).map((field) => (
                 <div key={field} className="group">
-                  <label htmlFor={field} className="block text-sm font-semibold text-ink transition-colors group-focus-within:text-synergy">
+                  <label
+                    htmlFor={field}
+                    className="block text-sm font-semibold text-ink transition-colors group-focus-within:text-synergy"
+                  >
                     {field === "message" ? "Message" : field === "email" ? "Email" : "Name"}
                   </label>
                   {field === "message" ? (

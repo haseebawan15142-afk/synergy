@@ -1,11 +1,19 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-import { services } from "@/lib/content/services";
+import { useCallback } from "react";
+import { services as localServices } from "@/lib/content/services";
+import { fetchServices } from "@/lib/cms/public";
+import { useCmsList } from "@/hooks/useCmsList";
 import { Button } from "@/components/ui/Button";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Reveal } from "@/components/motion/Reveal";
 
 export function ServicesGrid() {
+  const loader = useCallback(() => fetchServices(), []);
+  const services = useCmsList(localServices, loader);
+
   return (
     <section className="relative overflow-hidden bg-surface section-y" aria-labelledby="services-heading">
       <div
