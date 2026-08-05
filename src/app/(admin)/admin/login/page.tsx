@@ -28,24 +28,47 @@ function LoginForm() {
       return;
     }
 
-    const unsub = subscribeToAuth(async (user) => {
-      if (!user) {
-        setChecking(false);
-        return;
-      }
-      try {
-        const profile = await fetchAdminProfile(user.uid);
-        if (profile?.role === "admin") {
-          await refreshSessionCookie(user);
-          router.replace(next.startsWith("/admin") ? next : "/admin");
+    let settled = false;
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      setChecking(false);
+    };
+
+    // Don't leave the UI stuck if Firebase Auth/Firestore never responds.
+    const timeout = window.setTimeout(finish, 8000);
+
+    let unsub = () => {};
+    try {
+      unsub = subscribeToAuth(async (user) => {
+        if (!user) {
+          window.clearTimeout(timeout);
+          finish();
           return;
         }
-      } catch {
-        /* ignore */
-      }
-      setChecking(false);
-    });
-    return () => unsub();
+        try {
+          const profile = await fetchAdminProfile(user.uid);
+          if (profile?.role === "admin") {
+            await refreshSessionCookie(user);
+            window.clearTimeout(timeout);
+            router.replace(next.startsWith("/admin") ? next : "/admin");
+            return;
+          }
+        } catch {
+          /* ignore — show login form */
+        }
+        window.clearTimeout(timeout);
+        finish();
+      });
+    } catch {
+      window.clearTimeout(timeout);
+      finish();
+    }
+
+    return () => {
+      window.clearTimeout(timeout);
+      unsub();
+    };
   }, [next, router]);
 
   async function onSubmit(e: FormEvent) {
