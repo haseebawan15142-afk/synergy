@@ -1,13 +1,11 @@
 /**
  * Shown on /about under "Our Accomplishments".
- * Replace placeholder figures, certifications, and milestones with real data.
+ * Numeric claims limited to Company Profile 2026 where possible.
+ * See MISSING-CONTENT.md.
  */
-export const accomplishmentStats = [
-  { value: "40+", label: "Years in enterprise IT" },
-  { value: "24×7", label: "Client support coverage" },
-  { value: "100+", label: "Enterprise clients served" },
-  { value: "7", label: "Industry sectors served" },
-] as const;
+import { profileStats } from "@/lib/content/company-profile";
+
+export const accomplishmentStats = profileStats;
 
 export type Milestone = {
   year: string;
@@ -17,34 +15,38 @@ export type Milestone = {
 
 export const milestones: Milestone[] = [
   {
-    year: "1980s",
-    title: "Founded in Karachi",
-    description: "Synergy Computers begins operations at the start of Pakistan's IT industry.",
+    year: "1981",
+    title: "Founded as a technology partner",
+    description:
+      "Synergy Computers (Pvt.) Ltd. begins serving Pakistan as a trusted technology partner (Company Profile 2026).",
   },
   {
-    year: "2000s",
-    title: "Enterprise expansion",
-    description: "Grew into banking, power generation, and healthcare with large-scale infrastructure deployments.",
+    year: "Growth",
+    title: "Nationwide presence",
+    description:
+      "Expanded with offices in Karachi, Islamabad, Lahore, and Gilgit, backed by 200+ professionals.",
   },
   {
-    year: "2010s",
-    title: "Strategic vendor partnerships",
-    description: "Formalized partnerships with leading global technology vendors to expand solution breadth.",
+    year: "Partnerships",
+    title: "Global technology alliances",
+    description:
+      "Built strategic partnerships with leading global technology providers to deliver one-window IT solutions.",
   },
   {
     year: "Today",
-    title: "40+ years of trusted delivery",
-    description: "Continuing to serve Pakistan's leading enterprises with infrastructure, applications, and 24×7 support.",
+    title: "Decades of enterprise delivery",
+    description:
+      "Continuing to modernize IT landscapes across banking, telecom, power & utilities, healthcare, education, hospitality, and enterprise sectors.",
   },
-] as const;
+];
 
 export type Certification = {
   name: string;
   issuer: string;
 };
 
-export const certifications: Certification[] = [
-  { name: "Replace with certification", issuer: "Issuing body" },
-  { name: "Replace with certification", issuer: "Issuing body" },
-  { name: "Replace with certification", issuer: "Issuing body" },
-] as const;
+/**
+ * TODO: Company Profile 2026 does not list named certifications or awards.
+ * Keep empty until official certificate names are supplied.
+ */
+export const certifications: Certification[] = [];

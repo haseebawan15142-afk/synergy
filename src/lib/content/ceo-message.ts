@@ -1,7 +1,11 @@
 export const ceoMessage = {
-  /** Replace with the CEO's name when ready */
-  name: "Chief Executive Officer",
-  role: "Chief Executive Officer",
+  /**
+   * Name/title from Company Profile 2026 Board of Directors (Mr. Iqbal Ahmed — CEO).
+   * TODO: Confirm on-camera speaker matches this name; video file is still a layout placeholder.
+   * TODO: Site leadership list still shows a different CEO title — reconcile with board when ready.
+   */
+  name: "Mr. Iqbal Ahmed",
+  role: "CEO",
   company: "Synergy Computers (Pvt.) Ltd.",
   /**
    * CEO video file — must live in `public/videos/`.
@@ -15,6 +19,7 @@ export const ceoMessage = {
     "For more than four decades, Synergy has stood beside Pakistan's leading enterprises — helping them secure, modernize, and run critical technology with confidence.",
   body: [
     "Our commitment remains unchanged: deliver reliable IT outcomes through deep expertise, strong vendor partnerships, and teams who understand the realities of enterprise operations.",
-    "This message is a placeholder video for layout review. Replace the video file and update the details above when your CEO recording is ready.",
+    // TODO: Replace placeholder video copy when the final CEO recording is approved.
+    "This message is a placeholder video for layout review. Replace the video file when your CEO recording is ready.",
   ],
 } as const;

@@ -2,6 +2,10 @@
  * Leadership team shown on /about under "Our Leadership".
  * Photos live in `public/images/leadership/` — set `photoSrc` to that path,
  * or leave it `null` to show initials instead.
+ *
+ * TODO (Company Profile 2026): Board page lists Mr. Aman Ullah Khan as Chairman
+ * and Mr. Iqbal Ahmed as CEO. This ops leadership list still uses prior site titles
+ * (Amanullah Khan as CEO). Reconcile with board data when HR confirms.
  */
 export type LeadershipMember = {
   name: string;

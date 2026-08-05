@@ -2,19 +2,21 @@ export const siteConfig = {
   name: "Synergy Computers",
   legalName: "Synergy Computers (Pvt.) Ltd.",
   description:
-    "Pakistan's premium IT solutions provider — infrastructure, enterprise applications, security, and 24×7 support for over 40 years.",
+    "Trusted technology partner in Pakistan since 1981 — infrastructure, enterprise applications, system integration, cybersecurity, and support. We Do IT Better.",
   url: "https://synergy.net.pk",
   email: "info@synergy.net.pk",
   phoneDisplay: "021-34527060",
   phoneTel: "+922134527060",
   phones: ["021-34527060", "021-34540908", "021-34547068"],
+  fax: "021-34540907",
   address: {
-    line: "56-D, K.D.A Scheme No.1 Main Miran Muhammad Shah Road",
+    line: "56-D, K.D.A Scheme No.1 Main Miran M. Shah Road",
     city: "Karachi",
     country: "Pakistan",
   },
   social: {
     linkedin: "https://www.linkedin.com/company/synergy-computers/",
+    // TODO: Confirm Facebook slug spelling with marketing (existing site URL retained).
     facebook: "https://www.facebook.com/SynergyCompuetsPvtLtd/",
   },
   nav: [
@@ -28,8 +30,14 @@ export const siteConfig = {
         {
           label: "Who We Are",
           href: "/about#who-we-are",
-          description: "Our story, vision, and mission since the early days of Pakistan's IT industry.",
+          description: "Our story since 1981 — trusted technology partner across Pakistan.",
           icon: "building",
+        },
+        {
+          label: "Board of Directors",
+          href: "/about#board",
+          description: "Governance leadership as listed in the company profile.",
+          icon: "users",
         },
         {
           label: "Our Leadership",
@@ -40,7 +48,7 @@ export const siteConfig = {
         {
           label: "Our Accomplishments",
           href: "/about#accomplishments",
-          description: "Milestones, certifications, and recognitions earned over 40+ years.",
+          description: "Milestones and recognitions across four decades of enterprise IT.",
           icon: "award",
         },
       ],

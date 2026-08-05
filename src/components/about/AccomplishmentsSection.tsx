@@ -16,7 +16,7 @@ export function AccomplishmentsSection() {
             id="accomplishments-heading"
             eyebrow="Track Record"
             title="Our Accomplishments"
-            description="Milestones, certifications, and recognitions built over four decades of enterprise IT delivery."
+            description="Milestones and recognitions aligned to Synergy's Company Profile 2026."
             className="max-w-2xl"
           />
         </Reveal>
@@ -49,17 +49,24 @@ export function AccomplishmentsSection() {
           <Reveal variant="fadeUp" delay={0.08}>
             <div className="rounded-xl border border-border/70 bg-surface-elevated p-6 shadow-soft sm:p-8">
               <h3 className="text-base font-bold text-ink">Certifications &amp; recognitions</h3>
-              <ul className="mt-4 space-y-3">
-                {certifications.map((cert, index) => (
-                  <li key={`${cert.name}-${index}`} className="flex items-start gap-3">
-                    <Award className="mt-0.5 h-4 w-4 shrink-0 text-synergy" aria-hidden />
-                    <div>
-                      <p className="text-sm font-semibold text-ink">{cert.name}</p>
-                      <p className="text-xs text-ink-muted">{cert.issuer}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
+              {certifications.length === 0 ? (
+                <p className="mt-4 text-sm leading-relaxed text-ink-muted">
+                  Official certification and award names are not listed in the Company Profile 2026.
+                  This section will be updated when verified credentials are provided.
+                </p>
+              ) : (
+                <ul className="mt-4 space-y-3">
+                  {certifications.map((cert, index) => (
+                    <li key={`${cert.name}-${index}`} className="flex items-start gap-3">
+                      <Award className="mt-0.5 h-4 w-4 shrink-0 text-synergy" aria-hidden />
+                      <div>
+                        <p className="text-sm font-semibold text-ink">{cert.name}</p>
+                        <p className="text-xs text-ink-muted">{cert.issuer}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </Reveal>
         </div>
