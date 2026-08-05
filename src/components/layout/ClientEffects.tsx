@@ -17,22 +17,8 @@ const ChatWidget = dynamic(
 function useDeferredMount(ms = 1200) {
   const [ready, setReady] = useState(false);
   useEffect(() => {
-    let idleId: number | undefined;
-    let timeoutId: number | undefined;
-    const start = () => setReady(true);
-
-    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
-      idleId = window.requestIdleCallback(start, { timeout: ms });
-    } else {
-      timeoutId = window.setTimeout(start, ms);
-    }
-
-    return () => {
-      if (idleId !== undefined && "cancelIdleCallback" in window) {
-        window.cancelIdleCallback(idleId);
-      }
-      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
-    };
+    const timeoutId = window.setTimeout(() => setReady(true), ms);
+    return () => window.clearTimeout(timeoutId);
   }, [ms]);
   return ready;
 }

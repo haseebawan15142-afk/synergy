@@ -109,8 +109,9 @@ export async function fetchLeadership(): Promise<LeadershipMember[]> {
       const snap = await getDocs(collection(getFirebaseDb(), COLLECTIONS.leadership));
       if (snap.empty) return localLeadership;
 
+      type LeadershipRow = LeadershipMember & { sortOrder: number };
       const rows = snap.docs
-        .map((d) => {
+        .map((d): LeadershipRow | null => {
           const x = d.data();
           if (x.active === false) return null;
           const name = String(x.name || "").trim();
@@ -125,7 +126,7 @@ export async function fetchLeadership(): Promise<LeadershipMember[]> {
             sortOrder: typeof x.sortOrder === "number" ? x.sortOrder : Number.MAX_SAFE_INTEGER,
           };
         })
-        .filter((x): x is LeadershipMember & { sortOrder: number } => !!x);
+        .filter((x): x is LeadershipRow => x !== null);
 
       if (!rows.length) return localLeadership;
 
@@ -265,8 +266,24 @@ export async function fetchPartners(): Promise<Partner[]> {
     try {
       const snap = await getDocs(collection(getFirebaseDb(), COLLECTIONS.partners));
       if (snap.empty) return localPartners.map(withPartnerFallbacks);
+      type PartnerRow = Required<
+        Pick<
+          Partner,
+          | "name"
+          | "logo"
+          | "href"
+          | "slug"
+          | "heroImageUrl"
+          | "taglines"
+          | "shortDescription"
+          | "overview"
+          | "keySolutions"
+          | "category"
+        >
+      > & { sortOrder: number };
+
       const rows = snap.docs
-        .map((d) => {
+        .map((d): PartnerRow | null => {
           const x = d.data();
           if (x.active === false) return null;
           const name = String(x.name || "");
@@ -286,7 +303,7 @@ export async function fetchPartners(): Promise<Partner[]> {
             sortOrder: typeof x.sortOrder === "number" ? x.sortOrder : Number.MAX_SAFE_INTEGER,
           };
         })
-        .filter((p): p is Partner & { sortOrder: number } => !!p)
+        .filter((p): p is PartnerRow => p !== null)
         .sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name));
 
       return rows.map(({ sortOrder: _sortOrder, ...partner }) => withPartnerFallbacks(partner));

@@ -11,10 +11,7 @@ function toCssVar(key: string) {
 export function CmsThemeStyles() {
   useEffect(() => {
     let cancelled = false;
-    let idleId: number | undefined;
-    let timeoutId: number | undefined;
-
-    const run = () => {
+    const timeoutId = window.setTimeout(() => {
       fetchThemeTokens()
         .then((theme) => {
           if (cancelled) return;
@@ -34,20 +31,11 @@ export function CmsThemeStyles() {
         .catch(() => {
           /* keep design-token defaults */
         });
-    };
-
-    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
-      idleId = window.requestIdleCallback(run, { timeout: 2000 });
-    } else {
-      timeoutId = window.setTimeout(run, 400);
-    }
+    }, 400);
 
     return () => {
       cancelled = true;
-      if (idleId !== undefined && "cancelIdleCallback" in window) {
-        window.cancelIdleCallback(idleId);
-      }
-      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+      window.clearTimeout(timeoutId);
     };
   }, []);
 
