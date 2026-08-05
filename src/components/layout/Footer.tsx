@@ -16,7 +16,11 @@ export function Footer() {
           <p className="max-w-md text-sm leading-relaxed text-slate-400">
             {siteConfig.address.line}, {siteConfig.address.city}
           </p>
+          <p className="mt-2 text-xs text-slate-500">
+            Offices: Karachi, Islamabad, Lahore, Gilgit · Middle East: Ras Al Khaimah
+          </p>
           <p className="mt-3 text-sm text-slate-400">Tel: {siteConfig.phones.join(" · ")}</p>
+          <p className="mt-1 text-sm text-slate-400">Fax: {siteConfig.fax}</p>
           <p className="mt-2 text-sm">
             <a
               href={`mailto:${siteConfig.email}`}

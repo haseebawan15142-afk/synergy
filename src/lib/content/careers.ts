@@ -1,3 +1,5 @@
+import { officeLocationsDetailed } from "@/lib/content/company-profile";
+
 /** Careers hero background — replace file in `public/images/careers/` or change this path */
 export const careersHeroBackground = "/images/careers/hero-background.webp";
 
@@ -90,13 +92,17 @@ export const hiringSteps: HiringStep[] = [
   },
 ] as const;
 
-// Real branch cities — sourced from siteConfig.address / the Contact page.
-export const officeLocations = [
-  { city: "Karachi", note: "Head Office" },
-  { city: "Lahore", note: "Branch office" },
-  { city: "Islamabad", note: "Branch office" },
-  { city: "Gilgit", note: "Branch office" },
-] as const;
+/** Pakistan offices from Company Profile 2026 (excludes Middle East for careers stats). */
+export const officeLocations = officeLocationsDetailed
+  .filter((office) => office.country === "Pakistan")
+  .map((office) => ({
+    city: office.city,
+    note: office.isHeadOffice
+      ? "Head Office"
+      : office.addressPending
+        ? "Branch office — address on request"
+        : office.addressLines[0] ?? "Branch office",
+  }));
 
 export type JobOpening = {
   slug: string;

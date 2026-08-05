@@ -3,9 +3,11 @@ import { ContactForm } from "@/components/contact/ContactForm";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Reveal } from "@/components/motion/Reveal";
 import { siteConfig } from "@/lib/content/site";
+import { officeLocationsDetailed } from "@/lib/content/company-profile";
+
 export const metadata: Metadata = {
   title: "Contact",
-  description: `Contact ${siteConfig.name} — Karachi HQ and branches across Pakistan.`,
+  description: `Contact ${siteConfig.name} — Karachi HQ, branches across Pakistan, and Middle East presence.`,
 };
 
 export default function ContactPage() {
@@ -17,26 +19,57 @@ export default function ContactPage() {
       />
       <div className="page-container section-y-tight grid gap-10 lg:grid-cols-2 lg:gap-12">
         <ContactForm />
-        <Reveal variant="slideFromRight">
-          <div className="rounded-2xl border border-border/80 bg-gradient-to-br from-synergy-muted/60 to-accent-soft/40 p-6 sm:p-8">
-          <h2 className="text-lg font-bold text-ink">Head office — Karachi</h2>
-          <p className="mt-3 text-sm leading-relaxed text-ink-body">
-            {siteConfig.address.line}
-            <br />
-            {siteConfig.address.city}, {siteConfig.address.country}
-          </p>
-          <p className="mt-4 text-sm text-ink-body">Tel: {siteConfig.phones.join(", ")}</p>
-          <p className="mt-2 text-sm">
-            Email:{" "}
-            <a href={`mailto:${siteConfig.email}`} className="font-semibold text-synergy hover:text-synergy-dark">
-              {siteConfig.email}
-            </a>
-          </p>
-          <p className="mt-6 text-sm text-ink-muted">
-            Additional branches: Lahore, Islamabad, Gilgit — see company profile for addresses.
-          </p>
-          </div>
-        </Reveal>
+        <div className="space-y-5">
+          {officeLocationsDetailed.map((office, index) => (
+            <Reveal key={office.id} variant="slideFromRight" delay={index * 0.04}>
+              <address className="not-italic rounded-2xl border border-border/80 bg-gradient-to-br from-synergy-muted/60 to-accent-soft/40 p-6 sm:p-7">
+                <h2 className="text-lg font-bold text-ink">{office.label}</h2>
+                <p className="mt-3 text-sm leading-relaxed text-ink-body">
+                  {office.addressLines.map((line) => (
+                    <span key={line} className="block">
+                      {line}
+                    </span>
+                  ))}
+                  {!office.addressLines.some((line) => line === office.country) ? (
+                    <span className="block">{office.country}</span>
+                  ) : null}
+                </p>
+                {office.addressPending ? (
+                  <p className="mt-3 text-xs text-ink-muted">
+                    Street address not printed in Company Profile 2026 — contact us for directions.
+                  </p>
+                ) : null}
+                {office.phones.length > 0 ? (
+                  <p className="mt-4 text-sm text-ink-body">Tel: {office.phones.join(", ")}</p>
+                ) : null}
+                {office.fax ? (
+                  <p className="mt-1 text-sm text-ink-body">Fax: {office.fax}</p>
+                ) : null}
+                <p className="mt-2 text-sm">
+                  Email:{" "}
+                  <a
+                    href={`mailto:${office.email}`}
+                    className="font-semibold text-synergy hover:text-synergy-dark"
+                  >
+                    {office.email}
+                  </a>
+                </p>
+                {office.website ? (
+                  <p className="mt-2 text-sm">
+                    <a
+                      href={office.website}
+                      className="font-semibold text-synergy hover:text-synergy-dark"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {office.website.replace(/^https?:\/\//, "")}
+                    </a>
+                  </p>
+                ) : null}
+              </address>
+            </Reveal>
+          ))}
+        </div>
       </div>
     </>
   );
