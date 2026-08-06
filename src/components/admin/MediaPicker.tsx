@@ -58,7 +58,7 @@ export function MediaPicker({ open, folder, onClose, onSelect }: MediaPickerProp
           onProgress: setProgress,
         });
       }
-      toast.success(`Uploaded ${files.length} file(s)`);
+      toast.success(`Uploaded ${files.length} file(s) to Firebase (WebP for images)`);
       await reload();
       if (last && files.length === 1) {
         onSelect(last);
@@ -175,24 +175,44 @@ export function MediaUrlField({
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
 
+  const [phase, setPhase] = useState<"converting" | "uploading" | null>(null);
+
   async function handleFiles(files: File[]) {
     const file = files[0];
     if (!file) return;
+    if (!file.type.startsWith("image/") && file.type !== "application/pdf") {
+      toast.error("Please choose an image file (JPG, PNG, etc.). It will be saved as WebP.");
+      return;
+    }
     setUploading(true);
+    setPhase("converting");
     try {
       const asset = await uploadMediaFile(file, folder || "general", {
         createdBy: user?.uid,
         onProgress: setProgress,
+        onPhase: setPhase,
       });
       onChange(asset.url);
-      toast.success("Image uploaded");
+      toast.success(
+        asset.contentType === "image/webp"
+          ? "Uploaded to Firebase as WebP"
+          : "Uploaded to Firebase Storage",
+      );
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Upload failed");
+      const message = err instanceof Error ? err.message : "Upload failed";
+      toast.error(
+        message.includes("storage/") || message.includes("unauthorized")
+          ? "Upload blocked — check you are logged in as admin and Storage rules are deployed."
+          : message,
+      );
     } finally {
       setUploading(false);
+      setPhase(null);
       setProgress(0);
     }
   }
+
+  const isFirebaseUrl = Boolean(value && /firebasestorage\.googleapis\.com|storage\.googleapis\.com/.test(value));
 
   return (
     <div className="space-y-2">
@@ -202,9 +222,10 @@ export function MediaUrlField({
             className={inputClass}
             value={value || ""}
             onChange={(e) => onChange(e.target.value)}
-            placeholder="https://… or upload below"
+            placeholder="Upload below — Firebase URL appears here"
+            readOnly={uploading}
           />
-          <SecondaryButton type="button" onClick={() => setOpen(true)}>
+          <SecondaryButton type="button" onClick={() => setOpen(true)} disabled={uploading}>
             Library
           </SecondaryButton>
         </div>
@@ -216,15 +237,24 @@ export function MediaUrlField({
         uploading={uploading}
         progress={progress}
         onFiles={handleFiles}
-        accept="image/*,.webp"
-        label="Drop image here"
-        hint="or browse from your computer"
+        accept="image/*,.webp,.jpg,.jpeg,.png,.gif,.avif"
+        label={
+          phase === "converting"
+            ? "Converting to WebP…"
+            : phase === "uploading"
+              ? "Uploading to Firebase…"
+              : "Drop image here"
+        }
+        hint="JPG/PNG/etc. auto-convert to WebP, then save to Firebase Storage"
       />
 
       {value ? (
         <div className="overflow-hidden rounded-xl border border-border bg-surface-muted/40 p-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={value} alt="" className="mx-auto h-24 max-w-full object-contain" />
+          <p className="mt-2 break-all text-center text-[11px] text-ink-muted">
+            {isFirebaseUrl ? "Saved on Firebase Storage ✓" : "External / manual URL"}
+          </p>
         </div>
       ) : null}
 

@@ -1,5 +1,5 @@
 import { blogImagesGenerated } from "./blog-images.generated";
-import type { BlogPostMeta } from "./blog-posts.generated";
+import type { BlogPostMeta } from "./blog-posts";
 
 const categoryFallback: Record<string, string> = {
   "Data availability": "/images/blog/data-availability-solutions-trends-2025.webp",
@@ -13,12 +13,18 @@ const categoryFallback: Record<string, string> = {
   "Enterprise IT": "/images/blog/it-solution-partners-pakistan-business-transformation.webp",
 };
 
+/**
+ * Resolve the display image for a blog card/detail.
+ * Admin/CMS `post.image` (Firebase Storage URL) always wins — never override
+ * with local legacy maps or category placeholders.
+ */
 export function getBlogPostImage(
   post: Pick<BlogPostMeta, "slug" | "image" | "category">,
 ): string | null {
+  if (post.image?.trim()) return post.image.trim();
+
   const local = blogImagesGenerated[post.slug];
   if (local) return local;
-  const fallback = categoryFallback[post.category];
-  if (fallback) return fallback;
-  return post.image ?? null;
+
+  return categoryFallback[post.category] ?? null;
 }

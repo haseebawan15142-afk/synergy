@@ -54,7 +54,7 @@ export function MediaLibraryView() {
           onProgress: setProgress,
         });
       }
-      toast.success(`Uploaded ${files.length} file(s)`);
+      toast.success(`Uploaded ${files.length} file(s) to Firebase (images as WebP)`);
       await reload();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Upload failed");

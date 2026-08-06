@@ -11,7 +11,7 @@ type BlogPostCardProps = {
 };
 
 export function BlogPostCard({ post, compact }: BlogPostCardProps) {
-  const excerpt = getBlogExcerpt(post.slug);
+  const excerpt = post.excerpt?.trim() || getBlogExcerpt(post.slug);
   const image = getBlogPostImage(post);
 
   const article = (
