@@ -281,7 +281,7 @@ export async function fetchFooterNav(): Promise<NavItemDoc[]> {
     { id: "about", label: "About", href: "/about" },
     { id: "services", label: "Services", href: "/services" },
     { id: "partners", label: "Partners", href: "/partners" },
-    { id: "resources", label: "Resources", href: "/resources" },
+    { id: "insights", label: "Insights", href: "/resources" },
     { id: "newsletter", label: "Newsletter", href: "/newsletter" },
     { id: "contact", label: "Contact", href: "/contact" },
   ];

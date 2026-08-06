@@ -2,7 +2,7 @@ import { services } from "@/lib/content/services";
 import { industries } from "@/lib/content/industries";
 import { partnerDetailPath, partners } from "@/lib/content/partners";
 import { dynatracePartner } from "@/lib/content/dynatrace-partner";
-import { blogCategories, getRecentBlogPosts } from "@/lib/content/blog-posts";
+import { getRecentBlogPosts } from "@/lib/content/blog-posts";
 
 export type MegaMenuLink = {
   label: string;
@@ -43,8 +43,6 @@ const featuredIndustry = industries.find((i) => i.slug === "healthcare") ?? indu
 const [partnersLeft, partnersRight] = half(partners);
 
 const recentPost = getRecentBlogPosts(1)[0];
-const topicColumns = blogCategories.filter((cat) => cat !== "All");
-const [topicsLeft, topicsRight] = half(topicColumns);
 
 export const navMegaMenus: Record<string, MegaMenuConfig> = {
   "/services": {
@@ -94,8 +92,8 @@ export const navMegaMenus: Record<string, MegaMenuConfig> = {
       eyebrow: "Exclusive partner · Pakistan",
       title: dynatracePartner.headline,
       description: dynatracePartner.subheadline,
-      href: `/resources/${dynatracePartner.resourceSlug}`,
-      ctaLabel: "Read more",
+      href: "/partners/dynatrace",
+      ctaLabel: "View partner",
       image: dynatracePartner.logo,
     },
     columns: [
@@ -133,38 +131,30 @@ export const navMegaMenus: Record<string, MegaMenuConfig> = {
     ],
   },
 
+  /** Insights — Systems Ltd–style: Blog + Newsletter (not partners). */
   "/resources": {
     featured: recentPost
       ? {
-          eyebrow: recentPost.category,
+          eyebrow: "Latest blog",
           title: recentPost.title,
-          description: "Our latest insight — read the full article on resources.",
+          description: "News and service insights from Synergy Computers.",
           href: `/resources/${recentPost.slug}`,
-          ctaLabel: "Read more",
+          ctaLabel: "Read article",
           image: recentPost.image,
         }
       : {
-          title: "Resources",
-          description: "News, insights, and service updates from Synergy Computers.",
+          eyebrow: "Insights",
+          title: "Blog & newsletter",
+          description: "Articles and partner editions from Synergy Computers.",
           href: "/resources",
-          ctaLabel: "Browse all",
+          ctaLabel: "Browse blog",
         },
     columns: [
       {
-        heading: "Browse by topic",
-        links: topicsLeft.map((cat) => ({
-          label: cat,
-          href: `/resources?category=${encodeURIComponent(cat)}`,
-        })),
-      },
-      {
-        heading: "\u00A0",
+        heading: "Explore",
         links: [
-          ...topicsRight.map((cat) => ({
-            label: cat,
-            href: `/resources?category=${encodeURIComponent(cat)}`,
-          })),
-          { label: "All resources", href: "/resources" },
+          { label: "Blog", href: "/resources" },
+          { label: "Newsletter", href: "/newsletter" },
         ],
       },
     ],

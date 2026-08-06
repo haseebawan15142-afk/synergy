@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 type Props = { searchParams: Promise<{ category?: string }> };
 
 export const metadata = {
-  title: "Resources",
+  title: "Blog | Insights",
   description:
     "News, insights, and service updates from Synergy Computers — infrastructure, data availability, observability, and managed IT in Pakistan.",
 };
@@ -24,7 +24,7 @@ export default async function ResourcesPage({ searchParams }: Props) {
   return (
     <>
       <PageHeader
-        title="Resources"
+        title="Blog"
         description="Latest news and insights on services, partners, and enterprise technology in Pakistan."
       />
       <div className="page-container section-y-tight">

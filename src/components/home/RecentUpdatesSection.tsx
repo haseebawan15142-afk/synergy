@@ -45,7 +45,7 @@ export function RecentUpdatesSection() {
           <p className="text-sm text-ink-muted">
             Browse by topic on{" "}
             <Link href="/resources" className="font-semibold text-synergy hover:underline">
-              Resources
+              Insights
             </Link>
           </p>
         </Reveal>
