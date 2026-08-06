@@ -97,55 +97,51 @@ function LoginForm() {
 
   if (checking || ADMIN_AUTH_BYPASS) {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center text-sm text-zinc-500">
+      <div className="flex min-h-[50vh] items-center justify-center text-sm text-ink-muted">
         {ADMIN_AUTH_BYPASS ? "Auth bypass enabled — opening admin…" : "Checking session…"}
       </div>
     );
   }
 
   return (
-    <div className="w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-zinc-500">
+    <div className="w-full max-w-md rounded-2xl border border-border bg-surface-elevated p-8 shadow-card">
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-synergy">
         Synergy CMS
       </p>
-      <h1 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
+      <h1 className="mt-2 font-display text-2xl font-bold tracking-tight text-ink">
         Admin login
       </h1>
-      <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+      <p className="mt-2 text-sm text-ink-muted">
         Sign in with your Firebase admin account to manage the website.
       </p>
 
       <form onSubmit={onSubmit} className="mt-8 space-y-4">
         <label className="block">
-          <span className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-            Email
-          </span>
+          <span className="mb-1.5 block text-sm font-medium text-ink-secondary">Email</span>
           <input
             type="email"
             required
             autoComplete="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none ring-zinc-900 focus:ring-2 dark:border-zinc-600 dark:bg-zinc-950"
+            className="w-full rounded-lg border border-border bg-surface-elevated px-3 py-2.5 text-sm outline-none ring-synergy/30 focus:border-synergy focus:ring-2"
           />
         </label>
         <label className="block">
-          <span className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-            Password
-          </span>
+          <span className="mb-1.5 block text-sm font-medium text-ink-secondary">Password</span>
           <input
             type="password"
             required
             autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2.5 text-sm outline-none ring-zinc-900 focus:ring-2 dark:border-zinc-600 dark:bg-zinc-950"
+            className="w-full rounded-lg border border-border bg-surface-elevated px-3 py-2.5 text-sm outline-none ring-synergy/30 focus:border-synergy focus:ring-2"
           />
         </label>
         <button
           type="submit"
           disabled={submitting}
-          className="w-full rounded-lg bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-zinc-800 disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900"
+          className="w-full rounded-lg bg-synergy px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-synergy-dark disabled:opacity-60"
         >
           {submitting ? "Signing in…" : "Sign in"}
         </button>
@@ -156,11 +152,17 @@ function LoginForm() {
 
 export default function AdminLoginPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
+    <div className="relative flex min-h-screen items-center justify-center px-4">
+      <div
+        className="pointer-events-none absolute inset-0 bg-gradient-to-br from-synergy-muted via-surface-muted to-accent-soft/40"
+        aria-hidden
+      />
       <AdminToastProvider />
-      <Suspense fallback={<div className="text-sm text-zinc-500">Loading login…</div>}>
-        <LoginForm />
-      </Suspense>
+      <div className="relative w-full max-w-md">
+        <Suspense fallback={<div className="text-sm text-ink-muted">Loading login…</div>}>
+          <LoginForm />
+        </Suspense>
+      </div>
     </div>
   );
 }

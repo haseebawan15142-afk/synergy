@@ -2,17 +2,17 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Copy, Trash2, Upload } from "lucide-react";
+import { Copy, Trash2 } from "lucide-react";
 import { deleteMedia, listMedia, renameMedia, uploadMediaFile } from "@/lib/admin/media";
 import { MEDIA_FOLDERS, type MediaAsset } from "@/lib/admin/types";
 import { useAdminAuth } from "@/components/admin/AdminAuthProvider";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
+import { MediaDropzone } from "@/components/admin/MediaDropzone";
 import {
   AdminPageHeader,
   Card,
   EmptyState,
   Field,
-  PrimaryButton,
   SecondaryButton,
   inputClass,
 } from "@/components/admin/ui";
@@ -27,7 +27,6 @@ export function MediaLibraryView() {
   const [progress, setProgress] = useState(0);
   const [search, setSearch] = useState("");
   const [pendingDelete, setPendingDelete] = useState<MediaAsset | null>(null);
-  const [dragOver, setDragOver] = useState(false);
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -44,19 +43,18 @@ export function MediaLibraryView() {
     void reload();
   }, [reload]);
 
-  async function handleFiles(files: FileList | File[]) {
-    const list = Array.from(files);
-    if (!list.length) return;
+  async function handleFiles(files: File[]) {
+    if (!files.length) return;
     setUploading(true);
     try {
-      for (const file of list) {
+      for (const file of files) {
         setProgress(0);
         await uploadMediaFile(file, folder, {
           createdBy: user?.uid,
           onProgress: setProgress,
         });
       }
-      toast.success(`Uploaded ${list.length} file(s)`);
+      toast.success(`Uploaded ${files.length} file(s)`);
       await reload();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Upload failed");
@@ -74,23 +72,7 @@ export function MediaLibraryView() {
     <div>
       <AdminPageHeader
         title="Media Library"
-        description="Upload and manage files in Firebase Storage. Every module can pick from here."
-        actions={
-          <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white dark:bg-zinc-100 dark:text-zinc-900">
-            <Upload className="h-4 w-4" />
-            Upload
-            <input
-              type="file"
-              multiple
-              className="hidden"
-              accept="image/*,video/*,application/pdf"
-              onChange={(e) => {
-                if (e.target.files) void handleFiles(e.target.files);
-                e.target.value = "";
-              }}
-            />
-          </label>
-        }
+        description="Drag & drop or browse files into Firebase Storage. Every module can pick from here."
       />
 
       <div className="mb-4 grid gap-3 md:grid-cols-[12rem_1fr]">
@@ -113,23 +95,14 @@ export function MediaLibraryView() {
         </Field>
       </div>
 
-      <Card
-        className={dragOver ? "border-zinc-900 border-dashed" : "border-dashed"}
-        onDragOver={(e) => {
-          e.preventDefault();
-          setDragOver(true);
-        }}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={(e) => {
-          e.preventDefault();
-          setDragOver(false);
-          if (e.dataTransfer.files?.length) void handleFiles(e.dataTransfer.files);
-        }}
-      >
-        <p className="text-sm text-zinc-500">
-          Drag and drop files here{uploading ? ` — uploading ${progress}%` : ""}
-        </p>
-      </Card>
+      <MediaDropzone
+        uploading={uploading}
+        progress={progress}
+        onFiles={handleFiles}
+        accept="image/*,.webp,video/*,application/pdf"
+        label="Drag & drop files here"
+        hint="or click Browse to select from your computer — images, WebP, video, PDF"
+      />
 
       <div className="mt-6">
         {loading ? (
@@ -147,7 +120,7 @@ export function MediaLibraryView() {
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={item.url} alt={item.alt || item.name} className="h-36 w-full object-cover" />
                 ) : (
-                  <div className="flex h-36 items-center justify-center bg-zinc-100 text-sm dark:bg-zinc-800">
+                  <div className="flex h-36 items-center justify-center bg-surface-muted text-sm text-ink-muted">
                     {item.contentType}
                   </div>
                 )}
@@ -209,12 +182,6 @@ export function MediaLibraryView() {
           }
         }}
       />
-
-      {uploading ? (
-        <div className="fixed bottom-4 right-4 rounded-lg bg-zinc-900 px-4 py-2 text-sm text-white">
-          Uploading… {progress}%
-        </div>
-      ) : null}
     </div>
   );
 }

@@ -3,7 +3,7 @@
 import { cn } from "@/lib/cn";
 
 export const inputClass =
-  "w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm outline-none ring-zinc-900 focus:ring-2 dark:border-zinc-600 dark:bg-zinc-950";
+  "w-full rounded-lg border border-border bg-surface-elevated px-3 py-2 text-sm text-ink outline-none ring-synergy/30 transition focus:border-synergy focus:ring-2";
 
 export function AdminPageHeader({
   title,
@@ -17,9 +17,9 @@ export function AdminPageHeader({
   return (
     <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+        <h1 className="font-display text-2xl font-bold tracking-tight text-ink">{title}</h1>
         {description ? (
-          <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">{description}</p>
+          <p className="mt-1 text-sm text-ink-muted">{description}</p>
         ) : null}
       </div>
       {actions}
@@ -38,9 +38,7 @@ export function Field({
 }) {
   return (
     <label className={cn("block", className)}>
-      <span className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
-        {label}
-      </span>
+      <span className="mb-1.5 block text-sm font-medium text-ink-secondary">{label}</span>
       {children}
     </label>
   );
@@ -55,7 +53,7 @@ export function Card({
     <div
       {...props}
       className={cn(
-        "rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900",
+        "rounded-2xl border border-border bg-surface-elevated p-5 shadow-soft",
         className,
       )}
     >
@@ -73,7 +71,7 @@ export function PrimaryButton({
     <button
       {...props}
       className={cn(
-        "rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white hover:bg-zinc-800 disabled:opacity-60 dark:bg-zinc-100 dark:text-zinc-900",
+        "rounded-lg bg-synergy px-4 py-2 text-sm font-semibold text-white transition hover:bg-synergy-dark disabled:opacity-60",
         className,
       )}
     >
@@ -91,7 +89,7 @@ export function SecondaryButton({
     <button
       {...props}
       className={cn(
-        "rounded-lg border border-zinc-300 px-3 py-2 text-sm font-medium hover:bg-zinc-50 disabled:opacity-60 dark:border-zinc-600 dark:hover:bg-zinc-800",
+        "rounded-lg border border-border bg-surface-elevated px-3 py-2 text-sm font-medium text-ink-secondary transition hover:border-synergy/40 hover:bg-synergy-muted/40 disabled:opacity-60",
         className,
       )}
     >
@@ -103,10 +101,10 @@ export function SecondaryButton({
 export function StatusBadge({ status }: { status: string }) {
   const tone =
     status === "published" || status === "open" || status === "active"
-      ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+      ? "bg-synergy-muted text-synergy-dark"
       : status === "draft" || status === "scheduled"
         ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
-        : "bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300";
+        : "bg-surface-muted text-ink-muted";
   return (
     <span className={cn("inline-flex rounded-full px-2 py-0.5 text-xs font-medium capitalize", tone)}>
       {status}
@@ -116,9 +114,9 @@ export function StatusBadge({ status }: { status: string }) {
 
 export function EmptyState({ title, description }: { title: string; description: string }) {
   return (
-    <div className="rounded-2xl border border-dashed border-zinc-300 p-10 text-center dark:border-zinc-700">
-      <p className="font-medium">{title}</p>
-      <p className="mt-2 text-sm text-zinc-500">{description}</p>
+    <div className="rounded-2xl border border-dashed border-border p-10 text-center">
+      <p className="font-medium text-ink">{title}</p>
+      <p className="mt-2 text-sm text-ink-muted">{description}</p>
     </div>
   );
 }

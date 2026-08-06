@@ -15,10 +15,10 @@ export function AdminTopbar({ onMenuClick, collapsed, onToggleCollapse }: AdminT
   const { profile, logout } = useAdminAuth();
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-zinc-200 bg-white/90 px-3 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/90 sm:px-4">
+    <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-border bg-surface-elevated/90 px-3 backdrop-blur sm:px-4">
       <button
         type="button"
-        className="rounded-lg p-2 text-zinc-600 hover:bg-zinc-100 lg:hidden dark:text-zinc-300 dark:hover:bg-zinc-900"
+        className="rounded-lg p-2 text-ink-muted hover:bg-synergy-muted hover:text-synergy lg:hidden"
         onClick={onMenuClick}
         aria-label="Open sidebar"
       >
@@ -27,7 +27,7 @@ export function AdminTopbar({ onMenuClick, collapsed, onToggleCollapse }: AdminT
 
       <button
         type="button"
-        className="hidden rounded-lg p-2 text-zinc-600 hover:bg-zinc-100 lg:inline-flex dark:text-zinc-300 dark:hover:bg-zinc-900"
+        className="hidden rounded-lg p-2 text-ink-muted hover:bg-synergy-muted hover:text-synergy lg:inline-flex"
         onClick={onToggleCollapse}
         aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
       >
@@ -35,12 +35,12 @@ export function AdminTopbar({ onMenuClick, collapsed, onToggleCollapse }: AdminT
       </button>
 
       <div className="relative hidden min-w-0 flex-1 md:block">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-muted" />
         <input
           type="search"
           placeholder="Search admin… (coming soon)"
           disabled
-          className="w-full max-w-md rounded-lg border border-zinc-200 bg-zinc-50 py-2 pl-9 pr-3 text-sm text-zinc-500 dark:border-zinc-700 dark:bg-zinc-900"
+          className="w-full max-w-md rounded-lg border border-border bg-surface-muted py-2 pl-9 pr-3 text-sm text-ink-muted"
         />
       </div>
 
@@ -48,14 +48,14 @@ export function AdminTopbar({ onMenuClick, collapsed, onToggleCollapse }: AdminT
         <ThemeSelector className="[&_button]:min-h-9 [&_button]:min-w-9" />
         <Link
           href="/admin/profile"
-          className="hidden rounded-lg px-2 py-1.5 text-sm text-zinc-600 hover:bg-zinc-100 sm:block dark:text-zinc-300 dark:hover:bg-zinc-900"
+          className="hidden rounded-lg px-2 py-1.5 text-sm text-ink-muted hover:bg-synergy-muted hover:text-synergy sm:block"
         >
           {profile?.email ?? "Admin"}
         </Link>
         <button
           type="button"
           onClick={() => void logout()}
-          className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 dark:border-zinc-600 dark:text-zinc-200 dark:hover:bg-zinc-900"
+          className="rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-ink-secondary transition hover:border-synergy/40 hover:bg-synergy-muted/50"
         >
           Logout
         </button>

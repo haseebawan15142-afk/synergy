@@ -14,14 +14,14 @@ function AdminShellInner({ children }: { children: React.ReactNode }) {
 
   if (loading || !isAdmin) {
     return (
-      <div className="min-h-screen bg-zinc-50 p-6 dark:bg-zinc-950">
+      <div className="min-h-screen bg-surface-muted p-6">
         <AdminPageSkeleton />
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen bg-zinc-50 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-50">
+    <div className="flex min-h-screen bg-surface-muted text-ink">
       <AdminSidebar
         open={mobileOpen}
         onClose={() => setMobileOpen(false)}
