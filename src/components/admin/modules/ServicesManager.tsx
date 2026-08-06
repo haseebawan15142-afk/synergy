@@ -42,10 +42,10 @@ export function ServicesManager() {
   return (
     <CrudManager<ServiceDoc>
       title="Services"
-      description="Service listing cards and full /services/[slug] detail pages (challenge, approach, benefits, capabilities, outcomes, hero)."
+      description="Firebase owns services site-wide: homepage Problems we solve, /services list, detail pages, and Insights nav. Keep Status = published and Active ON for a service to appear."
       collection={COLLECTIONS.services}
       fields={fields}
-      empty="No services"
+      empty="No services — add one or seed from local content"
       initial={{
         title: "",
         slug: "",
@@ -58,22 +58,31 @@ export function ServicesManager() {
         benefits: "",
         capabilities: [],
         outcomes: [],
+        imageUrl: "",
+        bannerUrl: "",
         heroImageUrl: "",
         sortOrder: 0,
         featured: false,
-        status: "draft",
+        status: "published",
         active: true,
       }}
       normalize={(form) => ({
         ...form,
         slug: form.slug || slugify(form.title),
+        shortDescription: form.shortDescription || "",
+        description: form.description || "",
         headline: form.headline || "",
         lead: form.lead || "",
         challenge: form.challenge || "",
         approach: form.approach || "",
         benefits: form.benefits || "",
+        imageUrl: form.imageUrl || "",
+        bannerUrl: form.bannerUrl || "",
         heroImageUrl: form.heroImageUrl || "",
         sortOrder: typeof form.sortOrder === "number" ? form.sortOrder : 0,
+        status: form.status || "published",
+        active: form.active !== false,
+        featured: form.featured === true,
       })}
     />
   );

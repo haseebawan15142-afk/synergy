@@ -95,24 +95,36 @@ function parsePipeRows(value: unknown): { title: string; description: string }[]
 }
 
 export async function fetchServices(): Promise<Service[]> {
-  return cachedCms("services:v2", async () => {
+  return cachedCms("services:v3", async () => {
     if (!firebaseReady()) return localServices;
     try {
       const snap = await getDocs(collection(getFirebaseDb(), COLLECTIONS.services));
       if (snap.empty) return localServices;
+
+      const localBySlug = new Map(localServices.map((s) => [s.slug.toLowerCase(), s]));
+
       type Row = Service & { sortOrder: number };
       const fromCms = snap.docs
         .map((d): Row | null => {
           const x = d.data();
+          // Missing active = visible; explicit false hides.
           if (x.active === false) return null;
-          if (x.status && x.status !== "published") return null;
+          // Missing status = published (legacy); draft/archived stay private.
+          const status = x.status ? String(x.status) : "published";
+          if (status !== "published") return null;
           const title = String(x.title || "").trim();
           if (!title) return null;
+          const slug = String(x.slug || d.id).trim();
+          const local = localBySlug.get(slug.toLowerCase());
+          const image =
+            String(x.imageUrl || x.bannerUrl || x.heroImageUrl || "").trim() ||
+            local?.image ||
+            "";
           return {
-            slug: String(x.slug || d.id),
+            slug,
             title,
-            summary: String(x.shortDescription || x.description || ""),
-            image: String(x.imageUrl || x.bannerUrl || x.heroImageUrl || ""),
+            summary: String(x.shortDescription || x.description || local?.summary || ""),
+            image,
             sortOrder: typeof x.sortOrder === "number" ? x.sortOrder : Number.MAX_SAFE_INTEGER,
           };
         })
@@ -120,7 +132,7 @@ export async function fetchServices(): Promise<Service[]> {
         .sort((a, b) => a.sortOrder - b.sortOrder || a.title.localeCompare(b.title))
         .map(({ sortOrder: _s, ...service }) => service);
 
-      // CMS owns services once any published/active row exists.
+      // Admin CMS owns services once Firebase has any published row (no local merge).
       if (fromCms.length > 0) return fromCms;
       return localServices;
     } catch {

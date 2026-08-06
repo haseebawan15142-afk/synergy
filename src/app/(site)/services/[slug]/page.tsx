@@ -8,6 +8,9 @@ import { fetchPublishedBlogs, fetchServiceBySlug, fetchServices } from "@/lib/cm
 
 type Props = { params: Promise<{ slug: string }> };
 
+/** Pick up admin CMS service changes without a full redeploy. */
+export const revalidate = 30;
+
 export async function generateStaticParams() {
   const services = await fetchServices();
   return services.map((s) => ({ slug: s.slug }));

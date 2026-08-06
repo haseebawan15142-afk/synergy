@@ -12,7 +12,8 @@ import { ThemeSelector } from "@/components/theme/ThemeToggle";
 import { siteConfig } from "@/lib/content/site";
 import { navMegaMenus, type MegaMenuConfig } from "@/lib/content/nav-menus";
 import { partners as localPartners, partnerDetailPath } from "@/lib/content/partners";
-import { fetchPartners } from "@/lib/cms/public";
+import { services as localServices } from "@/lib/content/services";
+import { fetchPartners, fetchServices } from "@/lib/cms/public";
 import { useCmsList } from "@/hooks/useCmsList";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
@@ -27,28 +28,62 @@ export function Navbar() {
   const reduce = useReducedMotion();
   const partnersLoader = useCallback(() => fetchPartners(), []);
   const cmsPartners = useCmsList(localPartners, partnersLoader);
+  const servicesLoader = useCallback(() => fetchServices(), []);
+  const cmsServices = useCmsList(localServices, servicesLoader);
 
   const menus = useMemo((): Record<string, MegaMenuConfig> => {
-    const mid = Math.ceil(cmsPartners.length / 2);
-    const left = cmsPartners.slice(0, mid);
-    const right = cmsPartners.slice(mid);
+    const partnerMid = Math.ceil(cmsPartners.length / 2);
+    const partnerLeft = cmsPartners.slice(0, partnerMid);
+    const partnerRight = cmsPartners.slice(partnerMid);
+    const serviceMid = Math.ceil(cmsServices.length / 2);
+    const serviceLeft = cmsServices.slice(0, serviceMid);
+    const serviceRight = cmsServices.slice(serviceMid);
+    const featuredService = cmsServices[0];
     return {
       ...navMegaMenus,
+      "/services": {
+        ...navMegaMenus["/services"],
+        featured: featuredService
+          ? {
+              ...navMegaMenus["/services"].featured,
+              title: featuredService.title,
+              description: featuredService.summary,
+              href: `/services/${featuredService.slug}`,
+              image: featuredService.image || navMegaMenus["/services"].featured.image,
+            }
+          : navMegaMenus["/services"].featured,
+        columns: [
+          {
+            heading: "Infrastructure & Support",
+            links: serviceLeft.map((s) => ({
+              label: s.title,
+              href: `/services/${s.slug}`,
+            })),
+          },
+          {
+            heading: "Cloud & Data",
+            links: serviceRight.map((s) => ({
+              label: s.title,
+              href: `/services/${s.slug}`,
+            })),
+          },
+        ],
+      },
       "/partners": {
         ...navMegaMenus["/partners"],
         columns: [
           {
             heading: "Technology principals",
-            links: left.map((p) => ({ label: p.name, href: partnerDetailPath(p) })),
+            links: partnerLeft.map((p) => ({ label: p.name, href: partnerDetailPath(p) })),
           },
           {
             heading: "\u00A0",
-            links: right.map((p) => ({ label: p.name, href: partnerDetailPath(p) })),
+            links: partnerRight.map((p) => ({ label: p.name, href: partnerDetailPath(p) })),
           },
         ],
       },
     };
-  }, [cmsPartners]);
+  }, [cmsPartners, cmsServices]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 6);

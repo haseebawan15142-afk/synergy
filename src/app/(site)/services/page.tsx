@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   description: "Enterprise IT services — infrastructure, cloud, backup, on-site support, managed IT.",
 };
 
+/** Pick up admin CMS service changes without a full redeploy. */
+export const revalidate = 30;
+
 export default async function ServicesPage() {
   const services = await fetchServices();
 
