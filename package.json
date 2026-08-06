@@ -12,6 +12,8 @@
     "cms:migrate:force": "node scripts/migrate-to-firebase.mjs --force",
     "cms:seed-clients": "node scripts/seed-clients.mjs",
     "cms:seed-board": "node scripts/seed-board.mjs",
+    "cms:seed-partners": "node scripts/seed-partners.mjs",
+    "cms:seed-newsletter": "node scripts/seed-newsletter.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

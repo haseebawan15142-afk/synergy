@@ -22,6 +22,7 @@ export const COLLECTIONS = {
   faq: "faq",
   messages: "messages",
   newsletter: "newsletter",
+  newsletterIssues: "newsletterIssues",
   media: "media",
   seo: "seo",
   analytics: "analytics",

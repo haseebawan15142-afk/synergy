@@ -242,6 +242,25 @@ export type NewsletterDoc = {
   createdAt?: TimestampLike;
 };
 
+/** Public newsletter edition / spotlight shown on /newsletter */
+export type NewsletterIssueDoc = {
+  id?: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  body?: string;
+  coverUrl: string;
+  topic: string;
+  href?: string;
+  featured: boolean;
+  sortOrder: number;
+  status: ContentStatus;
+  publishedAt?: string;
+  active: boolean;
+  createdAt?: TimestampLike;
+  updatedAt?: TimestampLike;
+};
+
 export type NavItemDoc = {
   id: string;
   label: string;

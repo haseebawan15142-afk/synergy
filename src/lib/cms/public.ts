@@ -21,6 +21,10 @@ import { jobOpenings as localJobs } from "@/lib/content/careers";
 import { partners as localPartners, type Partner } from "@/lib/content/partners";
 import { clients as localClients, type ClientLogo } from "@/lib/content/clients";
 import {
+  newsletterIssues as localNewsletterIssues,
+  type NewsletterIssue,
+} from "@/lib/content/newsletter-issues";
+import {
   getServiceDetail,
   type ServiceCapability,
   type ServiceDetail,
@@ -91,7 +95,7 @@ function parsePipeRows(value: unknown): { title: string; description: string }[]
 }
 
 export async function fetchServices(): Promise<Service[]> {
-  return cachedCms("services", async () => {
+  return cachedCms("services:v2", async () => {
     if (!firebaseReady()) return localServices;
     try {
       const snap = await getDocs(collection(getFirebaseDb(), COLLECTIONS.services));
@@ -116,11 +120,9 @@ export async function fetchServices(): Promise<Service[]> {
         .sort((a, b) => a.sortOrder - b.sortOrder || a.title.localeCompare(b.title))
         .map(({ sortOrder: _s, ...service }) => service);
 
-      if (!fromCms.length) return localServices;
-
-      const cmsSlugs = new Set(fromCms.map((s) => s.slug.toLowerCase()));
-      const localOnly = localServices.filter((s) => !cmsSlugs.has(s.slug.toLowerCase()));
-      return [...fromCms, ...localOnly];
+      // CMS owns services once any published/active row exists.
+      if (fromCms.length > 0) return fromCms;
+      return localServices;
     } catch {
       return localServices;
     }
@@ -280,8 +282,59 @@ export async function fetchFooterNav(): Promise<NavItemDoc[]> {
     { id: "services", label: "Services", href: "/services" },
     { id: "partners", label: "Partners", href: "/partners" },
     { id: "resources", label: "Resources", href: "/resources" },
+    { id: "newsletter", label: "Newsletter", href: "/newsletter" },
     { id: "contact", label: "Contact", href: "/contact" },
   ];
+}
+
+export async function fetchNewsletterIssues(): Promise<NewsletterIssue[]> {
+  return cachedCms("newsletterIssues:v1", async () => {
+    if (!firebaseReady()) return localNewsletterIssues;
+    try {
+      const snap = await getDocs(collection(getFirebaseDb(), COLLECTIONS.newsletterIssues));
+      if (snap.empty) return localNewsletterIssues;
+
+      type Row = NewsletterIssue & { _order: number };
+      const fromCms = snap.docs
+        .map((d): Row | null => {
+          const x = d.data();
+          if (x.active === false) return null;
+          if (x.status && x.status !== "published") return null;
+          const title = String(x.title || "").trim();
+          const excerpt = String(x.excerpt || "").trim();
+          const coverUrl = String(x.coverUrl || "").trim();
+          if (!title || !excerpt || !coverUrl) return null;
+          const slug =
+            String(x.slug || "").trim() ||
+            title
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, "-")
+              .replace(/^-+|-+$/g, "");
+          return {
+            title,
+            slug,
+            excerpt,
+            body: String(x.body || "").trim() || undefined,
+            coverUrl,
+            topic: String(x.topic || "Update").trim() || "Update",
+            href: String(x.href || "").trim() || undefined,
+            featured: x.featured === true,
+            sortOrder: typeof x.sortOrder === "number" ? x.sortOrder : Number.MAX_SAFE_INTEGER,
+            publishedAt: String(x.publishedAt || "").trim() || new Date().toISOString().slice(0, 10),
+            _order: typeof x.sortOrder === "number" ? x.sortOrder : Number.MAX_SAFE_INTEGER,
+          };
+        })
+        .filter((row): row is Row => row !== null)
+        .sort((a, b) => a._order - b._order || a.title.localeCompare(b.title));
+
+      if (fromCms.length > 0) {
+        return fromCms.map(({ _order: _o, ...issue }) => issue);
+      }
+      return localNewsletterIssues;
+    } catch {
+      return localNewsletterIssues;
+    }
+  });
 }
 
 function isUsablePersonName(name: string) {
@@ -290,7 +343,7 @@ function isUsablePersonName(name: string) {
 }
 
 export async function fetchLeadership(): Promise<LeadershipMember[]> {
-  return cachedCms("leadership", async () => {
+  return cachedCms("leadership:v2", async () => {
     if (!firebaseReady()) return localLeadership;
     try {
       const snap = await getDocs(collection(getFirebaseDb(), COLLECTIONS.leadership));
@@ -318,6 +371,7 @@ export async function fetchLeadership(): Promise<LeadershipMember[]> {
       if (!rows.length) return localLeadership;
 
       rows.sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name));
+      // Board of Directors — CMS owns the list once Firebase has members.
       return rows.map(({ sortOrder: _sortOrder, ...member }) => member);
     } catch {
       return localLeadership;
@@ -488,13 +542,14 @@ function withPartnerFallbacks(partner: Partner): Partner {
 }
 
 export async function fetchPartners(): Promise<Partner[]> {
-  return cachedCms("partners", async () => {
+  return cachedCms("partners:v2", async () => {
     if (!firebaseReady()) {
       return localPartners.map(withPartnerFallbacks);
     }
     try {
       const snap = await getDocs(collection(getFirebaseDb(), COLLECTIONS.partners));
       if (snap.empty) return localPartners.map(withPartnerFallbacks);
+
       type PartnerRow = Required<
         Pick<
           Partner,
@@ -514,6 +569,7 @@ export async function fetchPartners(): Promise<Partner[]> {
       const rows = snap.docs
         .map((d): PartnerRow | null => {
           const x = d.data();
+          // Missing active = visible; explicit false hides (admin delete or deactivate).
           if (x.active === false) return null;
           const name = String(x.name || "");
           if (!name) return null;
@@ -538,15 +594,11 @@ export async function fetchPartners(): Promise<Partner[]> {
       const fromCms = rows.map(({ sortOrder: _sortOrder, ...partner }) =>
         withPartnerFallbacks(partner),
       );
-      const cmsSlugs = new Set(
-        fromCms.map((p) => (p.slug || slugifyPartnerName(p.name)).toLowerCase()),
-      );
-      // Keep CMS order, then append local-only partners (e.g. Company Profile 2026 additions).
-      const localOnly = localPartners
-        .map(withPartnerFallbacks)
-        .filter((p) => !cmsSlugs.has((p.slug || slugifyPartnerName(p.name)).toLowerCase()));
 
-      return [...fromCms, ...localOnly];
+      // Admin CMS owns partners once Firebase has any — no local merge
+      // (merge was why site showed partners that admin couldn't edit/delete).
+      if (fromCms.length > 0) return fromCms;
+      return localPartners.map(withPartnerFallbacks);
     } catch {
       return localPartners.map(withPartnerFallbacks);
     }
@@ -556,6 +608,37 @@ export async function fetchPartners(): Promise<Partner[]> {
 export async function fetchPartnerBySlug(slug: string): Promise<Partner | null> {
   const needle = slug.trim().toLowerCase();
   if (!needle) return null;
+
+  if (firebaseReady()) {
+    try {
+      const bySlug = query(
+        collection(getFirebaseDb(), COLLECTIONS.partners),
+        where("slug", "==", slug.trim()),
+        limit(1),
+      );
+      const snap = await getDocs(bySlug);
+      if (!snap.empty) {
+        const d = snap.docs[0];
+        const x = d.data();
+        if (x.active === false) return null;
+        return withPartnerFallbacks({
+          name: String(x.name || ""),
+          logo: String(x.logoUrl || x.logo || ""),
+          href: String(x.website || x.href || "#"),
+          slug: String(x.slug || d.id),
+          heroImageUrl: String(x.heroImageUrl || ""),
+          taglines: asStringList(x.taglines),
+          shortDescription: String(x.shortDescription || ""),
+          overview: String(x.overview || ""),
+          keySolutions: asStringList(x.keySolutions),
+          category: String(x.category || ""),
+        });
+      }
+    } catch {
+      /* fall through */
+    }
+  }
+
   const all = await fetchPartners();
   return all.find((partner) => (partner.slug || slugifyPartnerName(partner.name)) === needle) ?? null;
 }

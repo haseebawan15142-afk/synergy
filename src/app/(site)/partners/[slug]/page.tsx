@@ -9,6 +9,7 @@ import { fetchPartnerBySlug, fetchPartners } from "@/lib/cms/public";
 type Props = { params: Promise<{ slug: string }> };
 
 export const dynamicParams = true;
+export const revalidate = 30;
 
 export async function generateStaticParams() {
   const partners = await fetchPartners();

@@ -1,6 +1,9 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    /* ── Auth helpers ─────────────────────────────────────────────── */
+
     function isSignedIn() {
       return request.auth != null;
     }
@@ -14,135 +17,164 @@ service cloud.firestore {
       return resource.data.status == 'published';
     }
 
-    function isActive() {
-      return !('active' in resource.data) || resource.data.active == true;
+    function isOpenCareer() {
+      return resource.data.status == 'open';
     }
 
-    // Admin user profiles
+    /**
+     * Marketing / CMS catalog pattern:
+     * - Public READ so website list queries never fail when draft/inactive
+     *   docs exist (Firestore rejects the whole query otherwise).
+     * - Website app code still filters status/active for display.
+     * - Only admins can CREATE / UPDATE / DELETE.
+     */
+    function publicCatalog() {
+      return true;
+    }
+
+    /* ── Admin identity ───────────────────────────────────────────── */
+
     match /users/{userId} {
       allow read: if isAdmin() || (isSignedIn() && request.auth.uid == userId);
       allow create, update, delete: if isAdmin();
     }
 
-    // Site settings / theme / navigation / SEO — public read, admin write
+    /* ── Site chrome (footer, theme, nav, SEO) ─────────────────────── */
+
     match /settings/{docId} {
-      allow read: if true;
+      allow read: if publicCatalog();
       allow write: if isAdmin();
     }
 
     match /theme/{docId} {
-      allow read: if true;
+      allow read: if publicCatalog();
       allow write: if isAdmin();
     }
 
     match /navigation/{docId} {
-      allow read: if true;
+      allow read: if publicCatalog();
       allow write: if isAdmin();
     }
 
     match /seo/{document=**} {
-      allow read: if true;
+      allow read: if publicCatalog();
       allow write: if isAdmin();
     }
 
-    // Public content collections
+    match /media/{id} {
+      allow read: if publicCatalog();
+      allow write: if isAdmin();
+    }
+
+    match /categories/{id} {
+      allow read: if publicCatalog();
+      allow write: if isAdmin();
+    }
+
+    match /tags/{id} {
+      allow read: if publicCatalog();
+      allow write: if isAdmin();
+    }
+
+    /* ── Website content managed in Admin CMS ─────────────────────── */
+    /* App filters drafts/inactive; public list/detail stays reliable. */
+
+    match /partners/{id} {
+      allow read: if publicCatalog();
+      allow write: if isAdmin();
+    }
+
+    match /clients/{id} {
+      allow read: if publicCatalog();
+      allow write: if isAdmin();
+    }
+
+    match /services/{id} {
+      allow read: if publicCatalog();
+      allow write: if isAdmin();
+    }
+
+    match /leadership/{id} {
+      allow read: if publicCatalog();
+      allow write: if isAdmin();
+    }
+
+    match /industries/{id} {
+      allow read: if publicCatalog();
+      allow write: if isAdmin();
+    }
+
+    match /alumni/{id} {
+      allow read: if publicCatalog();
+      allow write: if isAdmin();
+    }
+
+    match /testimonials/{id} {
+      allow read: if publicCatalog();
+      allow write: if isAdmin();
+    }
+
+    match /gallery/{id} {
+      allow read: if publicCatalog();
+      allow write: if isAdmin();
+    }
+
+    match /galleryAlbums/{id} {
+      allow read: if publicCatalog();
+      allow write: if isAdmin();
+    }
+
+    match /faq/{id} {
+      allow read: if publicCatalog();
+      allow write: if isAdmin();
+    }
+
+    match /events/{id} {
+      allow read: if publicCatalog();
+      allow write: if isAdmin();
+    }
+
+    match /caseStudies/{id} {
+      allow read: if publicCatalog();
+      allow write: if isAdmin();
+    }
+
+    match /newsletterIssues/{id} {
+      allow read: if publicCatalog();
+      allow write: if isAdmin();
+    }
+
+    /**
+     * Blogs — drafts must NOT be world-readable by document ID.
+     * Public site MUST query: where("status", "==", "published")
+     */
     match /blogs/{id} {
       allow read: if isAdmin() || isPublished();
       allow write: if isAdmin();
     }
 
-    match /categories/{id} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
-
-    match /tags/{id} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
-
-    match /leadership/{id} {
-      allow read: if isAdmin() || isActive();
-      allow write: if isAdmin();
-    }
-
-    match /alumni/{id} {
-      allow read: if isAdmin() || isActive();
-      allow write: if isAdmin();
-    }
-
-    match /services/{id} {
-      allow read: if isAdmin() || isPublished() || isActive();
-      allow write: if isAdmin();
-    }
-
-    match /industries/{id} {
-      allow read: if isAdmin() || isPublished() || isActive();
-      allow write: if isAdmin();
-    }
-
-    match /partners/{id} {
-      allow read: if isAdmin() || isActive();
-      allow write: if isAdmin();
-    }
-
-    match /clients/{id} {
-      // Public logos — open read so list queries never fail when inactive docs exist.
-      // Site still filters active==true in app code for display.
-      allow read: if true;
-      allow write: if isAdmin();
-    }
-
-    match /caseStudies/{id} {
-      allow read: if isAdmin() || isPublished();
-      allow write: if isAdmin();
-    }
-
-    match /testimonials/{id} {
-      allow read: if isAdmin() || isActive();
-      allow write: if isAdmin();
-    }
-
-    match /gallery/{id} {
-      allow read: if isAdmin() || isActive();
-      allow write: if isAdmin();
-    }
-
-    match /galleryAlbums/{id} {
-      allow read: if isAdmin() || isActive();
-      allow write: if isAdmin();
-    }
-
+    /**
+     * Careers — closed/draft jobs stay private.
+     * Public site MUST query: where("status", "==", "open")
+     */
     match /careers/{id} {
-      allow read: if isAdmin() || resource.data.status == 'open' || isPublished();
+      allow read: if isAdmin() || isOpenCareer() || isPublished();
       allow write: if isAdmin();
     }
 
-    match /events/{id} {
-      allow read: if isAdmin() || isPublished() || isActive();
-      allow write: if isAdmin();
-    }
+    /* ── Public form intakes (create-only for visitors) ───────────── */
 
-    match /faq/{id} {
-      allow read: if isAdmin() || isActive();
-      allow write: if isAdmin();
-    }
-
-    match /media/{id} {
-      allow read: if true;
-      allow write: if isAdmin();
-    }
-
-    // Private admin collections
     match /messages/{id} {
+      allow create: if true;
       allow read, update, delete: if isAdmin();
-      allow create: if true; // public contact form (Phase 5)
     }
 
     match /newsletter/{id} {
+      allow create: if true;
       allow read, update, delete: if isAdmin();
-      allow create: if true; // public subscribe (Phase 5)
     }
+
+    /* ── Private admin ops ────────────────────────────────────────── */
 
     match /analytics/{document=**} {
       allow read, write: if isAdmin();

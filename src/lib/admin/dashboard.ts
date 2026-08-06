@@ -19,7 +19,7 @@ import {
 
 export type DashboardStats = {
   blogs: number;
-  alumni: number;
+  newsletterIssues: number;
   services: number;
   messages: number;
   unreadMessages: number;
@@ -41,9 +41,9 @@ async function safeCount(path: string) {
 export async function fetchDashboardStats(): Promise<DashboardStats> {
   const db = getFirebaseDb();
 
-  const [blogs, alumni, services, messages] = await Promise.all([
+  const [blogs, newsletterIssues, services, messages] = await Promise.all([
     safeCount(COLLECTIONS.blogs),
-    safeCount(COLLECTIONS.alumni),
+    safeCount(COLLECTIONS.newsletterIssues),
     safeCount(COLLECTIONS.services),
     safeCount(COLLECTIONS.messages),
   ]);
@@ -109,7 +109,7 @@ export async function fetchDashboardStats(): Promise<DashboardStats> {
 
   return {
     blogs,
-    alumni,
+    newsletterIssues,
     services,
     messages,
     unreadMessages,

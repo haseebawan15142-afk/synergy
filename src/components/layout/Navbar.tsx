@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
@@ -10,7 +10,10 @@ import { NavLinkMotion } from "@/components/motion/NavLinkMotion";
 import { MegaMenu } from "@/components/layout/MegaMenu";
 import { ThemeSelector } from "@/components/theme/ThemeToggle";
 import { siteConfig } from "@/lib/content/site";
-import { navMegaMenus } from "@/lib/content/nav-menus";
+import { navMegaMenus, type MegaMenuConfig } from "@/lib/content/nav-menus";
+import { partners as localPartners, partnerDetailPath } from "@/lib/content/partners";
+import { fetchPartners } from "@/lib/cms/public";
+import { useCmsList } from "@/hooks/useCmsList";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
 import { motionDurations, motionEase } from "@/lib/motion/transitions";
@@ -22,6 +25,30 @@ export function Navbar() {
   const [mobileSubOpen, setMobileSubOpen] = useState<string | null>(null);
   const pathname = usePathname();
   const reduce = useReducedMotion();
+  const partnersLoader = useCallback(() => fetchPartners(), []);
+  const cmsPartners = useCmsList(localPartners, partnersLoader);
+
+  const menus = useMemo((): Record<string, MegaMenuConfig> => {
+    const mid = Math.ceil(cmsPartners.length / 2);
+    const left = cmsPartners.slice(0, mid);
+    const right = cmsPartners.slice(mid);
+    return {
+      ...navMegaMenus,
+      "/partners": {
+        ...navMegaMenus["/partners"],
+        columns: [
+          {
+            heading: "Technology principals",
+            links: left.map((p) => ({ label: p.name, href: partnerDetailPath(p) })),
+          },
+          {
+            heading: "\u00A0",
+            links: right.map((p) => ({ label: p.name, href: partnerDetailPath(p) })),
+          },
+        ],
+      },
+    };
+  }, [cmsPartners]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 6);
@@ -65,7 +92,7 @@ export function Navbar() {
         <nav className="hidden items-center gap-0.5 lg:flex" aria-label="Primary">
           {siteConfig.nav.map((item) => {
             const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
-            const menu = navMegaMenus[item.href];
+            const menu = menus[item.href];
 
             if (menu) {
               return (
@@ -149,7 +176,7 @@ export function Navbar() {
               >
                 {siteConfig.nav.map((item) => {
                   const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
-                  const menu = navMegaMenus[item.href];
+                  const menu = menus[item.href];
                   const subOpen = mobileSubOpen === item.href;
                   const flatLinks = menu
                     ? menu.columns

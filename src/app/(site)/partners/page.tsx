@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   description: "Technology principals and strategic alliances — Synergy Computers Pakistan.",
 };
 
+/** Pick up admin CMS partner create/update/delete without full redeploy. */
+export const revalidate = 30;
+
 export default async function PartnersPage() {
   const partners = await fetchPartners();
 

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   FileText,
-  GraduationCap,
+  Newspaper,
   Briefcase,
   Mail,
   CheckCircle2,
@@ -82,7 +82,7 @@ export function DashboardView() {
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Total Blogs" value={stats.blogs} icon={FileText} />
-        <StatCard label="Total Alumni" value={stats.alumni} icon={GraduationCap} />
+        <StatCard label="Newsletter editions" value={stats.newsletterIssues} icon={Newspaper} />
         <StatCard label="Total Services" value={stats.services} icon={Briefcase} />
         <StatCard
           label="Total Messages"

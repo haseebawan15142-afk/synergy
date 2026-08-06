@@ -73,8 +73,8 @@ export const adminModuleStubs = [
   },
   {
     slug: "newsletter",
-    title: "Newsletter Subscribers",
-    description: "Store subscribers, search, delete, and export CSV lists.",
+    title: "Newsletter",
+    description: "Public newsletter editions (Dynatrace & partners) plus subscriber list export.",
     phase: 5,
   },
   {

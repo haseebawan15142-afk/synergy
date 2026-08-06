@@ -1,8 +1,11 @@
 /**
- * Deploy firestore.rules using Admin SDK service account from .env.local
- * via the Firebase Rules REST API (no interactive firebase login).
+ * Deploy firestore.rules (+ storage.rules) using Admin SDK credentials from .env.local
+ * via the Firebase Rules REST API.
  *
- * Usage: node scripts/deploy-firestore-rules.mjs
+ * Usage:
+ *   node scripts/deploy-firestore-rules.mjs
+ *   node scripts/deploy-firestore-rules.mjs --storage   // include Storage rules
+ *   node scripts/deploy-firestore-rules.mjs --all
  */
 import { readFileSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
@@ -11,6 +14,8 @@ import { GoogleAuth } from "google-auth-library";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, "..");
+const includeStorage =
+  process.argv.includes("--storage") || process.argv.includes("--all");
 
 function loadEnvFile(filePath) {
   if (!existsSync(filePath)) return;
@@ -44,15 +49,7 @@ if (!projectId || !clientEmail || !privateKey) {
   process.exit(1);
 }
 
-const rulesPath = resolve(root, "firestore.rules");
-if (!existsSync(rulesPath)) {
-  console.error("firestore.rules not found");
-  process.exit(1);
-}
-
-const source = readFileSync(rulesPath, "utf8");
-
-async function main() {
+async function getAccessToken() {
   const auth = new GoogleAuth({
     credentials: {
       client_email: clientEmail,
@@ -63,13 +60,21 @@ async function main() {
   const client = await auth.getClient();
   const token = await client.getAccessToken();
   if (!token.token) throw new Error("Failed to get access token");
+  return token.token;
+}
 
+async function deployRules({ token, fileName, releaseId, label }) {
+  const filePath = resolve(root, fileName);
+  if (!existsSync(filePath)) {
+    throw new Error(`${fileName} not found`);
+  }
+  const source = readFileSync(filePath, "utf8");
   const headers = {
-    Authorization: `Bearer ${token.token}`,
+    Authorization: `Bearer ${token}`,
     "Content-Type": "application/json",
   };
 
-  console.log(`Creating ruleset for project: ${projectId}…`);
+  console.log(`\n→ Creating ${label} ruleset…`);
   const createRes = await fetch(
     `https://firebaserules.googleapis.com/v1/projects/${projectId}/rulesets`,
     {
@@ -77,68 +82,81 @@ async function main() {
       headers,
       body: JSON.stringify({
         source: {
-          files: [{ name: "firestore.rules", content: source }],
+          files: [{ name: fileName, content: source }],
         },
       }),
     },
   );
   const createBody = await createRes.json();
   if (!createRes.ok) {
-    console.error("Failed to create ruleset:");
     console.error(JSON.stringify(createBody, null, 2));
     if (createRes.status === 403) {
       console.error(`
-Permission denied. In Google Cloud Console → IAM, grant this service account:
+Permission denied. Grant Firebase Rules Admin to:
   ${clientEmail}
-the role: Firebase Rules Admin (roles/firebaserules.admin)
-Then re-run: node scripts/deploy-firestore-rules.mjs
 `);
     }
-    process.exit(1);
+    throw new Error(`Failed to create ${label} ruleset`);
   }
 
   const rulesetName = createBody.name;
-  console.log(`Ruleset created: ${rulesetName}`);
-  console.log("Publishing release cloud.firestore…");
+  console.log(`  Ruleset: ${rulesetName}`);
+  console.log(`→ Publishing release ${releaseId}…`);
 
-  const releaseRes = await fetch(
-    `https://firebaserules.googleapis.com/v1/projects/${projectId}/releases/cloud.firestore`,
+  const releaseName = `projects/${projectId}/releases/${releaseId}`;
+  const patchRes = await fetch(
+    `https://firebaserules.googleapis.com/v1/${releaseName}`,
     {
       method: "PATCH",
       headers,
       body: JSON.stringify({
-        release: {
-          name: `projects/${projectId}/releases/cloud.firestore`,
-          rulesetName,
-        },
+        release: { name: releaseName, rulesetName },
       }),
     },
   );
 
-  // Some projects need PUT create if release missing
-  let releaseBody = await releaseRes.json();
-  if (!releaseRes.ok) {
-    const putRes = await fetch(
-      `https://firebaserules.googleapis.com/v1/projects/${projectId}/releases`,
-      {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          name: `projects/${projectId}/releases/cloud.firestore`,
-          rulesetName,
-        }),
-      },
-    );
-    releaseBody = await putRes.json();
-    if (!putRes.ok) {
-      console.error("Failed to publish release:");
-      console.error(JSON.stringify(releaseBody, null, 2));
-      process.exit(1);
-    }
+  if (patchRes.ok) {
+    console.log(`✓ ${label} rules deployed.`);
+    return;
   }
 
-  console.log("Firestore rules deployed successfully.");
-  console.log(JSON.stringify(releaseBody, null, 2));
+  const postRes = await fetch(
+    `https://firebaserules.googleapis.com/v1/projects/${projectId}/releases`,
+    {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ name: releaseName, rulesetName }),
+    },
+  );
+  const postBody = await postRes.json();
+  if (!postRes.ok) {
+    console.error(JSON.stringify(postBody, null, 2));
+    throw new Error(`Failed to publish ${label} release`);
+  }
+  console.log(`✓ ${label} rules deployed.`);
+}
+
+async function main() {
+  console.log(`Project: ${projectId}`);
+  const token = await getAccessToken();
+
+  await deployRules({
+    token,
+    fileName: "firestore.rules",
+    releaseId: "cloud.firestore",
+    label: "Firestore",
+  });
+
+  if (includeStorage) {
+    await deployRules({
+      token,
+      fileName: "storage.rules",
+      releaseId: "cloud.storage",
+      label: "Storage",
+    });
+  }
+
+  console.log("\nDone.");
 }
 
 main().catch((err) => {

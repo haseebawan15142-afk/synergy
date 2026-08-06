@@ -6,6 +6,7 @@ import { CtaBand, IndustriesGrid } from "@/components/home/IndustriesGrid";
 import { HeroSection } from "@/components/home/HeroSection";
 import { PartnersTeaser } from "@/components/home/PartnersTeaser";
 import { ProblemsSection } from "@/components/home/ProblemsSection";
+import { NewsletterSection } from "@/components/home/NewsletterSection";
 import { RecentUpdatesSection } from "@/components/home/RecentUpdatesSection";
 import { ServicesGrid } from "@/components/home/ServicesGrid";
 import { StorySection } from "@/components/home/StorySection";
@@ -21,6 +22,7 @@ export default function HomePage() {
       <ServicesGrid />
       <PartnershipsMarquee />
       <ClientSuccess />
+      <NewsletterSection />
       <RecentUpdatesSection />
       <PartnersTeaser />
       <IndustriesGrid />
