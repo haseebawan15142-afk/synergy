@@ -1,12 +1,21 @@
+"use client";
+
+import { useCallback } from "react";
 import Link from "next/link";
 import { getRecentBlogPosts } from "@/lib/content/blog-posts";
+import { fetchPublishedBlogs } from "@/lib/cms/public";
+import { useCmsList } from "@/hooks/useCmsList";
 import { BlogPostCard } from "@/components/resources/BlogPostCard";
 import { Button } from "@/components/ui/Button";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Reveal } from "@/components/motion/Reveal";
 
 export function RecentUpdatesSection() {
-  const posts = getRecentBlogPosts(6);
+  const loader = useCallback(async () => {
+    const all = await fetchPublishedBlogs(12);
+    return all.slice(0, 6);
+  }, []);
+  const posts = useCmsList(getRecentBlogPosts(6), loader);
 
   return (
     <section

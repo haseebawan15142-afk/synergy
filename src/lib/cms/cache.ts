@@ -3,7 +3,8 @@
 type Entry<T> = { at: number; data: T };
 
 const store = new Map<string, Entry<unknown>>();
-const DEFAULT_TTL_MS = 60_000;
+/** Keep short so admin publish/delete appears on the site quickly. */
+const DEFAULT_TTL_MS = 15_000;
 
 export async function cachedCms<T>(
   key: string,

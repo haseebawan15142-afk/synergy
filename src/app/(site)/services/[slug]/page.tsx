@@ -4,8 +4,7 @@ import Link from "next/link";
 import { BlogPostCard } from "@/components/resources/BlogPostCard";
 import { ServiceDetailHero } from "@/components/services/ServiceDetailHero";
 import { ServiceDetailSections } from "@/components/services/ServiceDetailSections";
-import { fetchServiceBySlug, fetchServices } from "@/lib/cms/public";
-import { getBlogPostsByService } from "@/lib/content/blog-posts";
+import { fetchPublishedBlogs, fetchServiceBySlug, fetchServices } from "@/lib/cms/public";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -30,7 +29,9 @@ export default async function ServiceDetailPage({ params }: Props) {
   if (!resolved) notFound();
 
   const { service, detail } = resolved;
-  const relatedPosts = getBlogPostsByService(slug, 4);
+  const relatedPosts = (await fetchPublishedBlogs(80))
+    .filter((p) => p.relatedServiceSlug === slug)
+    .slice(0, 4);
 
   return (
     <>

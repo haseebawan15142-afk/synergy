@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { blogCategories, getBlogPostsByCategory, isBlogCategory } from "@/lib/content/blog-posts";
+import { fetchPublishedBlogs } from "@/lib/cms/public";
 import { BlogPostCard } from "@/components/resources/BlogPostCard";
 import { PageHeader } from "@/components/ui/PageHeader";
 
@@ -11,10 +11,15 @@ export const metadata = {
     "News, insights, and service updates from Synergy Computers — infrastructure, data availability, observability, and managed IT in Pakistan.",
 };
 
+/** Pick up admin CMS blog changes without a full redeploy. */
+export const revalidate = 30;
+
 export default async function ResourcesPage({ searchParams }: Props) {
   const { category: raw } = await searchParams;
-  const category = isBlogCategory(raw) ? raw : "All";
-  const posts = getBlogPostsByCategory(category);
+  const posts = await fetchPublishedBlogs(300);
+  const categories = ["All", ...Array.from(new Set(posts.map((p) => p.category).filter(Boolean))).sort()];
+  const category = raw && categories.includes(raw) ? raw : "All";
+  const filtered = category === "All" ? posts : posts.filter((p) => p.category === category);
 
   return (
     <>
@@ -24,7 +29,7 @@ export default async function ResourcesPage({ searchParams }: Props) {
       />
       <div className="page-container section-y-tight">
         <nav className="scroll-touch-x" aria-label="Filter by topic">
-          {blogCategories.map((cat) => {
+          {categories.map((cat) => {
             const href = cat === "All" ? "/resources" : `/resources?category=${encodeURIComponent(cat)}`;
             const active = cat === category;
             return (
@@ -43,11 +48,11 @@ export default async function ResourcesPage({ searchParams }: Props) {
           })}
         </nav>
         <p className="mt-6 text-sm text-ink-muted">
-          {posts.length} article{posts.length === 1 ? "" : "s"}
+          {filtered.length} article{filtered.length === 1 ? "" : "s"}
           {category !== "All" ? ` · ${category}` : ""}
         </p>
         <ul className="mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {posts.map((post) => (
+          {filtered.map((post) => (
             <li key={post.slug}>
               <BlogPostCard post={post} />
             </li>

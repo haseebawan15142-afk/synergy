@@ -21,7 +21,17 @@ export function BlogsManager() {
   const filtered = useMemo(() => items.filter((item) => `${item.title} ${item.category} ${item.tags.join(" ")}`.toLowerCase().includes(query.toLowerCase())), [items, query]);
   const change = <K extends keyof BlogDoc>(key: K, value: BlogDoc[K]) => setForm((previous) => previous ? { ...previous, [key]: value } : previous);
   async function save(event: FormEvent) { event.preventDefault(); if (!form) return; setSaving(true); try {
-    const data = { ...form, slug: form.slug || slugify(form.title), tags: form.tags || [], readingTime: estimateReadingTime(form.bodyHtml || "") };
+    const publishedAt =
+      form.status === "published"
+        ? form.publishedAt || new Date().toISOString()
+        : form.publishedAt || null;
+    const data = {
+      ...form,
+      slug: form.slug || slugify(form.title),
+      tags: form.tags || [],
+      readingTime: estimateReadingTime(form.bodyHtml || ""),
+      publishedAt,
+    };
     const existingId = data.id;
     delete data.id;
     const savedId = existingId

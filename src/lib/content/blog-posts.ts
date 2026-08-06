@@ -1,6 +1,13 @@
-import { blogPostsGenerated, type BlogPostMeta } from "./blog-posts.generated";
+import {
+  blogPostsGenerated,
+  type BlogPostMeta as GeneratedBlogPostMeta,
+} from "./blog-posts.generated";
 
-export type { BlogPostMeta };
+export type BlogPostMeta = GeneratedBlogPostMeta & {
+  /** Rich HTML from admin CMS (Firebase). */
+  bodyHtml?: string;
+  excerpt?: string;
+};
 
 function parseBlogDate(dateStr: string): number {
   const normalized = dateStr.replace(/octaber/i, "October");

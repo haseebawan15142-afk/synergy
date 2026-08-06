@@ -8,7 +8,6 @@ import {
   getDoc,
   getDocs,
   limit,
-  orderBy,
   query,
   where,
 } from "firebase/firestore";
@@ -326,73 +325,110 @@ export async function fetchLeadership(): Promise<LeadershipMember[]> {
   });
 }
 
+function mapBlogDoc(id: string, x: Record<string, unknown>): BlogPostMeta {
+  const publishedAt = x.publishedAt;
+  let date = "";
+  if (typeof publishedAt === "string") date = publishedAt;
+  else if (publishedAt && typeof publishedAt === "object" && "seconds" in publishedAt) {
+    date = new Date(Number((publishedAt as { seconds: number }).seconds) * 1000).toISOString();
+  } else if (typeof x.scheduledAt === "string") {
+    date = x.scheduledAt;
+  } else if (x.updatedAt && typeof x.updatedAt === "object" && "seconds" in x.updatedAt) {
+    date = new Date(Number((x.updatedAt as { seconds: number }).seconds) * 1000).toISOString();
+  }
+
+  return {
+    slug: String(x.slug || id),
+    title: String(x.title || ""),
+    date,
+    legacyUrl: "",
+    image: x.featuredImageUrl ? String(x.featuredImageUrl) : null,
+    category: String(x.category || "General"),
+    relatedServiceSlug: String(x.relatedServiceSlug || ""),
+    bodyHtml: x.bodyHtml ? String(x.bodyHtml) : undefined,
+    excerpt: x.excerpt ? String(x.excerpt) : undefined,
+  };
+}
+
+/**
+ * Published blogs for the public site.
+ * Uses status==published query (matches Firestore rules). Avoids orderBy(publishedAt)
+ * so docs without that field are still returned. Merges CMS + local-only slugs.
+ */
 export async function fetchPublishedBlogs(max = 200): Promise<BlogPostMeta[]> {
   return cachedCms(`blogs:${max}`, async () => {
-  if (!firebaseReady()) return localBlogs.slice(0, max);
-  try {
-    const q = query(
-      collection(getFirebaseDb(), COLLECTIONS.blogs),
-      where("status", "==", "published"),
-      orderBy("publishedAt", "desc"),
-      limit(max),
-    );
-    const snap = await getDocs(q);
-    if (snap.empty) return localBlogs.slice(0, max);
-    return snap.docs.map((d) => {
-      const x = d.data();
-      return {
-        slug: String(x.slug || d.id),
-        title: String(x.title || ""),
-        date: String(x.publishedAt || x.scheduledAt || ""),
-        legacyUrl: "",
-        image: x.featuredImageUrl ? String(x.featuredImageUrl) : null,
-        category: String(x.category || "General"),
-        relatedServiceSlug: String(x.relatedServiceSlug || ""),
-      } satisfies BlogPostMeta;
-    });
-  } catch {
+    if (!firebaseReady()) return localBlogs.slice(0, max);
     try {
-      const snap = await getDocs(collection(getFirebaseDb(), COLLECTIONS.blogs));
-      type Row = {
-        id: string;
-        status?: string;
-        slug?: string;
-        title?: string;
-        publishedAt?: string;
-        featuredImageUrl?: string;
-        category?: string;
-        relatedServiceSlug?: string;
-      };
-      const published = snap.docs
-        .map((d) => ({ id: d.id, ...(d.data() as Omit<Row, "id">) }))
-        .filter((x) => x.status === "published");
-      if (!published.length) return localBlogs.slice(0, max);
-      return published.slice(0, max).map((x) => ({
-        slug: String(x.slug || x.id),
-        title: String(x.title || ""),
-        date: String(x.publishedAt || ""),
-        legacyUrl: "",
-        image: x.featuredImageUrl ? String(x.featuredImageUrl) : null,
-        category: String(x.category || "General"),
-        relatedServiceSlug: String(x.relatedServiceSlug || ""),
-      }));
+      // Constraint must match public read rule (status == published) or the
+      // whole list query fails when drafts exist in the collection.
+      const q = query(
+        collection(getFirebaseDb(), COLLECTIONS.blogs),
+        where("status", "==", "published"),
+        limit(Math.min(max, 500)),
+      );
+      const snap = await getDocs(q);
+      const fromCms = snap.docs
+        .map((d) => mapBlogDoc(d.id, d.data() as Record<string, unknown>))
+        .filter((b) => b.title && b.slug)
+        .sort((a, b) => {
+          const ta = Date.parse(a.date) || 0;
+          const tb = Date.parse(b.date) || 0;
+          return tb - ta;
+        });
+
+      const cmsSlugs = new Set(fromCms.map((b) => b.slug.toLowerCase()));
+      const localOnly = localBlogs.filter((b) => !cmsSlugs.has(b.slug.toLowerCase()));
+      return [...fromCms, ...localOnly].slice(0, max);
     } catch {
       return localBlogs.slice(0, max);
     }
-  }
   });
 }
 
+export async function fetchBlogBySlug(slug: string): Promise<BlogPostMeta | null> {
+  const needle = slug.trim().toLowerCase();
+  if (!needle) return null;
+
+  if (firebaseReady()) {
+    try {
+      const q = query(
+        collection(getFirebaseDb(), COLLECTIONS.blogs),
+        where("slug", "==", slug.trim()),
+        where("status", "==", "published"),
+        limit(1),
+      );
+      const snap = await getDocs(q);
+      if (!snap.empty) {
+        return mapBlogDoc(snap.docs[0].id, snap.docs[0].data() as Record<string, unknown>);
+      }
+      // Fallback: slug field may differ from doc id
+      const all = await fetchPublishedBlogs(500);
+      const hit = all.find((b) => b.slug.toLowerCase() === needle);
+      if (hit) return hit;
+    } catch {
+      /* fall through to local */
+    }
+  }
+
+  return localBlogs.find((b) => b.slug.toLowerCase() === needle) ?? null;
+}
+
+/**
+ * Open careers. Must query status==open — an unfiltered collection read fails
+ * under Firestore rules when draft/closed jobs exist (admin-only docs).
+ */
 export async function fetchOpenJobs() {
   return cachedCms("careers:open", async () => {
     if (!firebaseReady()) return localJobs;
     try {
-      const snap = await getDocs(collection(getFirebaseDb(), COLLECTIONS.careers));
-      if (snap.empty) return localJobs;
-      return snap.docs
+      const q = query(
+        collection(getFirebaseDb(), COLLECTIONS.careers),
+        where("status", "==", "open"),
+      );
+      const snap = await getDocs(q);
+      const fromCms = snap.docs
         .map((d) => {
           const x = d.data();
-          if (x.status && x.status !== "open") return null;
           if (x.active === false) return null;
           return {
             slug: String(x.slug || d.id),
@@ -402,7 +438,13 @@ export async function fetchOpenJobs() {
             type: (x.type || "Full-time") as "Full-time" | "Internship" | "Contract",
           };
         })
-        .filter((x): x is (typeof localJobs)[number] => !!x?.title);
+        .filter((x): x is (typeof localJobs)[number] => !!x?.title)
+        .sort((a, b) => a.title.localeCompare(b.title));
+
+      const cmsSlugs = new Set(fromCms.map((j) => j.slug.toLowerCase()));
+      const localOnly = localJobs.filter((j) => !cmsSlugs.has(j.slug.toLowerCase()));
+      // CMS openings first (admin-managed), then any local-only seed roles.
+      return [...fromCms, ...localOnly];
     } catch {
       return localJobs;
     }
