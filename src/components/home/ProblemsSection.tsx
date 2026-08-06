@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Button } from "@/components/ui/Button";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { problemCards } from "@/lib/content/problems";
 import { services } from "@/lib/content/services";
@@ -11,15 +12,17 @@ export function ProblemsSection() {
   return (
     <section className="bg-surface-muted/80 section-y" aria-labelledby="problems-heading">
       <div className="page-container">
-        <Reveal>
+        <Reveal className="mb-10 flex flex-col items-stretch justify-between gap-6 sm:mb-12 sm:flex-row sm:items-end">
           <SectionHeading
             id="problems-heading"
-            align="center"
             eyebrow="Outcomes"
             title="Problems we solve"
             description="Outcome-focused solutions aligned to how enterprises operate today."
-            className="mb-10 sm:mb-12"
+            className="max-w-2xl"
           />
+          <Button href="/services" variant="secondary" className="w-full shrink-0 sm:w-auto">
+            View all services
+          </Button>
         </Reveal>
 
         <ul className="grid gap-6 sm:grid-cols-2 lg:gap-7 xl:grid-cols-3">

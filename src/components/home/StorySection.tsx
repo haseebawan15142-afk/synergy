@@ -20,11 +20,11 @@ export function StorySection() {
           <SectionHeading
             eyebrow="Our story"
             title="Four decades of enterprise technology leadership"
-            description={`Synergy Computers (Pvt.) Ltd has been a trusted technology partner in Pakistan since ${companyProfileMeta.foundedYear} — delivering infrastructure, enterprise applications, integration, and support for banking, telecom, power & utilities, healthcare, education, hospitality, and enterprise clients nationwide.`}
+            description={`Synergy Computers (Pvt.) Ltd has been a trusted technology partner in Pakistan since ${companyProfileMeta.foundedYear} — helping enterprises modernize, secure, and run critical IT.`}
           />
           <p className="mt-6 text-sm leading-relaxed text-ink-body sm:text-base">
-            Backed by {companyProfileMeta.teamSizeLabel} professionals and alliances with leading
-            global technology providers, we serve as a one-window partner for secure, scalable IT.
+            Backed by {companyProfileMeta.teamSizeLabel} professionals and global technology
+            alliances, we deliver as a one-window partner for secure, scalable IT.
           </p>
           <Button href="/about" variant="secondary" className="mt-8 w-full sm:w-auto">
             About Synergy

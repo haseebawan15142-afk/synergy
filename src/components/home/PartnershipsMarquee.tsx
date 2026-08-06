@@ -37,6 +37,8 @@ export function PartnershipsMarquee() {
       rows={rows}
       durationSec={40}
       className="bg-[#F5F7FA]"
+      footerHref="/partners"
+      footerLabel="View all partners"
     />
   );
 }

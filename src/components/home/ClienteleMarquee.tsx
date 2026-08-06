@@ -11,7 +11,6 @@ import {
 } from "@/lib/content/clients";
 import { fetchClients } from "@/lib/cms/public";
 import { useCmsList } from "@/hooks/useCmsList";
-import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
 
 function ClientCard({ client }: { client: ClientLogo }) {
@@ -94,11 +93,6 @@ export function ClienteleMarquee() {
           <p className="mt-4 text-sm leading-relaxed text-ink-body sm:text-base">
             {clienteleIntro}
           </p>
-          <div className="mt-8 flex justify-center lg:justify-start">
-            <Button href="/contact" variant="primary" className="w-full sm:w-auto">
-              Book a meeting
-            </Button>
-          </div>
         </div>
 
         <div

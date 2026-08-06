@@ -11,7 +11,7 @@ export type ClientLogo = {
 export const clienteleHeadline = "Empowering success across industries";
 
 export const clienteleIntro =
-  "Synergy Computers (Pvt.) Ltd takes pride in serving a diverse portfolio of leading organizations across banking, telecom, government, and enterprise sectors. Our long-standing relationships with these clients reflect our commitment to delivering reliable, secure, and innovative technology solutions tailored to their business needs.";
+  "A diverse portfolio of leading organizations who trust Synergy for reliable, secure, and innovative technology — relationships built over decades of delivery.";
 
 export const clients: ClientLogo[] = [
   { name: "State Bank of Pakistan", slug: "state-bank-of-pakistan", logo: "/images/clients/state-bank-of-pakistan.webp" },

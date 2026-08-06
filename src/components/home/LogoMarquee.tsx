@@ -19,6 +19,9 @@ type LogoMarqueeProps = {
   className?: string;
   /** Seconds for one full loop (row 0). Opposite row is slightly slower. */
   durationSec?: number;
+  /** Optional CTA under the marquee (e.g. View all partners). */
+  footerHref?: string;
+  footerLabel?: string;
 };
 
 function LogoCard({ item }: { item: MarqueeLogo }) {
@@ -120,6 +123,8 @@ export function LogoMarquee({
   rows,
   className,
   durationSec = 42,
+  footerHref,
+  footerLabel,
 }: LogoMarqueeProps) {
   return (
     <section
@@ -156,6 +161,17 @@ export function LogoMarquee({
           />
         ))}
       </div>
+
+      {footerHref && footerLabel ? (
+        <div className="page-container mt-8 text-center sm:mt-10">
+          <Link
+            href={footerHref}
+            className="inline-flex text-sm font-semibold text-synergy transition hover:underline"
+          >
+            {footerLabel} →
+          </Link>
+        </div>
+      ) : null}
     </section>
   );
 }

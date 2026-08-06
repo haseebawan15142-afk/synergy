@@ -26,7 +26,7 @@ export function RecentUpdatesSection() {
         <Reveal className="flex flex-col items-stretch justify-between gap-6 sm:flex-row sm:items-end">
           <SectionHeading
             id="updates-heading"
-            eyebrow="Recent updates"
+            eyebrow="Insights"
             title="News & service insights"
             description="Articles on data availability, infrastructure, observability, managed IT, and partner solutions in Pakistan."
           />
