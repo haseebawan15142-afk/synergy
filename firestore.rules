@@ -87,7 +87,9 @@ service cloud.firestore {
     }
 
     match /clients/{id} {
-      allow read: if isAdmin() || isActive();
+      // Public logos — open read so list queries never fail when inactive docs exist.
+      // Site still filters active==true in app code for display.
+      allow read: if true;
       allow write: if isAdmin();
     }
 

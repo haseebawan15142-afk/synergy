@@ -20,7 +20,7 @@ export function ClientsManager() {
   return (
     <CrudManager<ClientDoc>
       title="Clients"
-      description="Client logos on the homepage Selected Clientele section. Upload a logo, set Active, and it appears on the live site."
+      description="Homepage Selected Clientele. Upload a logo, keep Active ON — when Firebase has active clients, the site uses only those (not local defaults)."
       collection={COLLECTIONS.clients}
       fields={fields}
       empty="No clients"
@@ -29,7 +29,7 @@ export function ClientsManager() {
         slug: "",
         logoUrl: "",
         website: "",
-        category: "",
+        category: "Selected Clientele",
         sortOrder: 0,
         featured: true,
         active: true,
@@ -39,8 +39,10 @@ export function ClientsManager() {
         slug: form.slug || slugify(form.name),
         logoUrl: form.logoUrl || "",
         website: form.website || "",
-        category: form.category || "",
+        category: form.category || "Selected Clientele",
         sortOrder: typeof form.sortOrder === "number" ? form.sortOrder : 0,
+        featured: form.featured !== false,
+        active: form.active !== false,
       })}
     />
   );

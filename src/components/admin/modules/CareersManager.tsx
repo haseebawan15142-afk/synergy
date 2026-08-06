@@ -34,7 +34,7 @@ export function CareersManager() {
   return (
     <CrudManager<CareerDoc & { skills?: string[] | string }>
       title="Careers"
-      description="Publish current openings and requirements."
+      description="Open jobs on /careers. Status must be Open + Active. Once any job is open in Firebase, local seed jobs are hidden."
       collection={COLLECTIONS.careers}
       fields={fields}
       empty="No career openings"
@@ -62,6 +62,8 @@ export function CareersManager() {
               .filter(Boolean),
         salary: form.salary || "",
         experience: form.experience || "",
+        status: form.status || "open",
+        active: form.active !== false,
       })}
     />
   );

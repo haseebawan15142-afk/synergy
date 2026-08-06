@@ -230,7 +230,7 @@ export async function fetchServiceBySlug(
 }
 
 export async function fetchClients(): Promise<ClientLogo[]> {
-  return cachedCms("clients", async () => {
+  return cachedCms("clients:v2", async () => {
     if (!firebaseReady()) return localClients;
     try {
       const snap = await getDocs(collection(getFirebaseDb(), COLLECTIONS.clients));
@@ -240,6 +240,7 @@ export async function fetchClients(): Promise<ClientLogo[]> {
       const fromCms = snap.docs
         .map((d): Row | null => {
           const x = d.data();
+          // Treat missing `active` as true (legacy docs); explicit false hides.
           if (x.active === false) return null;
           const name = String(x.name || "").trim();
           const logo = String(x.logoUrl || x.logo || "").trim();
@@ -260,12 +261,11 @@ export async function fetchClients(): Promise<ClientLogo[]> {
         .filter((c): c is Row => c !== null)
         .sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name));
 
-      if (!fromCms.length) return localClients;
-
-      const mapped = fromCms.map(({ sortOrder: _s, ...client }) => client);
-      const cmsSlugs = new Set(mapped.map((c) => c.slug.toLowerCase()));
-      const localOnly = localClients.filter((c) => !cmsSlugs.has(c.slug.toLowerCase()));
-      return [...mapped, ...localOnly];
+      // Once Firebase has clients, CMS owns the homepage list (no local seed merge).
+      if (fromCms.length > 0) {
+        return fromCms.map(({ sortOrder: _s, ...client }) => client);
+      }
+      return localClients;
     } catch {
       return localClients;
     }
@@ -418,7 +418,7 @@ export async function fetchBlogBySlug(slug: string): Promise<BlogPostMeta | null
  * under Firestore rules when draft/closed jobs exist (admin-only docs).
  */
 export async function fetchOpenJobs() {
-  return cachedCms("careers:open", async () => {
+  return cachedCms("careers:open:v2", async () => {
     if (!firebaseReady()) return localJobs;
     try {
       const q = query(
@@ -441,10 +441,9 @@ export async function fetchOpenJobs() {
         .filter((x): x is (typeof localJobs)[number] => !!x?.title)
         .sort((a, b) => a.title.localeCompare(b.title));
 
-      const cmsSlugs = new Set(fromCms.map((j) => j.slug.toLowerCase()));
-      const localOnly = localJobs.filter((j) => !cmsSlugs.has(j.slug.toLowerCase()));
-      // CMS openings first (admin-managed), then any local-only seed roles.
-      return [...fromCms, ...localOnly];
+      // Admin CMS owns careers once any open job exists — drop local seed defaults.
+      if (fromCms.length > 0) return fromCms;
+      return localJobs;
     } catch {
       return localJobs;
     }
