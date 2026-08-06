@@ -86,9 +86,27 @@ export type ServiceDoc = {
   slug: string;
   description: string;
   shortDescription: string;
+  /** Detail page headline */
+  headline?: string;
+  /** Detail page lead paragraph */
+  lead?: string;
+  challenge?: string;
+  approach?: string;
+  benefits?: string;
+  /**
+   * Capability lines: "Title | Description" (one per line in admin).
+   * Shown on /services/[slug] capabilities grid.
+   */
+  capabilities?: string[];
+  /**
+   * Outcome lines: "Title | Description" (one per line in admin).
+   */
+  outcomes?: string[];
   icon?: string;
   bannerUrl?: string;
   imageUrl?: string;
+  /** Full-bleed detail hero (falls back to bannerUrl / imageUrl). */
+  heroImageUrl?: string;
   category?: string;
   seoTitle?: string;
   seoDescription?: string;
@@ -137,6 +155,7 @@ export type TestimonialDoc = {
 export type ClientDoc = {
   id?: string;
   name: string;
+  slug?: string;
   logoUrl?: string;
   website?: string;
   category?: string;

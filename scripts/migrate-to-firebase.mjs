@@ -105,6 +105,7 @@ async function main() {
   const { leadership } = await import(pathToFileURL(resolve(root, "scripts/migrate-data/leadership.mjs")).href);
   const { jobs } = await import(pathToFileURL(resolve(root, "scripts/migrate-data/jobs.mjs")).href);
   const { partners } = await import(pathToFileURL(resolve(root, "scripts/migrate-data/partners.mjs")).href);
+  const { clients } = await import(pathToFileURL(resolve(root, "scripts/migrate-data/clients.mjs")).href);
   const { site } = await import(pathToFileURL(resolve(root, "scripts/migrate-data/site.mjs")).href);
 
   const { nav: _nav, ...siteSettings } = site;
@@ -171,6 +172,20 @@ async function main() {
     });
   }
   console.log(`✓ partners (${partners.length})`);
+
+  for (const [i, c] of clients.entries()) {
+    await upsert("clients", c.slug, {
+      name: c.name,
+      slug: c.slug,
+      logoUrl: c.logo,
+      website: "",
+      category: "Selected Clientele",
+      sortOrder: i,
+      featured: true,
+      active: true,
+    });
+  }
+  console.log(`✓ clients (${clients.length}) — run npm run cms:seed-clients to upload WebP logos to Storage`);
 
   // Blogs: migrate meta from generated JSON if present
   const blogsPath = resolve(root, "scripts/migrate-data/blogs.mjs");

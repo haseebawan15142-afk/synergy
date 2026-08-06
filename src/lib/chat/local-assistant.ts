@@ -7,7 +7,6 @@ import { ceoMessage } from "@/lib/content/ceo-message";
 import { dynatracePartner } from "@/lib/content/dynatrace-partner";
 import { problemCards } from "@/lib/content/problems";
 import { industries } from "@/lib/content/industries";
-import { leadershipTeam } from "@/lib/content/leadership";
 import { partners } from "@/lib/content/partners";
 import { services } from "@/lib/content/services";
 import { siteConfig } from "@/lib/content/site";
@@ -247,23 +246,24 @@ export function replyFromLocalKnowledge(userMessage: string): LocalReply {
       "leadership",
       "leader",
       "leaders",
+      "board",
+      "director",
+      "directors",
+      "chairman",
       "ceo",
-      "coo",
-      "cto",
       "management",
       "executive",
       "executives",
-      "team",
       "who is the ceo",
       "who leads",
-      "head of sales",
     ]) ||
-    leadershipTeam.some((m) => q.includes(m.name.toLowerCase()))
+    boardOfDirectors.some((m) => q.includes(m.name.toLowerCase().replace(/^mr\.\s*/i, "")))
   ) {
-    const lines = leadershipTeam.map((m) => `• ${m.name} — ${m.title}\n  ${m.bio}`);
     return {
       matched: true,
-      reply: `Our leadership team at ${siteConfig.legalName}:\n\n${lines.join("\n\n")}\n\nMore: /about#leadership`,
+      reply: `Board of Directors at ${siteConfig.legalName} (Company Profile 2026):\n\n${boardOfDirectors
+        .map((m) => `• ${m.name} — ${m.title}`)
+        .join("\n")}\n\nMore: /about#board`,
     };
   }
 
@@ -312,7 +312,7 @@ export function replyFromLocalKnowledge(userMessage: string): LocalReply {
   if (includesAny(q, ["about", "who are", "history", "years", "experience", "founded", "legacy"])) {
     return {
       matched: true,
-      reply: `${siteConfig.legalName} has served Pakistan for over 40 years as an enterprise IT solutions provider — hardware, applications, integration, and 24×7 maintenance.\n\nLeadership: /about#leadership\nAccomplishments: /about#accomplishments\nServices: /services`,
+      reply: `${siteConfig.legalName} has served Pakistan for over 40 years as an enterprise IT solutions provider — hardware, applications, integration, and 24×7 maintenance.\n\nBoard: /about#board\nAccomplishments: /about#accomplishments\nServices: /services`,
     };
   }
 

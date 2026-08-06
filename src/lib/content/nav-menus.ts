@@ -126,7 +126,7 @@ export const navMegaMenus: Record<string, MegaMenuConfig> = {
         links: [
           { label: "Who We Are", href: "/about#who-we-are" },
           { label: "Message from our CEO", href: "/about#ceo-message-heading" },
-          { label: "Our Leadership", href: "/about#leadership" },
+          { label: "Board of Directors", href: "/about#board" },
           { label: "Our Accomplishments", href: "/about#accomplishments" },
         ],
       },

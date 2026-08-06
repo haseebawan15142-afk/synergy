@@ -8,7 +8,6 @@ import { ceoMessage } from "@/lib/content/ceo-message";
 import { dynatracePartner } from "@/lib/content/dynatrace-partner";
 import { problemCards } from "@/lib/content/problems";
 import { industries } from "@/lib/content/industries";
-import { leadershipTeam } from "@/lib/content/leadership";
 import { partners } from "@/lib/content/partners";
 import { services } from "@/lib/content/services";
 import { siteConfig } from "@/lib/content/site";
@@ -28,10 +27,6 @@ export function buildChatSystemPrompt(userQuery?: string): string {
   const industryList = industries.map((i) => `- ${i.title}: ${i.summary}`).join("\n");
   const problemList = problemCards
     .map((p) => `- ${p.label}: ${p.problem} → ${p.solution}`)
-    .join("\n");
-
-  const leadershipList = leadershipTeam
-    .map((m) => `- ${m.name}, ${m.title}: ${m.bio}`)
     .join("\n");
 
   const statsList = accomplishmentStats.map((s) => `- ${s.value} ${s.label}`).join("\n");
@@ -61,13 +56,10 @@ Company facts (Company Profile ${companyProfileMeta.foundedYear} / 2026):
 - HQ: ${siteConfig.address.line}, ${siteConfig.address.city}, ${siteConfig.address.country}
 - Offices: ${officeLocationsDetailed.map((o) => `${o.city} (${o.country})`).join("; ")}
 - Email: ${siteConfig.email} | Phones: ${siteConfig.phones.join(", ")} | Fax: ${siteConfig.fax}
-- Key pages: /services, /partners, /industries, /resources, /contact, /about, /about#board, /about#leadership, /about#accomplishments
+- Key pages: /services, /partners, /industries, /resources, /contact, /about, /about#board, /about#accomplishments
 
 Board of Directors (from Company Profile 2026 /about#board):
 ${boardOfDirectors.map((m) => `- ${m.name}, ${m.title}`).join("\n")}
-
-Leadership team (from /about#leadership — may differ from board titles; prefer board for governance questions):
-${leadershipList}
 
 CEO message (from /about):
 - Speaker: ${ceoMessage.name}, ${ceoMessage.role}, ${ceoMessage.company}
@@ -103,7 +95,7 @@ ${caseStudyList}
 
 Rules:
 1. Answer ONLY using the website facts above — never invent prices, SLAs, contracts, or people not listed.
-2. For leadership questions, use the Leadership team section (names, titles, bios) and link /about#leadership.
+2. For leadership / board questions, use Board of Directors and link /about#board.
 3. Tie IT answers to what Synergy offers; mention relevant page paths when helpful.
 4. For quotes/pricing: direct to ${siteConfig.email} or /contact.
 5. Plain text, professional, concise (under ~180 words unless user asks for detail).

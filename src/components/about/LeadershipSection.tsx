@@ -1,9 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
 import { leadershipTeam } from "@/lib/content/leadership";
-import { fetchLeadership } from "@/lib/cms/public";
-import { useCmsList } from "@/hooks/useCmsList";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Reveal } from "@/components/motion/Reveal";
 
@@ -39,8 +36,8 @@ function LinkedInIcon({ className }: { className?: string }) {
 }
 
 export function LeadershipSection() {
-  const loader = useCallback(() => fetchLeadership(), []);
-  const team = useCmsList(leadershipTeam, loader);
+  // Ops leadership stays local; admin CMS `/admin/leadership` manages Board of Directors.
+  const team = leadershipTeam;
 
   return (
     <section id="leadership" className="scroll-mt-24 border-t border-border/60 section-y" aria-labelledby="leadership-heading">

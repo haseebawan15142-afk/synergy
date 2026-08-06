@@ -10,6 +10,8 @@
     "cms:export-blogs": "node scripts/export-blogs-for-migrate.mjs",
     "cms:migrate": "node scripts/migrate-to-firebase.mjs",
     "cms:migrate:force": "node scripts/migrate-to-firebase.mjs --force",
+    "cms:seed-clients": "node scripts/seed-clients.mjs",
+    "cms:seed-board": "node scripts/seed-board.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

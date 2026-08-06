@@ -13,8 +13,8 @@ export const adminModuleStubs = [
   },
   {
     slug: "leadership",
-    title: "Leadership",
-    description: "Add, edit, reorder, and publish leadership team members with photos and bios.",
+    title: "Board of Directors",
+    description: "Add, edit, reorder, and publish board members with photos and bios.",
     phase: 4,
   },
   {

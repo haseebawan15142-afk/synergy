@@ -65,6 +65,10 @@ const config: Config = {
         "aurora-drift": "auroraDrift 18s ease-in-out infinite",
         "shimmer-pass": "shimmerPass 4.5s ease-in-out infinite",
         "partner-ticker": "partnerTicker 45s linear infinite",
+        "logo-marquee": "logoMarquee 42s linear infinite",
+        "logo-marquee-reverse": "logoMarqueeReverse 42s linear infinite",
+        "logo-marquee-y": "logoMarqueeY 40s linear infinite",
+        "logo-marquee-y-reverse": "logoMarqueeYReverse 40s linear infinite",
       },
       keyframes: {
         fadeUp: {
@@ -92,6 +96,22 @@ const config: Config = {
         partnerTicker: {
           "0%": { transform: "translateX(0)" },
           "100%": { transform: "translateX(-50%)" },
+        },
+        logoMarquee: {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-50%)" },
+        },
+        logoMarqueeReverse: {
+          "0%": { transform: "translateX(-50%)" },
+          "100%": { transform: "translateX(0)" },
+        },
+        logoMarqueeY: {
+          "0%": { transform: "translateY(0)" },
+          "100%": { transform: "translateY(-50%)" },
+        },
+        logoMarqueeYReverse: {
+          "0%": { transform: "translateY(-50%)" },
+          "100%": { transform: "translateY(0)" },
         },
       },
     },

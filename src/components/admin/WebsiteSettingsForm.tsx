@@ -100,8 +100,7 @@ export function WebsiteSettingsForm() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Website Settings</h1>
           <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-            Company identity and contact details stored in Firestore (`settings/site`).
-            Company identity, contact details, and shared media stored in Firestore (`settings/site`).
+            Company identity, contact details, mission/vision, and brand media — used on Footer, Contact, and About.
           </p>
         </div>
         <button
@@ -161,6 +160,9 @@ export function WebsiteSettingsForm() {
           </Field>
           <Field label="Business hours">
             <input className={inputClass} value={form.businessHours} onChange={(e) => update("businessHours", e.target.value)} />
+          </Field>
+          <Field label="Fax">
+            <input className={inputClass} value={form.fax || ""} onChange={(e) => update("fax", e.target.value)} />
           </Field>
           <div className="md:col-span-2">
             <Field label="Additional phones (one per line)">

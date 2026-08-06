@@ -1,9 +1,9 @@
 import { ClientSuccess } from "@/components/home/ClientSuccess";
-import { PartnerTicker } from "@/components/home/PartnerTicker";
+import { ClienteleMarquee } from "@/components/home/ClienteleMarquee";
+import { PartnershipsMarquee } from "@/components/home/PartnershipsMarquee";
 import { SolutionsGrid } from "@/components/home/SolutionsGrid";
 import { CtaBand, IndustriesGrid } from "@/components/home/IndustriesGrid";
 import { HeroSection } from "@/components/home/HeroSection";
-import { PartnersStrip } from "@/components/home/PartnersStrip";
 import { PartnersTeaser } from "@/components/home/PartnersTeaser";
 import { ProblemsSection } from "@/components/home/ProblemsSection";
 import { RecentUpdatesSection } from "@/components/home/RecentUpdatesSection";
@@ -14,12 +14,12 @@ export default function HomePage() {
   return (
     <>
       <HeroSection />
-      <PartnersStrip />
+      <ClienteleMarquee />
       <StorySection />
       <ProblemsSection />
       <SolutionsGrid />
       <ServicesGrid />
-      <PartnerTicker />
+      <PartnershipsMarquee />
       <ClientSuccess />
       <RecentUpdatesSection />
       <PartnersTeaser />

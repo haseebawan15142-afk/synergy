@@ -1,7 +1,9 @@
 "use client";
+
 import type { LeadershipDoc } from "@/lib/admin/types";
 import { COLLECTIONS } from "@/lib/firebase/collections";
 import { CrudManager, type CrudField } from "./CrudManager";
+
 const fields: CrudField[] = [
   { key: "name", label: "Name", required: true },
   { key: "designation", label: "Designation", required: true },
@@ -19,18 +21,19 @@ const fields: CrudField[] = [
 export function LeadershipManager() {
   return (
     <CrudManager<LeadershipDoc>
-      title="Leadership"
-      description="Manage leadership profiles and display order. LinkedIn URLs appear as icons on the About page."
+      title="Board of Directors"
+      description="Board members shown on the About page (Company Profile). Edit names, titles, bios, and photos here."
       collection={COLLECTIONS.leadership}
       fields={fields}
-      empty="No leadership profiles"
+      empty="No board members yet"
       initial={{
         name: "",
         designation: "",
+        department: "Board of Directors",
         bio: "",
         linkedin: "",
         sortOrder: 0,
-        featured: false,
+        featured: true,
         active: true,
       }}
       normalize={(form) => ({
@@ -38,7 +41,7 @@ export function LeadershipManager() {
         linkedin: String(form.linkedin || "").trim(),
         email: String(form.email || "").trim(),
         phone: String(form.phone || "").trim(),
-        department: String(form.department || "").trim(),
+        department: String(form.department || "Board of Directors").trim(),
         photoUrl: String(form.photoUrl || "").trim(),
       })}
     />

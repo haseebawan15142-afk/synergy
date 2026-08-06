@@ -20,6 +20,13 @@ import { leadershipTeam as localLeadership, type LeadershipMember } from "@/lib/
 import { blogPosts as localBlogs, type BlogPostMeta } from "@/lib/content/blog-posts";
 import { jobOpenings as localJobs } from "@/lib/content/careers";
 import { partners as localPartners, type Partner } from "@/lib/content/partners";
+import { clients as localClients, type ClientLogo } from "@/lib/content/clients";
+import {
+  getServiceDetail,
+  type ServiceCapability,
+  type ServiceDetail,
+  type ServiceOutcome,
+} from "@/lib/content/service-details";
 import { siteConfig } from "@/lib/content/site";
 import { cachedCms } from "@/lib/cms/cache";
 
@@ -55,6 +62,7 @@ function mapSiteConfig(): SiteSettings {
     addressCountry: siteConfig.address.country,
     socialLinkedin: siteConfig.social.linkedin,
     socialFacebook: siteConfig.social.facebook,
+    fax: siteConfig.fax,
   };
 }
 
@@ -71,30 +79,210 @@ export async function fetchThemeTokens(): Promise<ThemeTokens> {
   });
 }
 
+function parsePipeRows(value: unknown): { title: string; description: string }[] {
+  return asStringList(value)
+    .map((line) => {
+      const [titlePart, ...rest] = line.split("|");
+      const title = (titlePart || "").trim();
+      const description = rest.join("|").trim();
+      if (!title) return null;
+      return { title, description };
+    })
+    .filter((row): row is { title: string; description: string } => row !== null);
+}
+
 export async function fetchServices(): Promise<Service[]> {
   return cachedCms("services", async () => {
     if (!firebaseReady()) return localServices;
     try {
       const snap = await getDocs(collection(getFirebaseDb(), COLLECTIONS.services));
       if (snap.empty) return localServices;
-      return snap.docs
-        .map((d) => {
+      type Row = Service & { sortOrder: number };
+      const fromCms = snap.docs
+        .map((d): Row | null => {
           const x = d.data();
           if (x.active === false) return null;
           if (x.status && x.status !== "published") return null;
+          const title = String(x.title || "").trim();
+          if (!title) return null;
           return {
             slug: String(x.slug || d.id),
-            title: String(x.title || ""),
+            title,
             summary: String(x.shortDescription || x.description || ""),
-            image: String(x.imageUrl || x.bannerUrl || ""),
-          } satisfies Service;
+            image: String(x.imageUrl || x.bannerUrl || x.heroImageUrl || ""),
+            sortOrder: typeof x.sortOrder === "number" ? x.sortOrder : Number.MAX_SAFE_INTEGER,
+          };
         })
-        .filter((s): s is Service => !!s?.title)
-        .sort((a, b) => a.title.localeCompare(b.title));
+        .filter((s): s is Row => s !== null)
+        .sort((a, b) => a.sortOrder - b.sortOrder || a.title.localeCompare(b.title))
+        .map(({ sortOrder: _s, ...service }) => service);
+
+      if (!fromCms.length) return localServices;
+
+      const cmsSlugs = new Set(fromCms.map((s) => s.slug.toLowerCase()));
+      const localOnly = localServices.filter((s) => !cmsSlugs.has(s.slug.toLowerCase()));
+      return [...fromCms, ...localOnly];
     } catch {
       return localServices;
     }
   });
+}
+
+export async function fetchServiceBySlug(
+  slug: string,
+): Promise<{ service: Service; detail: ServiceDetail } | null> {
+  const needle = slug.trim().toLowerCase();
+  if (!needle) return null;
+
+  const localService = localServices.find((s) => s.slug.toLowerCase() === needle) ?? null;
+  const localDetail = getServiceDetail(needle);
+
+  let cms: Record<string, unknown> | null = null;
+  if (firebaseReady()) {
+    try {
+      const q = query(
+        collection(getFirebaseDb(), COLLECTIONS.services),
+        where("slug", "==", slug.trim()),
+        limit(1),
+      );
+      const snap = await getDocs(q);
+      if (!snap.empty) {
+        cms = snap.docs[0].data() as Record<string, unknown>;
+      } else {
+        const all = await getDocs(collection(getFirebaseDb(), COLLECTIONS.services));
+        const match = all.docs.find((d) => {
+          const x = d.data();
+          return String(x.slug || d.id).toLowerCase() === needle;
+        });
+        if (match) cms = match.data() as Record<string, unknown>;
+      }
+    } catch {
+      cms = null;
+    }
+  }
+
+  const cmsLive =
+    cms &&
+    cms.active !== false &&
+    (!cms.status || String(cms.status) === "published")
+      ? cms
+      : null;
+
+  if (!cmsLive && !localService) return null;
+
+  const title = String(cmsLive?.title || localService?.title || "").trim();
+  if (!title) return null;
+
+  const service: Service = {
+    slug: String(cmsLive?.slug || localService?.slug || needle),
+    title,
+    summary: String(
+      cmsLive?.shortDescription ||
+        cmsLive?.description ||
+        localService?.summary ||
+        "",
+    ),
+    image: String(
+      cmsLive?.imageUrl ||
+        cmsLive?.bannerUrl ||
+        cmsLive?.heroImageUrl ||
+        localService?.image ||
+        "",
+    ),
+  };
+
+  const cmsCapabilities = parsePipeRows(cmsLive?.capabilities) as ServiceCapability[];
+  const cmsOutcomes = parsePipeRows(cmsLive?.outcomes) as ServiceOutcome[];
+
+  const detail: ServiceDetail = {
+    slug: service.slug,
+    headline: String(cmsLive?.headline || localDetail?.headline || service.title),
+    lead: String(cmsLive?.lead || localDetail?.lead || service.summary),
+    challenge: String(cmsLive?.challenge || localDetail?.challenge || ""),
+    approach: String(cmsLive?.approach || localDetail?.approach || ""),
+    benefits: String(cmsLive?.benefits || localDetail?.benefits || ""),
+    capabilities:
+      cmsCapabilities.length > 0 ? cmsCapabilities : (localDetail?.capabilities ?? []),
+    outcomes: cmsOutcomes.length > 0 ? cmsOutcomes : (localDetail?.outcomes ?? []),
+    heroImage: String(
+      cmsLive?.heroImageUrl ||
+        cmsLive?.bannerUrl ||
+        cmsLive?.imageUrl ||
+        localDetail?.heroImage ||
+        service.image ||
+        "",
+    ),
+  };
+
+  if (!detail.challenge && !detail.approach && !localDetail) {
+    // CMS-only stub without rich fields — still show a usable page
+    detail.challenge =
+      detail.challenge ||
+      "Organizations need a clear path from assessment to reliable operations.";
+    detail.approach =
+      detail.approach ||
+      "Synergy scopes, designs, and delivers with local delivery discipline.";
+    detail.benefits =
+      detail.benefits ||
+      "Practical outcomes backed by decades of enterprise IT experience in Pakistan.";
+  }
+
+  return { service, detail };
+}
+
+export async function fetchClients(): Promise<ClientLogo[]> {
+  return cachedCms("clients", async () => {
+    if (!firebaseReady()) return localClients;
+    try {
+      const snap = await getDocs(collection(getFirebaseDb(), COLLECTIONS.clients));
+      if (snap.empty) return localClients;
+
+      type Row = ClientLogo & { sortOrder: number };
+      const fromCms = snap.docs
+        .map((d): Row | null => {
+          const x = d.data();
+          if (x.active === false) return null;
+          const name = String(x.name || "").trim();
+          const logo = String(x.logoUrl || x.logo || "").trim();
+          if (!name || !logo) return null;
+          const slug =
+            String(x.slug || "").trim() ||
+            name
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, "-")
+              .replace(/^-+|-+$/g, "");
+          return {
+            name,
+            slug,
+            logo,
+            sortOrder: typeof x.sortOrder === "number" ? x.sortOrder : Number.MAX_SAFE_INTEGER,
+          };
+        })
+        .filter((c): c is Row => c !== null)
+        .sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name));
+
+      if (!fromCms.length) return localClients;
+
+      const mapped = fromCms.map(({ sortOrder: _s, ...client }) => client);
+      const cmsSlugs = new Set(mapped.map((c) => c.slug.toLowerCase()));
+      const localOnly = localClients.filter((c) => !cmsSlugs.has(c.slug.toLowerCase()));
+      return [...mapped, ...localOnly];
+    } catch {
+      return localClients;
+    }
+  });
+}
+
+export async function fetchFooterNav(): Promise<NavItemDoc[]> {
+  const cms = await fetchNav(DOCS.navigationFooter);
+  if (cms?.length) return cms.filter((item) => !item.hidden);
+  return [
+    { id: "about", label: "About", href: "/about" },
+    { id: "services", label: "Services", href: "/services" },
+    { id: "partners", label: "Partners", href: "/partners" },
+    { id: "resources", label: "Resources", href: "/resources" },
+    { id: "contact", label: "Contact", href: "/contact" },
+  ];
 }
 
 function isUsablePersonName(name: string) {

@@ -2,15 +2,33 @@ import type { Metadata } from "next";
 import { ContactForm } from "@/components/contact/ContactForm";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Reveal } from "@/components/motion/Reveal";
-import { siteConfig } from "@/lib/content/site";
 import { officeLocationsDetailed } from "@/lib/content/company-profile";
+import { fetchSiteSettings } from "@/lib/cms/public";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: `Contact ${siteConfig.name} — Karachi HQ, branches across Pakistan, and Middle East presence.`,
+  description:
+    "Contact Synergy Computers — Karachi HQ, branches across Pakistan, and Middle East presence.",
 };
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const settings = await fetchSiteSettings();
+
+  const offices = officeLocationsDetailed.map((office) => {
+    if (office.id !== "karachi") return office;
+    return {
+      ...office,
+      addressLines: [
+        settings.addressLine || office.addressLines[0],
+        [settings.addressCity, settings.addressCountry].filter(Boolean).join(", ") ||
+          office.addressLines[1],
+      ].filter(Boolean),
+      phones: settings.phones?.length ? settings.phones : office.phones,
+      fax: settings.fax || office.fax,
+      email: settings.email || office.email,
+    };
+  });
+
   return (
     <>
       <PageHeader
@@ -20,7 +38,7 @@ export default function ContactPage() {
       <div className="page-container section-y-tight grid gap-10 lg:grid-cols-2 lg:gap-12">
         <ContactForm />
         <div className="space-y-5">
-          {officeLocationsDetailed.map((office, index) => (
+          {offices.map((office, index) => (
             <Reveal key={office.id} variant="slideFromRight" delay={index * 0.04}>
               <address className="not-italic rounded-2xl border border-border/80 bg-gradient-to-br from-synergy-muted/60 to-accent-soft/40 p-6 sm:p-7">
                 <h2 className="text-lg font-bold text-ink">{office.label}</h2>

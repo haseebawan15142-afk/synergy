@@ -305,7 +305,7 @@ export const partners: Partner[] = [
   {
     name: "BMC Helix",
     slug: "bmc-helix",
-    logo: "/images/partners/wordmark-placeholder.svg",
+    logo: "/images/partners/profile/bmc-helix.webp",
     href: "https://www.bmc.com/helix",
     category: "IT Service Management",
     shortDescription:
@@ -323,7 +323,7 @@ export const partners: Partner[] = [
   {
     name: "EnterpriseDB",
     slug: "enterprisedb",
-    logo: "/images/partners/wordmark-placeholder.svg",
+    logo: "/images/partners/profile/enterprisedb.webp",
     href: "https://www.enterprisedb.com/",
     category: "Database",
     shortDescription:
@@ -341,7 +341,7 @@ export const partners: Partner[] = [
   {
     name: "KnowBe4",
     slug: "knowbe4",
-    logo: "/images/partners/wordmark-placeholder.svg",
+    logo: "/images/partners/profile/knowbe4.webp",
     href: "https://www.knowbe4.com/",
     category: "Security Awareness",
     shortDescription:
@@ -359,7 +359,7 @@ export const partners: Partner[] = [
   {
     name: "Hexagon",
     slug: "hexagon",
-    logo: "/images/partners/wordmark-placeholder.svg",
+    logo: "/images/partners/profile/hexagon.webp",
     href: "https://hexagon.com/",
     category: "Enterprise Asset Management",
     shortDescription:
@@ -395,7 +395,7 @@ export const partners: Partner[] = [
   {
     name: "Cohesity",
     slug: "cohesity",
-    logo: "/images/partners/wordmark-placeholder.svg",
+    logo: "/images/partners/profile/cohesity.webp",
     href: "https://www.cohesity.com/",
     category: "Data Security",
     shortDescription:
@@ -413,7 +413,7 @@ export const partners: Partner[] = [
   {
     name: "Pure Storage",
     slug: "pure-storage",
-    logo: "/images/partners/wordmark-placeholder.svg",
+    logo: "/images/partners/profile/pure-storage.webp",
     href: "https://www.purestorage.com/",
     category: "All-Flash Storage",
     shortDescription:
@@ -431,7 +431,7 @@ export const partners: Partner[] = [
   {
     name: "Proxmox",
     slug: "proxmox",
-    logo: "/images/partners/wordmark-placeholder.svg",
+    logo: "/images/partners/profile/proxmox.webp",
     href: "https://www.proxmox.com/",
     category: "Virtualization",
     shortDescription:
@@ -467,7 +467,7 @@ export const partners: Partner[] = [
   {
     name: "Red Hat",
     slug: "red-hat",
-    logo: "/images/partners/wordmark-placeholder.svg",
+    logo: "/images/partners/profile/red-hat.webp",
     href: "https://www.redhat.com/",
     category: "Open Source Platform",
     shortDescription:
@@ -485,7 +485,7 @@ export const partners: Partner[] = [
   {
     name: "Fujitsu",
     slug: "fujitsu",
-    logo: "/images/partners/wordmark-placeholder.svg",
+    logo: "/images/partners/profile/fujitsu.webp",
     href: "https://www.fujitsu.com/",
     category: "Infrastructure",
     shortDescription:
@@ -521,7 +521,7 @@ export const partners: Partner[] = [
   {
     name: "Supermicro",
     slug: "supermicro",
-    logo: "/images/partners/wordmark-placeholder.svg",
+    logo: "/images/partners/profile/supermicro.webp",
     href: "https://www.supermicro.com/",
     category: "Infrastructure",
     shortDescription:
@@ -534,6 +534,42 @@ export const partners: Partner[] = [
       "AI/ML and HPC platforms",
       "High-density compute",
       "Energy-efficient Green Computing",
+    ],
+  },
+  {
+    name: "Cisco",
+    slug: "cisco",
+    logo: "/images/partners/profile/cisco.webp",
+    href: "https://www.cisco.com/",
+    category: "Networking",
+    shortDescription:
+      "Enterprise networking and secure connectivity — listed in Synergy's Company Profile partnerships.",
+    overview:
+      "Cisco is featured among Synergy Computers' strategic technology partnerships in the Company Profile 2026. Synergy helps Pakistani enterprises design and support network and connectivity architectures aligned to Cisco platforms.",
+    taglines: ["Enterprise Networking", "Secure Connectivity", "Infrastructure Scale"],
+    keySolutions: [
+      "Enterprise networking platforms",
+      "Secure connectivity architectures",
+      "Infrastructure modernization",
+      "Local implementation support with Synergy",
+    ],
+  },
+  {
+    name: "Arctera",
+    slug: "arctera",
+    logo: "/images/partners/profile/arctera.webp",
+    href: "https://www.arctera.io/",
+    category: "Data Resilience",
+    shortDescription:
+      "Data resilience and availability technology — listed in Synergy's Company Profile partnerships.",
+    overview:
+      "Arctera is featured among Synergy Computers' strategic technology partnerships in the Company Profile 2026. Synergy supports enterprises seeking resilient data and availability outcomes through aligned technology partnerships.",
+    taglines: ["Data Resilience", "Availability", "Enterprise Protection"],
+    keySolutions: [
+      "Data resilience platforms",
+      "Availability-focused architectures",
+      "Enterprise data protection alignment",
+      "Local partnership delivery with Synergy",
     ],
   },
 ];

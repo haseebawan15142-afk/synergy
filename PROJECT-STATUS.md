@@ -60,6 +60,8 @@ Enterprise marketing site for **Synergy Computers (Pvt.) Ltd.** (Pakistan IT / i
 - [x] Chat knowledge expanded from site content (leadership, CEO, accomplishments, case studies, Dynatrace, services, partners, industries)
 - [x] Design tokens / ink text contrast tweaks
 - [x] Company Profile 2026 sync — gap analysis in `MISSING-CONTENT.md`; PDF-backed offices, board, expertise, industries, partners, stats (see `src/lib/content/company-profile.ts`)
+- [x] Homepage Selected Clientele + Partnerships infinite logo marquees (profile screenshots); removed duplicate PartnersStrip / PartnerTicker carousels
+- [x] Service detail pages upgraded (Arcana-style sober layout): hero banner, challenge/approach/benefits, capabilities, outcomes, process, CTA
 
 ### Tooling
 - [x] `npm run dev` / `build` / `start` / `lint`

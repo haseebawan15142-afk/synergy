@@ -60,6 +60,7 @@ export type SiteSettings = {
   phoneDisplay: string;
   phoneTel: string;
   phones: string[];
+  fax?: string;
   addressLine: string;
   addressCity: string;
   addressCountry: string;
@@ -117,6 +118,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   phoneDisplay: "021-34527060",
   phoneTel: "+922134527060",
   phones: ["021-34527060", "021-34540908", "021-34547068"],
+  fax: "021-34540907",
   addressLine: "56-D, K.D.A Scheme No.1 Main Miran Muhammad Shah Road",
   addressCity: "Karachi",
   addressCountry: "Pakistan",

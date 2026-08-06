@@ -92,7 +92,7 @@ Partnerships intro (p.7) + logo pages (p.5–7) — individual client logo names
 | 11 | Partners BMC Helix, EDB, KnowBe4, Hexagon, Nutanix, Cohesity, Pure, Proxmox, Lenovo, Red Hat, Fujitsu, IBM, Supermicro | Missing | Add local partner entries (PDF copy); SVG wordmark placeholders until brand assets exist |
 | 12 | Innovative Virtua 178 / 6 Pakistan | Wrong/outdated Innovative blurb | Correct from PDF |
 | 13 | Enrich Infor, Dynatrace, AA, Oracle, etc. | Partial | Align overviews to PDF where thinner |
-| 14 | Selected Clientele logos | No public page; PDF image-only | **TODO** — do not invent names |
+| 14 | Selected Clientele logos | Homepage `ClienteleMarquee` (logos cropped from profile) | Done — duplicate NBP seal omitted |
 | 15 | Certifications / awards | Fake placeholders | Remove placeholders; show empty TODO state |
 | 16 | Professional training / cybersecurity / consultancy as services | Mentioned in About PDF; not first-class services | Reflect in About expertise copy only (no invented service pages) |
 | 17 | Mission / Vision | Present but not in PDF | Leave unchanged; note in TODO |

@@ -39,7 +39,7 @@ export const adminNavItems: AdminNavItem[] = [
   { label: "Website Settings", href: "/admin/settings", icon: Globe, phase: 1, implemented: true },
   { label: "Blogs", href: "/admin/blogs", icon: FileText, phase: 3, implemented: true },
   { label: "Alumni", href: "/admin/alumni", icon: GraduationCap, phase: 4, implemented: true },
-  { label: "Leadership", href: "/admin/leadership", icon: Users, phase: 4, implemented: true },
+  { label: "Board of Directors", href: "/admin/leadership", icon: Users, phase: 4, implemented: true },
   { label: "Services", href: "/admin/services", icon: Briefcase, phase: 4, implemented: true },
   { label: "Partners", href: "/admin/partners", icon: Handshake, phase: 4, implemented: true },
   { label: "Testimonials", href: "/admin/testimonials", icon: MessageSquareQuote, phase: 4, implemented: true },

@@ -40,12 +40,6 @@ export const siteConfig = {
           icon: "users",
         },
         {
-          label: "Our Leadership",
-          href: "/about#leadership",
-          description: "Meet the team steering Synergy's strategy and client relationships.",
-          icon: "users",
-        },
-        {
           label: "Our Accomplishments",
           href: "/about#accomplishments",
           description: "Milestones and recognitions across four decades of enterprise IT.",
