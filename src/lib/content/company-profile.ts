@@ -85,6 +85,14 @@ export const companyDivisions = [
   "Sales & Marketing — Software Sales",
 ] as const;
 
+export type OfficeLandmark = {
+  name: string;
+  /** Pin thumbnail / card image */
+  image: string;
+  /** Optional wide photo for low-opacity card background */
+  background?: string;
+};
+
 export type OfficeLocation = {
   id: string;
   label: string;
@@ -98,13 +106,43 @@ export type OfficeLocation = {
   website?: string;
   /** Set when PDF names the city but gives no street address. */
   addressPending?: boolean;
+  /** WGS84 coords for free OpenStreetMap marker links. */
+  lat: number;
+  lng: number;
+  /** Pin position on the stylized Pakistan map (percent of map box). */
+  mapX?: number;
+  mapY?: number;
+  landmark?: OfficeLandmark;
 };
+
+/** Free OpenStreetMap marker URL — no API key. */
+export function officeOsmUrl(office: Pick<OfficeLocation, "lat" | "lng">, zoom = 17) {
+  const { lat, lng } = office;
+  return `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}#map=${zoom}/${lat}/${lng}`;
+}
+
+/** Percentage positions on pakistan-map.webp (tip of pin = city). Responsive across breakpoints. */
+export type CityMapPosition = { left: string; top: string };
+
+export const pakistanCityMapPositions: Record<
+  "gilgit" | "islamabad" | "lahore" | "karachi",
+  CityMapPosition
+> = {
+  // Gilgit: northern tip, slightly east (right) on the landmass
+  gilgit: { left: "63%", top: "14%" },
+  islamabad: { left: "53%", top: "40%" },
+  lahore: { left: "70%", top: "48%" },
+  karachi: { left: "44%", top: "88%" },
+};
+
+export const officesIntro =
+  "Synergy Computers (Pvt.) Ltd – (SCL) has a strong nationwide footprint with offices in Karachi, Lahore, Islamabad, and Gilgit, ensuring seamless support and service availability across Pakistan.";
 
 /** Nation-wide presence — PDF p.23 */
 export const officeLocationsDetailed: OfficeLocation[] = [
   {
     id: "karachi",
-    label: "SCL Karachi — Head Office",
+    label: "Karachi — Head Office",
     city: "Karachi",
     country: "Pakistan",
     isHeadOffice: true,
@@ -117,10 +155,19 @@ export const officeLocationsDetailed: OfficeLocation[] = [
     fax: "021-34540907",
     email: "info@synergy.net.pk",
     website: "https://www.synergy.net.pk",
+    lat: 24.8821,
+    lng: 67.0642,
+    mapX: 44,
+    mapY: 88,
+    landmark: {
+      name: "Mazar-e-Quaid",
+      image: "/images/offices/karachi-mazar-e-quaid.webp",
+      background: "/images/offices/bg-karachi-mazar.webp",
+    },
   },
   {
     id: "islamabad",
-    label: "SCL Islamabad Office",
+    label: "Islamabad Office",
     city: "Islamabad",
     country: "Pakistan",
     addressLines: [
@@ -131,10 +178,19 @@ export const officeLocationsDetailed: OfficeLocation[] = [
     fax: "2824125",
     email: "info@synergy.net.pk",
     website: "https://www.synergy.net.pk",
+    lat: 33.7182,
+    lng: 73.0674,
+    mapX: 53,
+    mapY: 40,
+    landmark: {
+      name: "Faisal Mosque",
+      image: "/images/offices/islamabad-faisal-vivid.webp",
+      background: "/images/offices/bg-islamabad-faisal.webp",
+    },
   },
   {
     id: "lahore",
-    label: "SCL Lahore Office",
+    label: "Lahore Office",
     city: "Lahore",
     country: "Pakistan",
     addressLines: ["House 130-F, Model Town", "Lahore"],
@@ -142,18 +198,36 @@ export const officeLocationsDetailed: OfficeLocation[] = [
     fax: "042-5856476",
     email: "info@synergy.net.pk",
     website: "https://www.synergy.net.pk",
+    lat: 31.4828,
+    lng: 74.3214,
+    mapX: 70,
+    mapY: 48,
+    landmark: {
+      name: "Minar-e-Pakistan",
+      image: "/images/offices/lahore-minar-e-pakistan.webp",
+      background: "/images/offices/bg-lahore-minar.webp",
+    },
   },
   {
     id: "gilgit",
-    label: "SCL Gilgit Office",
+    label: "Gilgit Office",
     city: "Gilgit",
     country: "Pakistan",
-    // TODO: PDF lists Gilgit among nationwide offices but does not print a street address.
+    // PDF lists Gilgit among nationwide offices but does not print a street address.
     addressLines: ["Gilgit"],
     phones: [],
     email: "info@synergy.net.pk",
     website: "https://www.synergy.net.pk",
     addressPending: true,
+    lat: 35.9208,
+    lng: 74.308,
+    mapX: 63,
+    mapY: 14,
+    landmark: {
+      name: "Gilgit",
+      image: "/images/offices/gilgit-valley.webp",
+      background: "/images/offices/bg-gilgit-valley.webp",
+    },
   },
   {
     id: "middle-east",
@@ -169,8 +243,23 @@ export const officeLocationsDetailed: OfficeLocation[] = [
     phones: [],
     email: "info@synergy.net.pk",
     website: "https://www.synergy-me.ae",
+    lat: 25.6845,
+    lng: 55.7782,
+    landmark: {
+      name: "Ras Al Khaimah",
+      image: "/images/offices/ras-al-khaimah.webp",
+      background: "/images/offices/bg-rak-coast.webp",
+    },
   },
 ];
+
+export const pakistanOffices = officeLocationsDetailed.filter(
+  (office) => office.country === "Pakistan" && office.mapX != null && office.mapY != null,
+);
+
+export const internationalOffices = officeLocationsDetailed.filter(
+  (office) => office.country !== "Pakistan",
+);
 
 /** Homepage / About stats — only PDF-backed figures */
 export const profileStats = [

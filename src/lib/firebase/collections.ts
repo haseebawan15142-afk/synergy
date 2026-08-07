@@ -23,6 +23,7 @@ export const COLLECTIONS = {
   messages: "messages",
   newsletter: "newsletter",
   newsletterIssues: "newsletterIssues",
+  offices: "offices",
   media: "media",
   seo: "seo",
   analytics: "analytics",
@@ -74,6 +75,11 @@ export type SiteSettings = {
   copyright: string;
   mission: string;
   vision: string;
+  /** Contact page copy (Admin → Website Settings) */
+  contactTitle?: string;
+  contactDescription?: string;
+  contactFormIntro?: string;
+  contactAsideText?: string;
   /** Media URLs — filled in Phase 2 */
   logoUrl?: string;
   darkLogoUrl?: string;
@@ -132,4 +138,9 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   copyright: "© Synergy Computers (Pvt.) Ltd. All rights reserved.",
   mission: "",
   vision: "",
+  contactTitle: "Contact us",
+  contactDescription: "Reach our team for sales, support, and project inquiries.",
+  contactFormIntro: "Send a message and we'll respond as soon as we can.",
+  contactAsideText:
+    "Prefer email or phone? Use the form, or explore our offices on the map below and open free OpenStreetMap directions for the exact location.",
 };

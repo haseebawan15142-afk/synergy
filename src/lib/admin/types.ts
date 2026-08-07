@@ -242,6 +242,33 @@ export type NewsletterDoc = {
   createdAt?: TimestampLike;
 };
 
+/** Contact page office / map pin (Admin → Offices) */
+export type OfficeDoc = {
+  id?: string;
+  label: string;
+  city: string;
+  country: string;
+  isHeadOffice?: boolean;
+  addressLines: string[];
+  phones: string[];
+  fax?: string;
+  email: string;
+  website?: string;
+  addressPending?: boolean;
+  lat: number;
+  lng: number;
+  mapX?: number;
+  mapY?: number;
+  landmarkName?: string;
+  landmarkImageUrl?: string;
+  /** Wide photo used as low-opacity card background on /contact */
+  landmarkBackgroundUrl?: string;
+  sortOrder: number;
+  active: boolean;
+  createdAt?: TimestampLike;
+  updatedAt?: TimestampLike;
+};
+
 /** Public newsletter edition / spotlight shown on /newsletter */
 export type NewsletterIssueDoc = {
   id?: string;

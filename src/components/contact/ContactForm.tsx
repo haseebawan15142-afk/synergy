@@ -12,7 +12,13 @@ import { COLLECTIONS } from "@/lib/firebase/collections";
 const inputClass =
   "mt-2 w-full rounded-xl border border-border bg-surface-elevated px-4 py-3 text-ink shadow-soft transition focus:border-synergy focus:outline-none focus:ring-2 focus:ring-synergy/20";
 
-export function ContactForm() {
+type ContactFormProps = {
+  intro?: string;
+};
+
+export function ContactForm({
+  intro = "Send a message and we'll respond as soon as we can.",
+}: ContactFormProps) {
   const reduce = useReducedMotion();
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -77,9 +83,7 @@ export function ContactForm() {
           </motion.div>
         ) : (
           <motion.div key="fields" initial={false} animate={{ opacity: 1 }}>
-            <p className="text-sm text-ink-muted">
-              Send a message and we&apos;ll respond as soon as we can.
-            </p>
+            <p className="text-sm text-ink-muted">{intro}</p>
             {error ? (
               <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950/40 dark:text-red-300">
                 {error}

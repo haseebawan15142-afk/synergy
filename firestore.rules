@@ -99,6 +99,11 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    match /offices/{id} {
+      allow read: if publicCatalog();
+      allow write: if isAdmin();
+    }
+
     match /industries/{id} {
       allow read: if publicCatalog();
       allow write: if isAdmin();

@@ -30,6 +30,11 @@ import {
   type ServiceDetail,
   type ServiceOutcome,
 } from "@/lib/content/service-details";
+import {
+  officeLocationsDetailed as localOffices,
+  pakistanCityMapPositions,
+  type OfficeLocation,
+} from "@/lib/content/company-profile";
 import { siteConfig } from "@/lib/content/site";
 import { cachedCms } from "@/lib/cms/cache";
 
@@ -67,6 +72,93 @@ function mapSiteConfig(): SiteSettings {
     socialFacebook: siteConfig.social.facebook,
     fax: siteConfig.fax,
   };
+}
+
+export async function fetchOffices(): Promise<OfficeLocation[]> {
+  return cachedCms("offices:v3", async () => {
+    if (!firebaseReady()) return localOffices;
+    try {
+      const snap = await getDocs(collection(getFirebaseDb(), COLLECTIONS.offices));
+      if (snap.empty) return localOffices;
+
+      type Row = OfficeLocation & { sortOrder: number };
+      const fromCms = snap.docs
+        .map((d): Row | null => {
+          const x = d.data();
+          if (x.active === false) return null;
+          const label = String(x.label || "").trim();
+          const city = String(x.city || "").trim();
+          if (!label || !city) return null;
+          const id = String(d.id);
+          const preset =
+            id in pakistanCityMapPositions
+              ? pakistanCityMapPositions[id as keyof typeof pakistanCityMapPositions]
+              : null;
+          const mapX =
+            typeof x.mapX === "number"
+              ? x.mapX
+              : preset
+                ? Number.parseFloat(preset.left)
+                : undefined;
+          const mapY =
+            typeof x.mapY === "number"
+              ? x.mapY
+              : preset
+                ? Number.parseFloat(preset.top)
+                : undefined;
+          const addressLines = Array.isArray(x.addressLines)
+            ? x.addressLines.map(String).filter(Boolean)
+            : String(x.addressLines || "")
+                .split("\n")
+                .map((l) => l.trim())
+                .filter(Boolean);
+          const phones = Array.isArray(x.phones)
+            ? x.phones.map(String).filter(Boolean)
+            : String(x.phones || "")
+                .split("\n")
+                .map((l) => l.trim())
+                .filter(Boolean);
+          const landmarkName = String(x.landmarkName || "").trim();
+          const landmarkImage = String(x.landmarkImageUrl || "").trim();
+          const landmarkBackground = String(x.landmarkBackgroundUrl || "").trim();
+          return {
+            id,
+            label,
+            city,
+            country: String(x.country || "Pakistan").trim() || "Pakistan",
+            isHeadOffice: x.isHeadOffice === true,
+            addressLines: addressLines.length ? addressLines : [city],
+            phones,
+            fax: String(x.fax || "").trim() || undefined,
+            email: String(x.email || "info@synergy.net.pk").trim(),
+            website: String(x.website || "").trim() || undefined,
+            addressPending: x.addressPending === true,
+            lat: typeof x.lat === "number" ? x.lat : Number(x.lat) || 0,
+            lng: typeof x.lng === "number" ? x.lng : Number(x.lng) || 0,
+            mapX,
+            mapY,
+            landmark:
+              landmarkName || landmarkImage || landmarkBackground
+                ? {
+                    name: landmarkName || city,
+                    image: landmarkImage || landmarkBackground,
+                    background: landmarkBackground || undefined,
+                  }
+                : undefined,
+            sortOrder: typeof x.sortOrder === "number" ? x.sortOrder : Number.MAX_SAFE_INTEGER,
+          };
+        })
+        .filter((row): row is Row => row !== null)
+        .sort((a, b) => a.sortOrder - b.sortOrder || a.city.localeCompare(b.city));
+
+      if (fromCms.length > 0) {
+        return fromCms.map(({ sortOrder: _s, ...office }) => office);
+      }
+      return localOffices;
+    } catch {
+      return localOffices;
+    }
+  });
 }
 
 export async function fetchThemeTokens(): Promise<ThemeTokens> {

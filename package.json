@@ -14,6 +14,7 @@
     "cms:seed-board": "node scripts/seed-board.mjs",
     "cms:seed-partners": "node scripts/seed-partners.mjs",
     "cms:seed-newsletter": "node scripts/seed-newsletter.mjs",
+    "cms:seed-offices": "node scripts/seed-offices.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",

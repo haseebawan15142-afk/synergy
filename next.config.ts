@@ -17,6 +17,14 @@ const nextConfig = {
         protocol: "https",
         hostname: "synergy-9ea81.firebasestorage.app",
       },
+      {
+        protocol: "https",
+        hostname: "synergy.net.pk",
+      },
+      {
+        protocol: "https",
+        hostname: "www.synergy.net.pk",
+      },
     ],
   },
   experimental: {

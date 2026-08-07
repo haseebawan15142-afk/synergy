@@ -147,7 +147,8 @@ export function WebsiteSettingsForm() {
       </section>
 
       <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-        <h2 className="text-sm font-semibold">Contact</h2>
+        <h2 className="text-sm font-semibold">Contact details</h2>
+        <p className="mt-1 text-xs text-zinc-500">Used on Contact page, Footer, and office cards (HQ).</p>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <Field label="Email">
             <input type="email" className={inputClass} value={form.email} onChange={(e) => update("email", e.target.value)} />
@@ -180,6 +181,47 @@ export function WebsiteSettingsForm() {
           </Field>
           <Field label="Google Maps URL">
             <input className={inputClass} value={form.googleMapsUrl} onChange={(e) => update("googleMapsUrl", e.target.value)} />
+          </Field>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <h2 className="text-sm font-semibold">Contact page copy</h2>
+        <p className="mt-1 text-xs text-zinc-500">
+          Headlines and helper text on /contact. Office pins are managed under Admin → Offices.
+        </p>
+        <div className="mt-4 grid gap-4">
+          <Field label="Page title">
+            <input
+              className={inputClass}
+              value={form.contactTitle || ""}
+              onChange={(e) => update("contactTitle", e.target.value)}
+              placeholder="Contact us"
+            />
+          </Field>
+          <Field label="Page description">
+            <textarea
+              rows={2}
+              className={inputClass}
+              value={form.contactDescription || ""}
+              onChange={(e) => update("contactDescription", e.target.value)}
+            />
+          </Field>
+          <Field label="Form intro (above Send message fields)">
+            <textarea
+              rows={2}
+              className={inputClass}
+              value={form.contactFormIntro || ""}
+              onChange={(e) => update("contactFormIntro", e.target.value)}
+            />
+          </Field>
+          <Field label="Aside text (next to the form)">
+            <textarea
+              rows={3}
+              className={inputClass}
+              value={form.contactAsideText || ""}
+              onChange={(e) => update("contactAsideText", e.target.value)}
+            />
           </Field>
         </div>
       </section>

@@ -10,3 +10,10 @@ next-env.d.ts
 
 # Accidental nested project copy — do not deploy
 /synergy_computer_website/
+
+# Local image processing leftovers (previews / temp writes)
+public/images/offices/_p-*.jpg
+public/images/offices/*.tmp.webp
+public/images/offices/*-tmp.webp
+public/images/offices/*-bright.webp
+public/images/offices/*-new.webp
