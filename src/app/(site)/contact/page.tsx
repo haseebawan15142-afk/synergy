@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { ContactForm } from "@/components/contact/ContactForm";
+import { ContactHero } from "@/components/contact/ContactHero";
 import { OfficesMap } from "@/components/contact/OfficesMap";
-import { PageHeader } from "@/components/ui/PageHeader";
 import { DEFAULT_SITE_SETTINGS } from "@/lib/firebase/collections";
 import { fetchOffices, fetchSiteSettings } from "@/lib/cms/public";
 
@@ -45,20 +45,29 @@ export default async function ContactPage() {
 
   return (
     <>
-      <PageHeader title={title} description={description} />
-      <div className="page-container section-y-tight">
-        <div className="mx-auto max-w-xl lg:mx-0 lg:max-w-none lg:grid lg:grid-cols-2 lg:gap-12">
-          <ContactForm intro={formIntro} />
-          <div className="mt-10 lg:mt-0">
+      <ContactHero title={title} description={description}>
+        <div className="space-y-4">
+          <div className="rounded-2xl border border-white/20 bg-white/55 p-5 shadow-card backdrop-blur-md sm:p-6 dark:bg-slate-950/50">
+            <ContactForm intro={formIntro} bare />
+          </div>
+          <div className="rounded-2xl border border-white/15 bg-ink/35 px-5 py-4 backdrop-blur-sm sm:px-6">
             {aside ? (
-              <p className="text-sm leading-relaxed text-ink-body">{aside}</p>
-            ) : null}
+              <p className="text-sm leading-relaxed text-white/85">{aside}</p>
+            ) : (
+              <p className="text-sm leading-relaxed text-white/85">
+                Prefer to talk directly? Email or call — we&apos;ll connect you with the right
+                specialist.
+              </p>
+            )}
             {settings.email || settings.phoneDisplay ? (
-              <ul className="mt-4 space-y-1 text-sm text-ink-body">
+              <ul className="mt-3 space-y-1.5 text-sm text-white/90">
                 {settings.email ? (
                   <li>
                     Email:{" "}
-                    <a href={`mailto:${settings.email}`} className="font-semibold text-synergy">
+                    <a
+                      href={`mailto:${settings.email}`}
+                      className="font-semibold text-synergy-glow hover:underline"
+                    >
                       {settings.email}
                     </a>
                   </li>
@@ -68,7 +77,7 @@ export default async function ContactPage() {
                     Tel:{" "}
                     <a
                       href={`tel:${settings.phoneTel || settings.phoneDisplay}`}
-                      className="font-semibold text-synergy"
+                      className="font-semibold text-synergy-glow hover:underline"
                     >
                       {settings.phoneDisplay}
                     </a>
@@ -78,8 +87,10 @@ export default async function ContactPage() {
             ) : null}
           </div>
         </div>
+      </ContactHero>
 
-        <div className="mt-14 border-t border-border/60 pt-12 sm:mt-16 sm:pt-14">
+      <div className="page-container section-y-tight">
+        <div className="mt-4 border-t border-border/60 pt-12 sm:mt-6 sm:pt-14">
           <OfficesMap offices={offices} />
         </div>
       </div>

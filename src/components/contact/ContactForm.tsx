@@ -14,10 +14,13 @@ const inputClass =
 
 type ContactFormProps = {
   intro?: string;
+  /** Skip outer card chrome when parent already provides a panel. */
+  bare?: boolean;
 };
 
 export function ContactForm({
   intro = "Send a message and we'll respond as soon as we can.",
+  bare = false,
 }: ContactFormProps) {
   const reduce = useReducedMotion();
   const [loading, setLoading] = useState(false);
@@ -54,7 +57,11 @@ export function ContactForm({
 
   return (
     <form
-      className="rounded-2xl border border-border/80 bg-surface-elevated p-6 shadow-soft sm:p-8"
+      className={
+        bare
+          ? "w-full"
+          : "rounded-2xl border border-border/80 bg-surface-elevated p-6 shadow-soft sm:p-8"
+      }
       onSubmit={handleSubmit}
     >
       <AnimatePresence mode="wait">
