@@ -377,7 +377,7 @@ export const partners: Partner[] = [
   {
     name: "Nutanix",
     slug: "nutanix",
-    logo: "/images/partners/wordmark-placeholder.svg",
+    logo: "/images/partners/profile/nutanix.svg",
     href: "https://www.nutanix.com/",
     category: "Hybrid Cloud",
     shortDescription:
@@ -449,7 +449,7 @@ export const partners: Partner[] = [
   {
     name: "Lenovo",
     slug: "lenovo",
-    logo: "/images/partners/wordmark-placeholder.svg",
+    logo: "/images/partners/profile/lenovo.svg",
     href: "https://www.lenovo.com/",
     category: "Infrastructure",
     shortDescription:
@@ -503,7 +503,7 @@ export const partners: Partner[] = [
   {
     name: "IBM",
     slug: "ibm",
-    logo: "/images/partners/wordmark-placeholder.svg",
+    logo: "/images/partners/profile/ibm.svg",
     href: "https://www.ibm.com/",
     category: "Enterprise Computing",
     shortDescription:

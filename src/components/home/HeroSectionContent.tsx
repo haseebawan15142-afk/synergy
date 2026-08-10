@@ -13,7 +13,7 @@ export function HeroSectionContent() {
 
   if (reduce) {
     return (
-      <div className="relative z-10 page-container py-12 sm:py-16 lg:py-24">
+      <div className="relative z-10 page-container pb-12 pt-24 sm:pb-16 sm:pt-28 lg:pb-24 lg:pt-32">
         <HeroCopy />
       </div>
     );
@@ -21,7 +21,7 @@ export function HeroSectionContent() {
 
   return (
     <motion.div
-      className="relative z-10 page-container py-12 sm:py-16 lg:py-24"
+      className="relative z-10 page-container pb-12 pt-24 sm:pb-16 sm:pt-28 lg:pb-24 lg:pt-32"
       initial="hidden"
       animate="visible"
       variants={staggerContainer}

@@ -5,7 +5,7 @@ import { HeroExperienceLayer } from "@/components/effects/HeroExperienceLayer";
 export function HeroSection() {
   return (
     <HeroExperienceLayer
-      className="min-h-[min(100svh,820px)] border-b border-border/40 sm:min-h-[min(88vh,780px)]"
+      className="min-h-svh border-b border-border/40"
       backdrop={
         <>
           <div className="absolute inset-0 bg-grid-subtle opacity-20" aria-hidden />

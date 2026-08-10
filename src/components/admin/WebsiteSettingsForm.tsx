@@ -100,7 +100,8 @@ export function WebsiteSettingsForm() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Website Settings</h1>
           <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-            Company identity, contact details, mission/vision, and brand media — used on Footer, Contact, and About.
+            Company identity, contact details, and brand media. Logo/favicon updates apply across the public site
+            (navbar, footer, partner blocks, browser tab).
           </p>
         </div>
         <button
@@ -246,14 +247,52 @@ export function WebsiteSettingsForm() {
 
       <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
         <h2 className="text-sm font-semibold">Brand media</h2>
+        <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+          Upload once here — saved to Firebase and used site-wide. Leave empty to keep the built-in Synergy mark.
+        </p>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
-          <MediaUrlField label="Logo" folder="logos" value={form.logoUrl} onChange={(value) => update("logoUrl", value)} />
-          <MediaUrlField label="Dark logo" folder="logos" value={form.darkLogoUrl} onChange={(value) => update("darkLogoUrl", value)} />
-          <MediaUrlField label="Favicon" folder="logos" value={form.faviconUrl} onChange={(value) => update("faviconUrl", value)} />
-          <MediaUrlField label="Footer logo" folder="logos" value={form.footerLogoUrl} onChange={(value) => update("footerLogoUrl", value)} />
-          <MediaUrlField label="Hero background" folder="hero" value={form.heroBackgroundUrl} onChange={(value) => update("heroBackgroundUrl", value)} />
-          <MediaUrlField label="Company video" folder="hero" value={form.companyVideoUrl} onChange={(value) => update("companyVideoUrl", value)} />
-          <MediaUrlField label="Open Graph image" folder="seo" value={form.ogImageUrl} onChange={(value) => update("ogImageUrl", value)} />
+          <MediaUrlField
+            label="Logo (navbar / light backgrounds)"
+            folder="logos"
+            value={form.logoUrl}
+            onChange={(value) => update("logoUrl", value)}
+          />
+          <MediaUrlField
+            label="Dark logo (transparent nav over hero)"
+            folder="logos"
+            value={form.darkLogoUrl}
+            onChange={(value) => update("darkLogoUrl", value)}
+          />
+          <MediaUrlField
+            label="Favicon (browser tab)"
+            folder="logos"
+            value={form.faviconUrl}
+            onChange={(value) => update("faviconUrl", value)}
+          />
+          <MediaUrlField
+            label="Footer logo"
+            folder="logos"
+            value={form.footerLogoUrl}
+            onChange={(value) => update("footerLogoUrl", value)}
+          />
+          <MediaUrlField
+            label="Hero background"
+            folder="hero"
+            value={form.heroBackgroundUrl}
+            onChange={(value) => update("heroBackgroundUrl", value)}
+          />
+          <MediaUrlField
+            label="Company video"
+            folder="hero"
+            value={form.companyVideoUrl}
+            onChange={(value) => update("companyVideoUrl", value)}
+          />
+          <MediaUrlField
+            label="Open Graph image (social share)"
+            folder="seo"
+            value={form.ogImageUrl}
+            onChange={(value) => update("ogImageUrl", value)}
+          />
         </div>
       </section>
     </form>

@@ -102,7 +102,10 @@ export type ServiceDoc = {
    * Outcome lines: "Title | Description" (one per line in admin).
    */
   outcomes?: string[];
+  /** Lucide preset for mega menu when iconUrl is empty. */
   icon?: string;
+  /** Uploaded custom nav/mega-menu icon (wins over Lucide `icon`). */
+  iconUrl?: string;
   bannerUrl?: string;
   imageUrl?: string;
   /** Full-bleed detail hero (falls back to bannerUrl / imageUrl). */
@@ -295,6 +298,22 @@ export type NavItemDoc = {
   external?: boolean;
   hidden?: boolean;
   children?: NavItemDoc[];
+  /** Lucide NavIconKey for mega-menu rows (optional). */
+  icon?: string;
+};
+
+/** Stored at navigation/megaMenus — icons for About / Industries / Insights. */
+export type MegaMenuIconLinkDoc = {
+  href: string;
+  label: string;
+  /** Lucide preset when iconUrl is empty. */
+  icon?: string;
+  /** Uploaded custom icon image (wins over Lucide). */
+  iconUrl?: string;
+};
+
+export type MegaMenuIconsDoc = {
+  menus: Record<string, { links: MegaMenuIconLinkDoc[] }>;
 };
 
 export type ThemeTokens = {
@@ -357,13 +376,19 @@ export const DEFAULT_THEME: ThemeTokens = {
 
 export const MEDIA_FOLDERS = [
   "logos",
+  "icons",
   "blogs",
   "leadership",
   "services",
+  "services/heroes",
   "gallery",
   "events",
   "careers",
   "clients",
+  "partners",
+  "partners/hero",
+  "offices",
+  "newsletter",
   "testimonials",
   "hero",
   "seo",
@@ -371,3 +396,6 @@ export const MEDIA_FOLDERS = [
 ] as const;
 
 export type MediaFolder = (typeof MEDIA_FOLDERS)[number];
+
+/** Sentinel for Media Library “show every folder”. */
+export const MEDIA_FOLDER_ALL = "all" as const;

@@ -13,6 +13,7 @@ import { useAdminAuth } from "@/components/admin/AdminAuthProvider";
 import { AdminPageSkeleton } from "@/components/admin/AdminSkeleton";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
 import { MediaUrlField } from "@/components/admin/MediaPicker";
+import { IconSelect } from "@/components/admin/IconSelect";
 import {
   AdminPageHeader,
   Card,
@@ -28,7 +29,7 @@ export type CrudRecord = { id?: string; [key: string]: unknown };
 export type CrudField = {
   key: string;
   label: string;
-  type?: "text" | "textarea" | "number" | "select" | "checkbox" | "media" | "date" | "list";
+  type?: "text" | "textarea" | "number" | "select" | "checkbox" | "media" | "date" | "list" | "icon";
   options?: string[];
   folder?: string;
   required?: boolean;
@@ -196,6 +197,12 @@ export function CrudManager<T extends CrudRecord>({
                       value={toLabel(form[field.key])}
                       folder={field.folder}
                       onChange={(value) => update(field.key, value)}
+                    />
+                  ) : field.type === "icon" ? (
+                    <IconSelect
+                      value={toLabel(form[field.key])}
+                      onChange={(value) => update(field.key, value)}
+                      allowEmpty
                     />
                   ) : field.type === "list" ? (
                     <textarea

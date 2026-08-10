@@ -1,9 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { HeroTextRotator } from "@/components/home/HeroTextRotator";
-import type { Partner } from "@/lib/content/partners";
+import { ResilientImage, ResilientImg } from "@/components/media/ResilientImage";
+import { partners as localPartners, type Partner } from "@/lib/content/partners";
 
 type PartnerDetailHeroProps = {
   partner: Partner;
@@ -14,7 +14,12 @@ export function PartnerDetailHero({ partner }: PartnerDetailHeroProps) {
   const taglines = (partner.taglines ?? []).filter(Boolean);
   const label = partner.category?.trim() || "Strategic partner";
   const slides = taglines.map((heading) => ({ label, heading }));
+  const local = localPartners.find(
+    (p) => (p.slug || p.name).toLowerCase() === (partner.slug || partner.name).toLowerCase(),
+  );
   const heroSrc = partner.heroImageUrl?.trim() || "";
+  const heroFallback = local?.heroImageUrl?.trim() || "";
+  const logoFallback = local?.logo;
 
   return (
     <section className="relative isolate min-h-[min(72vh,640px)] overflow-hidden border-b border-border/40">
@@ -30,8 +35,9 @@ export function PartnerDetailHero({ partner }: PartnerDetailHeroProps) {
                 : { duration: 18, ease: "linear", repeat: Infinity, repeatType: "reverse" }
             }
           >
-            <Image
+            <ResilientImage
               src={heroSrc}
+              fallbackSrc={heroFallback}
               alt=""
               fill
               priority
@@ -55,13 +61,24 @@ export function PartnerDetailHero({ partner }: PartnerDetailHeroProps) {
         <div className="mx-auto w-full max-w-3xl text-center lg:mx-0 lg:max-w-2xl lg:text-left">
           {partner.logo ? (
             <div className="mx-auto mb-6 inline-flex h-16 w-auto items-center justify-center rounded-xl bg-white px-5 py-3 shadow-soft lg:mx-0">
-              <Image
-                src={partner.logo}
-                alt={`${partner.name} logo`}
-                width={180}
-                height={56}
-                className="max-h-10 w-auto object-contain"
-              />
+              {partner.logo.toLowerCase().endsWith(".svg") ||
+              logoFallback?.toLowerCase().endsWith(".svg") ? (
+                <ResilientImg
+                  src={partner.logo}
+                  fallbackSrc={logoFallback}
+                  alt={`${partner.name} logo`}
+                  className="max-h-10 w-auto object-contain"
+                />
+              ) : (
+                <ResilientImage
+                  src={partner.logo}
+                  fallbackSrc={logoFallback}
+                  alt={`${partner.name} logo`}
+                  width={180}
+                  height={56}
+                  className="max-h-10 w-auto object-contain"
+                />
+              )}
             </div>
           ) : null}
 

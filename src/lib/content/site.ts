@@ -20,9 +20,6 @@ export const siteConfig = {
     facebook: "https://www.facebook.com/SynergyCompuetsPvtLtd/",
   },
   nav: [
-    { label: "Services", href: "/services" },
-    { label: "Industries", href: "/industries" },
-    { label: "Partners", href: "/partners" },
     {
       label: "About",
       href: "/about",
@@ -47,7 +44,10 @@ export const siteConfig = {
         },
       ],
     },
-    { label: "Careers", href: "/careers" },
+    { label: "Services", href: "/services" },
+    { label: "Industries", href: "/industries" },
+    { label: "Partners", href: "/partners" },
     { label: "Insights", href: "/resources" },
+    { label: "Careers", href: "/careers" },
   ],
 } as const;

@@ -1,10 +1,15 @@
-/** Short-lived in-memory cache so route changes do not re-hit Firestore every time. */
+/**
+ * Short-lived in-memory CMS cache with stale-on-error.
+ * After a successful read, a Firebase blip serves the last good payload
+ * instead of immediately dropping to empty/local defaults.
+ */
 
 type Entry<T> = { at: number; data: T };
 
 const store = new Map<string, Entry<unknown>>();
-/** Keep short so admin publish/delete appears on the site quickly. */
-const DEFAULT_TTL_MS = 15_000;
+
+/** Fresh window — admin publish still appears within about a minute. */
+const DEFAULT_TTL_MS = 60_000;
 
 export async function cachedCms<T>(
   key: string,
@@ -15,9 +20,15 @@ export async function cachedCms<T>(
   if (hit && Date.now() - hit.at < ttlMs) {
     return hit.data;
   }
-  const data = await loader();
-  store.set(key, { at: Date.now(), data });
-  return data;
+
+  try {
+    const data = await loader();
+    store.set(key, { at: Date.now(), data });
+    return data;
+  } catch (error) {
+    if (hit) return hit.data;
+    throw error;
+  }
 }
 
 export function invalidateCmsCache(prefix?: string) {

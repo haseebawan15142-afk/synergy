@@ -20,11 +20,18 @@ export function PartnershipsMarquee() {
   const rows = useMemo(() => {
     const logos: MarqueeLogo[] = partners
       .filter((p) => p.logo)
-      .map((p) => ({
-        name: p.name,
-        logo: p.logo,
-        href: p.slug ? `/partners/${p.slug}` : p.href && p.href !== "#" ? p.href : undefined,
-      }));
+      .map((p) => {
+        const local = localPartners.find(
+          (lp) =>
+            (lp.slug || lp.name).toLowerCase() === (p.slug || p.name).toLowerCase(),
+        );
+        return {
+          name: p.name,
+          logo: p.logo,
+          fallbackLogo: local?.logo,
+          href: p.slug ? `/partners/${p.slug}` : p.href && p.href !== "#" ? p.href : undefined,
+        };
+      });
     return toMarqueeRows(logos);
   }, [partners]);
 

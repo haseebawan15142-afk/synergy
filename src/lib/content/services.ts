@@ -3,6 +3,10 @@ export type Service = {
   title: string;
   summary: string;
   image: string;
+  /** Lucide NavIconKey for mega menu (optional; heuristic fallback). */
+  icon?: string;
+  /** Uploaded custom mega-menu icon (wins over Lucide). */
+  iconUrl?: string;
 };
 
 export const services: Service[] = [
@@ -12,6 +16,7 @@ export const services: Service[] = [
     summary:
       "Expert engineers at your location for deployment, troubleshooting, and operational support across your IT estate.",
     image: "/images/services/on-site-it-support.webp",
+    icon: "headset",
   },
   {
     slug: "network-infrastructure",
@@ -19,6 +24,7 @@ export const services: Service[] = [
     summary:
       "Design, transformation, and management of networks and infrastructure — from strategy to workplace solutions.",
     image: "/images/services/network-infrastructure.webp",
+    icon: "network",
   },
   {
     slug: "data-backup-recovery",
@@ -26,6 +32,7 @@ export const services: Service[] = [
     summary:
       "Data availability and protection solutions to keep critical workloads resilient and recoverable.",
     image: "/images/services/data-backup-recovery.webp",
+    icon: "databaseBackup",
   },
   {
     slug: "microsoft-365-cloud",
@@ -33,6 +40,7 @@ export const services: Service[] = [
     summary:
       "Cloud and collaboration setup, migration, and governance aligned to your business objectives.",
     image: "/images/services/microsoft-365-cloud.webp",
+    icon: "cloud",
   },
   {
     slug: "managed-it",
@@ -40,5 +48,6 @@ export const services: Service[] = [
     summary:
       "24×7 third-party support and maintenance across your infrastructure — SLA-backed and cost-effective.",
     image: "/images/services/managed-it.webp",
+    icon: "serverCog",
   },
 ];

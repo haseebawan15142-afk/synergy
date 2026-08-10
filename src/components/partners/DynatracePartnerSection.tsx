@@ -5,7 +5,11 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Reveal } from "@/components/motion/Reveal";
 import { DynatracePartnerGallery } from "@/components/partners/DynatracePartnerGallery";
 import { dynatracePartner } from "@/lib/content/dynatrace-partner";
-export function DynatracePartnerSection() {
+import { fetchSiteSettings } from "@/lib/cms/public";
+
+export async function DynatracePartnerSection() {
+  const settings = await fetchSiteSettings();
+
   return (
     <section className="border-b border-border/70 bg-surface section-y" aria-labelledby="dynatrace-partner-heading">
       <div className="page-container">
@@ -30,7 +34,13 @@ export function DynatracePartnerSection() {
                 ×
               </span>
               <div className="flex min-w-[180px] flex-1 items-center justify-center rounded-lg border border-border/60 bg-white px-3 py-2.5">
-                <BrandLogo variant="header" theme="light" />
+                <BrandLogo
+                  variant="header"
+                  theme="light"
+                  logoUrl={settings.logoUrl}
+                  darkLogoUrl={settings.darkLogoUrl}
+                  companyName={settings.legalName || settings.companyName}
+                />
               </div>
             </div>
 

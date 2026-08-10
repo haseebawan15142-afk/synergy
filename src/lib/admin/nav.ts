@@ -15,6 +15,7 @@ import {
   UserCog,
   Palette,
   PanelBottom,
+  PanelTop,
   Settings,
   UserCircle,
 } from "lucide-react";
@@ -43,6 +44,7 @@ export const adminNavItems: AdminNavItem[] = [
   { label: "Contact Messages", href: "/admin/messages", icon: Mail, phase: 5, implemented: true },
   { label: "Users", href: "/admin/users", icon: UserCog, phase: 1, implemented: true },
   { label: "Theme", href: "/admin/theme", icon: Palette, phase: 6, implemented: true },
+  { label: "Navigation", href: "/admin/navigation", icon: PanelTop, phase: 6, implemented: true },
   { label: "Footer", href: "/admin/footer", icon: PanelBottom, phase: 6, implemented: true },
   { label: "Settings", href: "/admin/system", icon: Settings, phase: 1, implemented: true },
   { label: "Profile", href: "/admin/profile", icon: UserCircle, phase: 1, implemented: true },

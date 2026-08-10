@@ -33,7 +33,7 @@ export function CareersHero() {
           <PremiumTitle
             as="h1"
             variant="hero"
-            className="mt-4 text-[2.75rem] font-bold leading-[1.05] text-white sm:text-6xl lg:text-7xl xl:text-[5.5rem]"
+            className="heading-shimmer-synergy mt-4 text-[2.75rem] font-bold leading-[1.05] sm:text-6xl lg:text-7xl xl:text-[5.5rem]"
           >
             Take your career
             <br />

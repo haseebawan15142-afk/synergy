@@ -8,38 +8,110 @@ import { ChevronDown } from "lucide-react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { NavLinkMotion } from "@/components/motion/NavLinkMotion";
 import { MegaMenu } from "@/components/layout/MegaMenu";
+import { NavLinkIcon } from "@/components/layout/NavLinkIcon";
+import { ResilientImg } from "@/components/media/ResilientImage";
 import { ThemeSelector } from "@/components/theme/ThemeToggle";
-import { siteConfig } from "@/lib/content/site";
-import { navMegaMenus, type MegaMenuConfig } from "@/lib/content/nav-menus";
+import {
+  MEGA_MENU_ICON_KEYS,
+  navMegaMenus,
+  type MegaMenuConfig,
+} from "@/lib/content/nav-menus";
+import { resolveCmsNavIcon, withNavIcons } from "@/lib/content/nav-icons";
 import { partners as localPartners, partnerDetailPath } from "@/lib/content/partners";
 import { services as localServices } from "@/lib/content/services";
-import { fetchPartners, fetchServices } from "@/lib/cms/public";
+import {
+  defaultHeaderNav,
+  fetchHeaderNav,
+  fetchMegaMenuIcons,
+  fetchPartners,
+  fetchServices,
+  type MegaMenuIconMap,
+} from "@/lib/cms/public";
 import { useCmsList } from "@/hooks/useCmsList";
+import type { NavItemDoc } from "@/lib/admin/types";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
 import { motionDurations, motionEase } from "@/lib/motion/transitions";
 import { fadeUp } from "@/lib/motion/variants";
 
-export function Navbar() {
+type NavbarProps = {
+  /** From server `fetchSiteSettings` — avoids default logo flash on first paint */
+  logoUrl?: string | null;
+  darkLogoUrl?: string | null;
+  companyName?: string | null;
+};
+
+function applyMegaMenuIcons(
+  menu: MegaMenuConfig,
+  menuKey: string,
+  iconMap: MegaMenuIconMap | null,
+): MegaMenuConfig {
+  const overrides = iconMap?.[menuKey];
+  if (!overrides) return menu;
+  return {
+    ...menu,
+    columns: menu.columns.map((column) => ({
+      ...column,
+      links: withNavIcons(
+        column.links.map((link) => {
+          const style = overrides[link.href];
+          const iconUrl = String(style?.iconUrl || link.logoUrl || "").trim();
+          return {
+            ...link,
+            logoUrl: iconUrl || undefined,
+            icon: resolveCmsNavIcon(style?.icon ?? link.icon, link.href, link.label),
+          };
+        }),
+      ),
+    })),
+  };
+}
+
+export function Navbar({ logoUrl, darkLogoUrl, companyName }: NavbarProps) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [mobileSubOpen, setMobileSubOpen] = useState<string | null>(null);
+  const [megaIcons, setMegaIcons] = useState<MegaMenuIconMap | null>(null);
   const pathname = usePathname();
   const reduce = useReducedMotion();
   const partnersLoader = useCallback(() => fetchPartners(), []);
   const cmsPartners = useCmsList(localPartners, partnersLoader);
   const servicesLoader = useCallback(() => fetchServices(), []);
   const cmsServices = useCmsList(localServices, servicesLoader);
+  const headerLoader = useCallback(() => fetchHeaderNav(), []);
+  const localHeader = useMemo(() => defaultHeaderNav(), []);
+  const headerNav = useCmsList<NavItemDoc>(localHeader, headerLoader);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchMegaMenuIcons()
+      .then((map) => {
+        if (!cancelled) setMegaIcons(map);
+      })
+      .catch(() => {
+        /* keep local mega defaults from navMegaMenus */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const menus = useMemo((): Record<string, MegaMenuConfig> => {
-    const partnerMid = Math.ceil(cmsPartners.length / 2);
-    const partnerLeft = cmsPartners.slice(0, partnerMid);
-    const partnerRight = cmsPartners.slice(partnerMid);
     const serviceMid = Math.ceil(cmsServices.length / 2);
     const serviceLeft = cmsServices.slice(0, serviceMid);
     const serviceRight = cmsServices.slice(serviceMid);
     const featuredService = cmsServices[0];
-    return {
+    const serviceLink = (s: (typeof cmsServices)[number]) => {
+      const iconUrl = String(s.iconUrl || "").trim();
+      return {
+        label: s.title,
+        href: `/services/${s.slug}`,
+        logoUrl: iconUrl || undefined,
+        icon: resolveCmsNavIcon(s.icon, `/services/${s.slug}`, s.title),
+      };
+    };
+
+    const next: Record<string, MegaMenuConfig> = {
       ...navMegaMenus,
       "/services": {
         ...navMegaMenus["/services"],
@@ -55,17 +127,11 @@ export function Navbar() {
         columns: [
           {
             heading: "Infrastructure & Support",
-            links: serviceLeft.map((s) => ({
-              label: s.title,
-              href: `/services/${s.slug}`,
-            })),
+            links: withNavIcons(serviceLeft.map(serviceLink)),
           },
           {
             heading: "Cloud & Data",
-            links: serviceRight.map((s) => ({
-              label: s.title,
-              href: `/services/${s.slug}`,
-            })),
+            links: withNavIcons(serviceRight.map(serviceLink)),
           },
         ],
       },
@@ -74,16 +140,25 @@ export function Navbar() {
         columns: [
           {
             heading: "Technology principals",
-            links: partnerLeft.map((p) => ({ label: p.name, href: partnerDetailPath(p) })),
-          },
-          {
-            heading: "\u00A0",
-            links: partnerRight.map((p) => ({ label: p.name, href: partnerDetailPath(p) })),
+            links: cmsPartners.slice(0, 5).map((p) => ({
+              label: p.name,
+              href: partnerDetailPath(p),
+              logoUrl: p.logo,
+            })),
           },
         ],
+        seeAll: { label: "See all partners", href: "/partners" },
       },
     };
-  }, [cmsPartners, cmsServices]);
+
+    for (const key of MEGA_MENU_ICON_KEYS) {
+      if (next[key]) {
+        next[key] = applyMegaMenuIcons(next[key], key, megaIcons);
+      }
+    }
+
+    return next;
+  }, [cmsPartners, cmsServices, megaIcons]);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 6);
@@ -103,16 +178,21 @@ export function Navbar() {
     setOpen(false);
   }, [pathname]);
 
+  const isHome = pathname === "/";
+  // Transparent sticky bar over hero video so media can fill the viewport
+  const overMedia = isHome && !scrolled && !open;
+
   const headerClass = cn(
-    "sticky top-0 z-50 border-b shadow-soft backdrop-blur-md transition-colors duration-300 lg:backdrop-blur-xl",
-    scrolled
-      ? "border-border/80 bg-surface-elevated/95"
-      : "border-border/60 bg-surface-elevated/80",
+    "fixed inset-x-0 top-0 z-50 border-b transition-[background-color,border-color,box-shadow] duration-300",
+    overMedia
+      ? "border-transparent bg-transparent shadow-none"
+      : "border-border bg-surface-elevated shadow-soft",
   );
 
   return (
+    <>
     <header className={headerClass}>
-      <div className="page-container relative flex items-center justify-between gap-2 py-2.5 sm:gap-3 sm:py-3">
+      <div className="page-container relative flex items-center justify-between gap-3 py-2.5 sm:gap-4 sm:py-3 lg:gap-8">
         <motion.div
           initial={reduce ? false : { opacity: 0.92 }}
           animate={{ opacity: 1 }}
@@ -120,37 +200,48 @@ export function Navbar() {
           className="min-w-0 shrink"
         >
           <Link href="/" className="flex shrink-0 items-center gap-2 rounded-xl transition hover:opacity-90">
-            <BrandLogo variant="header" />
+            <BrandLogo
+              variant="header"
+              theme={overMedia ? "dark" : "light"}
+              logoUrl={logoUrl}
+              darkLogoUrl={darkLogoUrl}
+              companyName={companyName}
+            />
           </Link>
         </motion.div>
 
-        <nav className="hidden items-center gap-0.5 lg:flex" aria-label="Primary">
-          {siteConfig.nav.map((item) => {
+        <nav className="hidden items-center gap-1.5 lg:flex xl:gap-2" aria-label="Primary">
+          {headerNav.map((item) => {
             const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
             const menu = menus[item.href];
 
             if (menu) {
               return (
                 <MegaMenu
-                  key={item.href}
+                  key={item.id || item.href}
                   label={item.label}
                   href={item.href}
                   menu={menu}
                   active={active}
+                  onMedia={overMedia}
                 />
               );
             }
 
             return (
               <NavLinkMotion
-                key={item.href}
+                key={item.id || item.href}
                 href={item.href}
                 active={active}
                 className={cn(
-                  "relative rounded-full px-3.5 py-2 text-sm font-medium transition-colors xl:px-4",
-                  active
-                    ? "bg-synergy-muted text-synergy-light dark:text-synergy-glow"
-                    : "text-ink-body hover:bg-surface-muted hover:text-ink",
+                  "relative rounded-full px-4 py-2 text-sm font-medium transition-colors xl:px-5",
+                  overMedia
+                    ? active
+                      ? "bg-white/15 text-white"
+                      : "text-white/90 hover:bg-white/10 hover:text-white"
+                    : active
+                      ? "bg-synergy-muted text-synergy-light dark:text-synergy-glow"
+                      : "text-ink-body hover:bg-surface-muted hover:text-ink",
                 )}
               >
                 {item.label}
@@ -159,24 +250,48 @@ export function Navbar() {
           })}
         </nav>
 
-        <div className="hidden items-center gap-2 lg:flex">
-          <ThemeSelector />
-          <Button href="/contact" size="default">
-            Contact us
+        <div className="hidden items-center gap-3 lg:flex">
+          <ThemeSelector
+            className={
+              overMedia
+                ? "[&_button]:border-white/25 [&_button]:bg-white/10 [&_button]:text-white [&_button]:hover:bg-white/15"
+                : undefined
+            }
+          />
+          <Button
+            href="/contact"
+            size="default"
+            className={cn(
+              "whitespace-nowrap rounded-lg px-5 font-semibold tracking-wide shadow-card xl:px-7",
+              overMedia && "ring-1 ring-white/20",
+            )}
+          >
+            Contact Us
           </Button>
         </div>
 
         <div className="flex items-center gap-1.5 lg:hidden">
-          <ThemeSelector className="[&_button]:min-h-10 [&_button]:min-w-10 [&_button]:px-2.5 [&_span.hidden]:hidden" />
+          <ThemeSelector
+            className={cn(
+              "[&_button]:min-h-10 [&_button]:min-w-10 [&_button]:px-2.5 [&_span.hidden]:hidden",
+              overMedia &&
+                "[&_button]:border-white/25 [&_button]:bg-white/10 [&_button]:text-white [&_button]:hover:bg-white/15",
+            )}
+          />
           <button
             type="button"
-            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-border bg-surface-elevated shadow-soft"
+            className={cn(
+              "inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border shadow-soft",
+              overMedia
+                ? "border-white/25 bg-white/10 text-white"
+                : "border-border bg-surface-elevated text-ink",
+            )}
             aria-expanded={open}
             aria-controls="mobile-nav"
             onClick={() => setOpen((v) => !v)}
           >
             <span className="sr-only">Menu</span>
-            <span className="text-xl leading-none text-ink">{open ? "×" : "☰"}</span>
+            <span className="text-xl leading-none">{open ? "×" : "☰"}</span>
           </button>
         </div>
       </div>
@@ -209,7 +324,7 @@ export function Navbar() {
                 initial="hidden"
                 animate="visible"
               >
-                {siteConfig.nav.map((item) => {
+                {headerNav.map((item) => {
                   const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
                   const menu = menus[item.href];
                   const subOpen = mobileSubOpen === item.href;
@@ -221,7 +336,7 @@ export function Navbar() {
 
                   return (
                     <motion.div
-                      key={item.href}
+                      key={item.id || item.href}
                       variants={reduce ? undefined : fadeUp}
                       className="bg-surface-elevated"
                     >
@@ -264,12 +379,16 @@ export function Navbar() {
                               animate={{ height: "auto", opacity: 1 }}
                               exit={{ height: 0, opacity: 0 }}
                               transition={{ duration: motionDurations.reveal, ease: motionEase }}
-                              className="overflow-hidden border-t border-border bg-surface-muted/70"
+                              className="overflow-hidden border-t border-white/15"
+                              style={{
+                                background:
+                                  "linear-gradient(145deg, #0d2818 0%, #1a4d2a 45%, #357c3c 100%)",
+                              }}
                             >
-                              <div className="divide-y divide-border/70">
+                              <div className="divide-y divide-white/10">
                                 <Link
                                   href={menu.featured.href}
-                                  className="block px-5 py-3 text-sm font-bold text-synergy transition hover:bg-surface-elevated"
+                                  className="block px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10"
                                   onClick={() => setOpen(false)}
                                 >
                                   {menu.featured.title}
@@ -278,12 +397,43 @@ export function Navbar() {
                                   <Link
                                     key={link.href}
                                     href={link.href}
-                                    className="block px-5 py-3 text-sm font-medium text-ink transition hover:bg-surface-elevated"
+                                    className="flex items-center gap-3 px-5 py-3 text-sm font-medium text-white/90 transition hover:bg-white/10 hover:text-white"
                                     onClick={() => setOpen(false)}
                                   >
-                                    {link.label}
+                                    <span
+                                      className={cn(
+                                        "flex h-8 w-8 items-center justify-center overflow-hidden text-white",
+                                        link.logoUrl && "rounded-md bg-white/95 p-0.5",
+                                      )}
+                                    >
+                                      {link.logoUrl ? (
+                                        <ResilientImg
+                                          src={link.logoUrl}
+                                          alt=""
+                                          className="h-5 w-6 object-contain"
+                                        />
+                                      ) : (
+                                        <NavLinkIcon
+                                          href={link.href}
+                                          label={link.label}
+                                          icon={link.icon}
+                                          size={16}
+                                        />
+                                      )}
+                                    </span>
+                                    <span className="flex-1">{link.label}</span>
+                                    <ChevronDown className="h-3.5 w-3.5 -rotate-90 text-white/45" aria-hidden />
                                   </Link>
                                 ))}
+                                {menu.seeAll ? (
+                                  <Link
+                                    href={menu.seeAll.href}
+                                    className="block px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
+                                    onClick={() => setOpen(false)}
+                                  >
+                                    {menu.seeAll.label} →
+                                  </Link>
+                                ) : null}
                               </div>
                             </motion.div>
                           ) : null}
@@ -297,8 +447,8 @@ export function Navbar() {
                 <div className="border-t border-border pt-4">
                   <ThemeSelector variant="pills" />
                 </div>
-                <Button href="/contact" className="mt-4 w-full sm:max-w-xs">
-                  Contact us
+                <Button href="/contact" className="mt-4 w-full rounded-lg sm:max-w-xs">
+                  Contact Us
                 </Button>
               </div>
             </motion.div>
@@ -306,5 +456,11 @@ export function Navbar() {
         ) : null}
       </AnimatePresence>
     </header>
+    {/* Reserve space under fixed nav on non-home pages; home hero goes full-bleed under transparent bar */}
+    <div
+      className={cn("shrink-0", isHome ? "h-0" : "h-[3.75rem] sm:h-16")}
+      aria-hidden
+    />
+    </>
   );
 }

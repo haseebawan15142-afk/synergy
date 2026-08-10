@@ -3,10 +3,14 @@ import { industries } from "@/lib/content/industries";
 import { partnerDetailPath, partners } from "@/lib/content/partners";
 import { dynatracePartner } from "@/lib/content/dynatrace-partner";
 import { getRecentBlogPosts } from "@/lib/content/blog-posts";
+import { resolveNavIconKey, withNavIcons, type NavIconKey } from "@/lib/content/nav-icons";
 
 export type MegaMenuLink = {
   label: string;
   href: string;
+  icon?: NavIconKey;
+  /** Partner / brand mark image — shown instead of Lucide icon when set */
+  logoUrl?: string;
 };
 
 export type MegaMenuColumn = {
@@ -27,6 +31,8 @@ export type MegaMenuFeatured = {
 export type MegaMenuConfig = {
   featured: MegaMenuFeatured;
   columns: MegaMenuColumn[];
+  /** Optional “See all …” row under the link columns */
+  seeAll?: { label: string; href: string };
 };
 
 const half = <T,>(arr: T[]): [T[], T[]] => {
@@ -40,9 +46,66 @@ const featuredService = services[0];
 const [industriesLeft, industriesRight] = half(industries);
 const featuredIndustry = industries.find((i) => i.slug === "healthcare") ?? industries[0];
 
-const [partnersLeft, partnersRight] = half(partners);
-
 const recentPost = getRecentBlogPosts(1)[0];
+
+function serviceLinks(list: typeof services) {
+  return withNavIcons(
+    list.map((s) => ({
+      label: s.title,
+      href: `/services/${s.slug}`,
+      icon: resolveNavIconKey(`/services/${s.slug}`, s.title),
+    })),
+  );
+}
+
+function industryLinks(list: typeof industries) {
+  return withNavIcons(
+    list.map((i) => ({
+      label: i.title,
+      href: `/industries/${i.slug}`,
+      icon: resolveNavIconKey(`/industries/${i.slug}`, i.title),
+    })),
+  );
+}
+
+/** Menus whose Lucide icons are edited in Admin → Navigation → Mega menus. */
+export const MEGA_MENU_ICON_KEYS = ["/about", "/industries", "/resources"] as const;
+export type MegaMenuIconKey = (typeof MEGA_MENU_ICON_KEYS)[number];
+
+export const MEGA_MENU_ICON_SECTION_LABELS: Record<MegaMenuIconKey, string> = {
+  "/about": "About (Company)",
+  "/industries": "Industries",
+  "/resources": "Insights",
+};
+
+/** Default link rows + icons for seeding / fallback (Partners & Services excluded). */
+export function defaultMegaMenuIconLinks(): Record<
+  MegaMenuIconKey,
+  { links: MegaMenuLink[] }
+> {
+  return {
+    "/about": {
+      links: withNavIcons([
+        { label: "Who We Are", href: "/about#who-we-are", icon: "building2" },
+        { label: "Message from our CEO", href: "/about#ceo-message-heading", icon: "messageSquare" },
+        { label: "Board of Directors", href: "/about#board", icon: "users" },
+        { label: "Our Accomplishments", href: "/about#accomplishments", icon: "award" },
+      ]),
+    },
+    "/industries": {
+      links: withNavIcons([
+        ...industryLinks(industriesLeft),
+        ...industryLinks(industriesRight),
+      ]),
+    },
+    "/resources": {
+      links: withNavIcons([
+        { label: "Blog", href: "/resources", icon: "newspaper" },
+        { label: "Newsletter", href: "/newsletter", icon: "mail" },
+      ]),
+    },
+  };
+}
 
 export const navMegaMenus: Record<string, MegaMenuConfig> = {
   "/services": {
@@ -53,15 +116,16 @@ export const navMegaMenus: Record<string, MegaMenuConfig> = {
       href: `/services/${featuredService.slug}`,
       ctaLabel: "Learn more",
       image: featuredService.image,
+      icon: "headset",
     },
     columns: [
       {
         heading: "Infrastructure & Support",
-        links: servicesLeft.map((s) => ({ label: s.title, href: `/services/${s.slug}` })),
+        links: serviceLinks(servicesLeft),
       },
       {
         heading: "Cloud & Data",
-        links: servicesRight.map((s) => ({ label: s.title, href: `/services/${s.slug}` })),
+        links: serviceLinks(servicesRight),
       },
     ],
   },
@@ -78,11 +142,11 @@ export const navMegaMenus: Record<string, MegaMenuConfig> = {
     columns: [
       {
         heading: "Industries",
-        links: industriesLeft.map((i) => ({ label: i.title, href: `/industries/${i.slug}` })),
+        links: industryLinks(industriesLeft),
       },
       {
-        heading: "\u00A0",
-        links: industriesRight.map((i) => ({ label: i.title, href: `/industries/${i.slug}` })),
+        heading: "Sectors",
+        links: industryLinks(industriesRight),
       },
     ],
   },
@@ -95,17 +159,19 @@ export const navMegaMenus: Record<string, MegaMenuConfig> = {
       href: "/partners/dynatrace",
       ctaLabel: "View partner",
       image: dynatracePartner.logo,
+      icon: "handshake",
     },
     columns: [
       {
         heading: "Technology principals",
-        links: partnersLeft.map((p) => ({ label: p.name, href: partnerDetailPath(p) })),
-      },
-      {
-        heading: "\u00A0",
-        links: partnersRight.map((p) => ({ label: p.name, href: partnerDetailPath(p) })),
+        links: partners.slice(0, 5).map((p) => ({
+          label: p.name,
+          href: partnerDetailPath(p),
+          logoUrl: p.logo,
+        })),
       },
     ],
+    seeAll: { label: "See all partners", href: "/partners" },
   },
 
   "/about": {
@@ -121,17 +187,16 @@ export const navMegaMenus: Record<string, MegaMenuConfig> = {
     columns: [
       {
         heading: "Company",
-        links: [
-          { label: "Who We Are", href: "/about#who-we-are" },
-          { label: "Message from our CEO", href: "/about#ceo-message-heading" },
-          { label: "Board of Directors", href: "/about#board" },
-          { label: "Our Accomplishments", href: "/about#accomplishments" },
-        ],
+        links: withNavIcons([
+          { label: "Who We Are", href: "/about#who-we-are", icon: "building2" },
+          { label: "Message from our CEO", href: "/about#ceo-message-heading", icon: "messageSquare" },
+          { label: "Board of Directors", href: "/about#board", icon: "users" },
+          { label: "Our Accomplishments", href: "/about#accomplishments", icon: "award" },
+        ]),
       },
     ],
   },
 
-  /** Insights — Systems Ltd–style: Blog + Newsletter (not partners). */
   "/resources": {
     featured: recentPost
       ? {
@@ -141,6 +206,7 @@ export const navMegaMenus: Record<string, MegaMenuConfig> = {
           href: `/resources/${recentPost.slug}`,
           ctaLabel: "Read article",
           image: recentPost.image,
+          icon: "newspaper",
         }
       : {
           eyebrow: "Insights",
@@ -148,14 +214,15 @@ export const navMegaMenus: Record<string, MegaMenuConfig> = {
           description: "Articles and partner editions from Synergy Computers.",
           href: "/resources",
           ctaLabel: "Browse blog",
+          icon: "newspaper",
         },
     columns: [
       {
         heading: "Explore",
-        links: [
-          { label: "Blog", href: "/resources" },
-          { label: "Newsletter", href: "/newsletter" },
-        ],
+        links: withNavIcons([
+          { label: "Blog", href: "/resources", icon: "newspaper" },
+          { label: "Newsletter", href: "/newsletter", icon: "mail" },
+        ]),
       },
     ],
   },

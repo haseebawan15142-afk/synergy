@@ -3,16 +3,28 @@
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
-import { Building2, Users, Award, Landmark, ArrowRight, type LucideIcon } from "lucide-react";
+import {
+  ArrowRight,
+  Building2,
+  ChevronRight,
+  Handshake,
+  Headset,
+  Landmark,
+  Newspaper,
+  type LucideIcon,
+} from "lucide-react";
 import { cn } from "@/lib/cn";
 import { motionDurations, motionEase } from "@/lib/motion/transitions";
 import type { MegaMenuConfig } from "@/lib/content/nav-menus";
+import { NavLinkIcon } from "@/components/layout/NavLinkIcon";
+import { ResilientImg } from "@/components/media/ResilientImage";
 
-const icons: Record<string, LucideIcon> = {
+const featuredIcons: Record<string, LucideIcon> = {
   building: Building2,
-  users: Users,
-  award: Award,
   landmark: Landmark,
+  handshake: Handshake,
+  headset: Headset,
+  newspaper: Newspaper,
 };
 
 type MegaMenuProps = {
@@ -20,13 +32,15 @@ type MegaMenuProps = {
   href: string;
   menu: MegaMenuConfig;
   active?: boolean;
+  /** Light text for transparent nav over dark hero media */
+  onMedia?: boolean;
 };
 
-export function MegaMenu({ label, href, menu, active }: MegaMenuProps) {
+export function MegaMenu({ label, href, menu, active, onMedia }: MegaMenuProps) {
   const [open, setOpen] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const reduce = useReducedMotion();
-  const FeaturedIcon = menu.featured.icon ? icons[menu.featured.icon] : undefined;
+  const FeaturedIcon = menu.featured.icon ? featuredIcons[menu.featured.icon] : undefined;
 
   const clearCloseTimer = () => {
     if (closeTimer.current) {
@@ -45,17 +59,24 @@ export function MegaMenu({ label, href, menu, active }: MegaMenuProps) {
     closeTimer.current = setTimeout(() => setOpen(false), 120);
   };
 
+  const multiCol = menu.columns.length > 1;
+
   return (
-    /* Not position:relative — panel is centered to the header page-container. */
     <div onMouseEnter={handleEnter} onMouseLeave={handleLeave}>
       <Link
         href={href}
         aria-expanded={open}
         className={cn(
-          "relative flex items-center gap-1 rounded-full px-3.5 py-2 text-sm font-medium transition-colors xl:px-4",
-          active
-            ? "bg-synergy-muted text-synergy-light dark:text-synergy-glow"
-            : "text-ink-body hover:bg-surface-muted hover:text-ink",
+          "relative flex items-center gap-1 rounded-full px-4 py-2 text-sm font-medium transition-colors xl:px-5",
+          onMedia
+            ? active || open
+              ? "bg-white/15 text-white"
+              : "text-white/90 hover:bg-white/10 hover:text-white"
+            : active || open
+              ? "bg-synergy-muted text-synergy-light dark:text-synergy-glow"
+              : "text-ink-body hover:bg-surface-muted hover:text-ink",
+          (active || open) &&
+            "after:absolute after:inset-x-4 after:-bottom-0.5 after:h-0.5 after:rounded-full after:bg-synergy",
         )}
         onFocus={handleEnter}
       >
@@ -68,14 +89,19 @@ export function MegaMenu({ label, href, menu, active }: MegaMenuProps) {
           aria-hidden
           className={cn("mt-px transition-transform duration-200", open && "rotate-180")}
         >
-          <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+          <path
+            d="M2 3.5L5 6.5L8 3.5"
+            stroke="currentColor"
+            strokeWidth="1.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
       </Link>
 
       <AnimatePresence>
         {open ? (
-          /* Outer shell owns centering transform; Framer Motion animates only the inner layer. */
-          <div className="absolute left-1/2 top-full z-50 w-[min(52rem,calc(100vw-2rem))] -translate-x-1/2 pt-3">
+          <div className="absolute left-1/2 top-full z-50 w-[min(64rem,calc(100vw-2rem))] -translate-x-1/2 pt-3">
             <motion.div
               role="menu"
               aria-label={`${label} submenu`}
@@ -84,13 +110,88 @@ export function MegaMenu({ label, href, menu, active }: MegaMenuProps) {
               exit={{ opacity: 0, y: -6 }}
               transition={{ duration: motionDurations.hover, ease: motionEase }}
             >
-              <div className="overflow-hidden rounded-2xl border border-border/70 bg-surface-elevated shadow-card">
-                <div className="grid grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
-                  {/* Featured column */}
+              <div
+                className="overflow-hidden rounded-2xl border border-white/15 shadow-card"
+                style={{
+                  background:
+                    "linear-gradient(145deg, #0d2818 0%, #1a4d2a 42%, #357c3c 78%, #2d6a34 100%)",
+                }}
+              >
+                <div className="grid lg:grid-cols-[minmax(0,1.35fr)_minmax(14rem,0.65fr)]">
+                  <div className="flex flex-col px-6 py-7 sm:px-8">
+                    <div
+                      className={cn(
+                        "grid flex-1 gap-8",
+                        multiCol ? "sm:grid-cols-2" : "grid-cols-1",
+                      )}
+                    >
+                      {menu.columns.map((column, colIndex) => (
+                        <div key={`${column.heading}-${colIndex}`}>
+                          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/70">
+                            {column.heading.trim() || "Explore"}
+                          </p>
+                          <div className="mt-2 h-px w-10 bg-white/80" aria-hidden />
+                          <ul className="mt-4 space-y-0.5">
+                            {column.links.map((link) => (
+                              <li key={link.href}>
+                                <Link
+                                  href={link.href}
+                                  role="menuitem"
+                                  className="group flex items-center gap-3 rounded-lg px-2 py-2.5 text-sm font-medium text-white/90 transition-colors hover:bg-white/10 hover:text-white"
+                                >
+                                  <span
+                                    className={cn(
+                                      "flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden text-white transition",
+                                      link.logoUrl && "rounded-md bg-white/95 p-1",
+                                    )}
+                                  >
+                                    {link.logoUrl ? (
+                                      <ResilientImg
+                                        src={link.logoUrl}
+                                        alt=""
+                                        className="h-6 w-7 object-contain"
+                                      />
+                                    ) : (
+                                      <NavLinkIcon
+                                        href={link.href}
+                                        label={link.label}
+                                        icon={link.icon}
+                                        size={18}
+                                      />
+                                    )}
+                                  </span>
+                                  <span className="min-w-0 flex-1 leading-snug">{link.label}</span>
+                                  <ChevronRight
+                                    className="h-4 w-4 shrink-0 text-white/40 transition group-hover:translate-x-0.5 group-hover:text-white"
+                                    aria-hidden
+                                  />
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+
+                    {menu.seeAll ? (
+                      <Link
+                        href={menu.seeAll.href}
+                        role="menuitem"
+                        className="group mt-6 inline-flex items-center gap-2 border-t border-white/20 pt-4 text-sm font-semibold text-white transition hover:text-white/85"
+                      >
+                        {menu.seeAll.label}
+                        <ArrowRight
+                          className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
+                          aria-hidden
+                        />
+                      </Link>
+                    ) : null}
+                  </div>
+
                   <Link
                     href={menu.featured.href}
                     role="menuitem"
-                    className="group flex flex-col justify-between gap-4 border-r border-border/60 bg-surface-muted/60 p-6 transition-colors hover:bg-synergy-muted/40"
+                    className="group flex flex-col justify-between gap-5 border-t border-white/15 bg-black/20 px-6 py-7 transition-colors hover:bg-black/30 sm:px-7 lg:border-l lg:border-t-0"
                   >
                     <div>
                       {menu.featured.image ? (
@@ -98,22 +199,27 @@ export function MegaMenu({ label, href, menu, active }: MegaMenuProps) {
                         <img
                           src={menu.featured.image}
                           alt=""
-                          className="mb-4 h-28 w-full rounded-lg object-cover"
+                          className="mb-4 h-24 w-full rounded-lg object-cover object-center ring-1 ring-white/15"
                         />
                       ) : FeaturedIcon ? (
-                        <span className="mb-4 flex h-11 w-11 items-center justify-center rounded-full bg-synergy-muted text-synergy-dark dark:text-synergy-glow">
-                          <FeaturedIcon className="h-5 w-5" aria-hidden />
+                        <span className="mb-4 flex h-11 w-11 items-center justify-center text-white">
+                          <FeaturedIcon className="h-6 w-6" strokeWidth={1.75} aria-hidden />
                         </span>
                       ) : null}
                       {menu.featured.eyebrow ? (
-                        <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-synergy">
+                        <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/85">
                           {menu.featured.eyebrow}
                         </p>
                       ) : null}
-                      <h3 className="mt-1.5 text-base font-bold leading-snug text-ink">{menu.featured.title}</h3>
-                      <p className="mt-2 text-sm leading-relaxed text-ink-muted">{menu.featured.description}</p>
+                      <div className="mt-2 h-px w-10 bg-white/70" aria-hidden />
+                      <h3 className="mt-3 text-base font-bold leading-snug text-white">
+                        {menu.featured.title}
+                      </h3>
+                      <p className="mt-2 text-sm leading-relaxed text-white/70">
+                        {menu.featured.description}
+                      </p>
                     </div>
-                    <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-synergy">
+                    <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-white">
                       {menu.featured.ctaLabel}
                       <ArrowRight
                         className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
@@ -121,39 +227,6 @@ export function MegaMenu({ label, href, menu, active }: MegaMenuProps) {
                       />
                     </span>
                   </Link>
-
-                  {/* Link columns */}
-                  <div
-                    className={cn(
-                      "grid gap-x-6 p-6",
-                      menu.columns.length > 1 ? "grid-cols-2" : "grid-cols-1",
-                    )}
-                  >
-                    {menu.columns.map((column, colIndex) => (
-                      <div key={`${column.heading}-${colIndex}`}>
-                        <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-ink-muted">
-                          {column.heading}
-                        </p>
-                        <ul className="mt-3 space-y-0.5">
-                          {column.links.map((link) => (
-                            <li key={link.href}>
-                              <Link
-                                href={link.href}
-                                role="menuitem"
-                                className="group flex items-center justify-between gap-2 rounded-lg px-2 py-2 text-sm font-medium text-ink-body transition-colors hover:bg-surface-muted hover:text-ink"
-                              >
-                                <span>{link.label}</span>
-                                <ArrowRight
-                                  className="h-3.5 w-3.5 shrink-0 text-synergy opacity-0 transition-all duration-200 group-hover:translate-x-0.5 group-hover:opacity-100"
-                                  aria-hidden
-                                />
-                              </Link>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
-                  </div>
                 </div>
               </div>
             </motion.div>

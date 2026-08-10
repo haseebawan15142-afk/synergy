@@ -1,5 +1,7 @@
 /**
- * Public CMS reads — Firestore first, local content fallback.
+ * Public CMS reads — Firestore first, stale cache, then local content fallback.
+ * Image fields prefer same-origin `/images` / `/brand` assets when a local seed
+ * exists so the site keeps rendering if Firebase Storage is unreachable.
  * Safe for client components; also usable from the browser after hydration.
  */
 import {
@@ -13,8 +15,19 @@ import {
 } from "firebase/firestore";
 import { getFirebaseDb } from "@/lib/firebase/client";
 import { COLLECTIONS, DOCS, DEFAULT_SITE_SETTINGS, type SiteSettings } from "@/lib/firebase/collections";
-import { DEFAULT_THEME, type ThemeTokens, type NavItemDoc } from "@/lib/admin/types";
+import {
+  DEFAULT_THEME,
+  type ThemeTokens,
+  type NavItemDoc,
+  type MegaMenuIconsDoc,
+} from "@/lib/admin/types";
 import { services as localServices, type Service } from "@/lib/content/services";
+import {
+  MEGA_MENU_ICON_KEYS,
+  defaultMegaMenuIconLinks,
+  type MegaMenuIconKey,
+} from "@/lib/content/nav-menus";
+import { isNavIconKey } from "@/lib/content/nav-icons";
 import { leadershipTeam as localLeadership, type LeadershipMember } from "@/lib/content/leadership";
 import { blogPosts as localBlogs, type BlogPostMeta } from "@/lib/content/blog-posts";
 import { jobOpenings as localJobs } from "@/lib/content/careers";
@@ -36,23 +49,34 @@ import {
   type OfficeLocation,
 } from "@/lib/content/company-profile";
 import { siteConfig } from "@/lib/content/site";
+import { blogImagesGenerated } from "@/lib/content/blog-images.generated";
 import { cachedCms } from "@/lib/cms/cache";
+import { resolveResilientAssetUrl } from "@/lib/media/asset-url";
 
 function firebaseReady() {
   return Boolean(process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID);
 }
 
+/** Cache + stale-on-error, then bundled local content if nothing cached yet. */
+async function cmsRead<T>(key: string, loader: () => Promise<T>, fallback: () => T): Promise<T> {
+  try {
+    return await cachedCms(key, loader);
+  } catch {
+    return fallback();
+  }
+}
+
 export async function fetchSiteSettings(): Promise<SiteSettings> {
-  return cachedCms("settings:site", async () => {
-    if (!firebaseReady()) return mapSiteConfig();
-    try {
+  return cmsRead(
+    "settings:site",
+    async () => {
+      if (!firebaseReady()) return mapSiteConfig();
       const snap = await getDoc(doc(getFirebaseDb(), COLLECTIONS.settings, DOCS.settingsSite));
       if (!snap.exists()) return mapSiteConfig();
       return { ...DEFAULT_SITE_SETTINGS, ...mapSiteConfig(), ...(snap.data() as Partial<SiteSettings>) };
-    } catch {
-      return mapSiteConfig();
-    }
-  });
+    },
+    mapSiteConfig,
+  );
 }
 
 function mapSiteConfig(): SiteSettings {
@@ -75,11 +99,14 @@ function mapSiteConfig(): SiteSettings {
 }
 
 export async function fetchOffices(): Promise<OfficeLocation[]> {
-  return cachedCms("offices:v3", async () => {
-    if (!firebaseReady()) return localOffices;
-    try {
+  return cmsRead(
+    "offices:v4",
+    async () => {
+      if (!firebaseReady()) return localOffices;
       const snap = await getDocs(collection(getFirebaseDb(), COLLECTIONS.offices));
       if (snap.empty) return localOffices;
+
+      const localById = new Map(localOffices.map((o) => [o.id, o]));
 
       type Row = OfficeLocation & { sortOrder: number };
       const fromCms = snap.docs
@@ -90,6 +117,7 @@ export async function fetchOffices(): Promise<OfficeLocation[]> {
           const city = String(x.city || "").trim();
           if (!label || !city) return null;
           const id = String(d.id);
+          const local = localById.get(id);
           const preset =
             id in pakistanCityMapPositions
               ? pakistanCityMapPositions[id as keyof typeof pakistanCityMapPositions]
@@ -119,8 +147,14 @@ export async function fetchOffices(): Promise<OfficeLocation[]> {
                 .map((l) => l.trim())
                 .filter(Boolean);
           const landmarkName = String(x.landmarkName || "").trim();
-          const landmarkImage = String(x.landmarkImageUrl || "").trim();
-          const landmarkBackground = String(x.landmarkBackgroundUrl || "").trim();
+          const landmarkImage = resolveResilientAssetUrl(
+            String(x.landmarkImageUrl || "").trim(),
+            local?.landmark?.image,
+          );
+          const landmarkBackground = resolveResilientAssetUrl(
+            String(x.landmarkBackgroundUrl || "").trim(),
+            local?.landmark?.background,
+          );
           return {
             id,
             label,
@@ -155,23 +189,22 @@ export async function fetchOffices(): Promise<OfficeLocation[]> {
         return fromCms.map(({ sortOrder: _s, ...office }) => office);
       }
       return localOffices;
-    } catch {
-      return localOffices;
-    }
-  });
+    },
+    () => localOffices,
+  );
 }
 
 export async function fetchThemeTokens(): Promise<ThemeTokens> {
-  return cachedCms("theme:tokens", async () => {
-    if (!firebaseReady()) return DEFAULT_THEME;
-    try {
+  return cmsRead(
+    "theme:tokens",
+    async () => {
+      if (!firebaseReady()) return DEFAULT_THEME;
       const snap = await getDoc(doc(getFirebaseDb(), COLLECTIONS.theme, DOCS.themeTokens));
       if (!snap.exists()) return DEFAULT_THEME;
       return { ...DEFAULT_THEME, ...(snap.data() as Partial<ThemeTokens>) };
-    } catch {
-      return DEFAULT_THEME;
-    }
-  });
+    },
+    () => DEFAULT_THEME,
+  );
 }
 
 function parsePipeRows(value: unknown): { title: string; description: string }[] {
@@ -187,9 +220,10 @@ function parsePipeRows(value: unknown): { title: string; description: string }[]
 }
 
 export async function fetchServices(): Promise<Service[]> {
-  return cachedCms("services:v3", async () => {
-    if (!firebaseReady()) return localServices;
-    try {
+  return cmsRead(
+    "services:v6",
+    async () => {
+      if (!firebaseReady()) return localServices;
       const snap = await getDocs(collection(getFirebaseDb(), COLLECTIONS.services));
       if (snap.empty) return localServices;
 
@@ -208,15 +242,22 @@ export async function fetchServices(): Promise<Service[]> {
           if (!title) return null;
           const slug = String(x.slug || d.id).trim();
           const local = localBySlug.get(slug.toLowerCase());
-          const image =
-            String(x.imageUrl || x.bannerUrl || x.heroImageUrl || "").trim() ||
-            local?.image ||
-            "";
+          const image = resolveResilientAssetUrl(
+            String(x.imageUrl || x.bannerUrl || x.heroImageUrl || "").trim(),
+            local?.image,
+          );
+          const icon = String(x.icon || "").trim() || local?.icon || "";
+          const iconUrl = resolveResilientAssetUrl(
+            String(x.iconUrl || "").trim(),
+            local?.iconUrl,
+          );
           return {
             slug,
             title,
             summary: String(x.shortDescription || x.description || local?.summary || ""),
             image,
+            icon: icon || undefined,
+            iconUrl: iconUrl || undefined,
             sortOrder: typeof x.sortOrder === "number" ? x.sortOrder : Number.MAX_SAFE_INTEGER,
           };
         })
@@ -227,10 +268,9 @@ export async function fetchServices(): Promise<Service[]> {
       // Admin CMS owns services once Firebase has any published row (no local merge).
       if (fromCms.length > 0) return fromCms;
       return localServices;
-    } catch {
-      return localServices;
-    }
-  });
+    },
+    () => localServices,
+  );
 }
 
 export async function fetchServiceBySlug(
@@ -287,12 +327,9 @@ export async function fetchServiceBySlug(
         localService?.summary ||
         "",
     ),
-    image: String(
-      cmsLive?.imageUrl ||
-        cmsLive?.bannerUrl ||
-        cmsLive?.heroImageUrl ||
-        localService?.image ||
-        "",
+    image: resolveResilientAssetUrl(
+      String(cmsLive?.imageUrl || cmsLive?.bannerUrl || cmsLive?.heroImageUrl || ""),
+      localService?.image,
     ),
   };
 
@@ -309,13 +346,9 @@ export async function fetchServiceBySlug(
     capabilities:
       cmsCapabilities.length > 0 ? cmsCapabilities : (localDetail?.capabilities ?? []),
     outcomes: cmsOutcomes.length > 0 ? cmsOutcomes : (localDetail?.outcomes ?? []),
-    heroImage: String(
-      cmsLive?.heroImageUrl ||
-        cmsLive?.bannerUrl ||
-        cmsLive?.imageUrl ||
-        localDetail?.heroImage ||
-        service.image ||
-        "",
+    heroImage: resolveResilientAssetUrl(
+      String(cmsLive?.heroImageUrl || cmsLive?.bannerUrl || cmsLive?.imageUrl || ""),
+      localDetail?.heroImage || service.image,
     ),
   };
 
@@ -336,11 +369,14 @@ export async function fetchServiceBySlug(
 }
 
 export async function fetchClients(): Promise<ClientLogo[]> {
-  return cachedCms("clients:v2", async () => {
-    if (!firebaseReady()) return localClients;
-    try {
+  return cmsRead(
+    "clients:v3",
+    async () => {
+      if (!firebaseReady()) return localClients;
       const snap = await getDocs(collection(getFirebaseDb(), COLLECTIONS.clients));
       if (snap.empty) return localClients;
+
+      const localBySlug = new Map(localClients.map((c) => [c.slug.toLowerCase(), c]));
 
       type Row = ClientLogo & { sortOrder: number };
       const fromCms = snap.docs
@@ -349,18 +385,19 @@ export async function fetchClients(): Promise<ClientLogo[]> {
           // Treat missing `active` as true (legacy docs); explicit false hides.
           if (x.active === false) return null;
           const name = String(x.name || "").trim();
-          const logo = String(x.logoUrl || x.logo || "").trim();
-          if (!name || !logo) return null;
+          const cmsLogo = String(x.logoUrl || x.logo || "").trim();
+          if (!name || !cmsLogo) return null;
           const slug =
             String(x.slug || "").trim() ||
             name
               .toLowerCase()
               .replace(/[^a-z0-9]+/g, "-")
               .replace(/^-+|-+$/g, "");
+          const local = localBySlug.get(slug.toLowerCase());
           return {
             name,
             slug,
-            logo,
+            logo: resolveResilientAssetUrl(cmsLogo, local?.logo),
             sortOrder: typeof x.sortOrder === "number" ? x.sortOrder : Number.MAX_SAFE_INTEGER,
           };
         })
@@ -372,10 +409,31 @@ export async function fetchClients(): Promise<ClientLogo[]> {
         return fromCms.map(({ sortOrder: _s, ...client }) => client);
       }
       return localClients;
-    } catch {
-      return localClients;
-    }
-  });
+    },
+    () => localClients,
+  );
+}
+
+/** Default header items when CMS primary nav is empty (matches siteConfig.nav). */
+export function defaultHeaderNav(): NavItemDoc[] {
+  return siteConfig.nav.map((item, index) => ({
+    id: item.href.replace(/[^\w]+/g, "-").replace(/^-|-$/g, "") || `nav-${index}`,
+    label: item.label,
+    href: item.href,
+  }));
+}
+
+export async function fetchHeaderNav(): Promise<NavItemDoc[]> {
+  return cmsRead(
+    "navigation:header:v1",
+    async () => {
+      if (!firebaseReady()) return defaultHeaderNav();
+      const cms = await fetchNav(DOCS.navigationPrimary);
+      const items = cms?.filter((item) => !item.hidden && item.label && item.href) || [];
+      return items.length ? items : defaultHeaderNav();
+    },
+    defaultHeaderNav,
+  );
 }
 
 export async function fetchFooterNav(): Promise<NavItemDoc[]> {
@@ -392,11 +450,14 @@ export async function fetchFooterNav(): Promise<NavItemDoc[]> {
 }
 
 export async function fetchNewsletterIssues(): Promise<NewsletterIssue[]> {
-  return cachedCms("newsletterIssues:v1", async () => {
-    if (!firebaseReady()) return localNewsletterIssues;
-    try {
+  return cmsRead(
+    "newsletterIssues:v2",
+    async () => {
+      if (!firebaseReady()) return localNewsletterIssues;
       const snap = await getDocs(collection(getFirebaseDb(), COLLECTIONS.newsletterIssues));
       if (snap.empty) return localNewsletterIssues;
+
+      const localBySlug = new Map(localNewsletterIssues.map((i) => [i.slug.toLowerCase(), i]));
 
       type Row = NewsletterIssue & { _order: number };
       const fromCms = snap.docs
@@ -406,20 +467,21 @@ export async function fetchNewsletterIssues(): Promise<NewsletterIssue[]> {
           if (x.status && x.status !== "published") return null;
           const title = String(x.title || "").trim();
           const excerpt = String(x.excerpt || "").trim();
-          const coverUrl = String(x.coverUrl || "").trim();
-          if (!title || !excerpt || !coverUrl) return null;
+          const cmsCover = String(x.coverUrl || "").trim();
+          if (!title || !excerpt || !cmsCover) return null;
           const slug =
             String(x.slug || "").trim() ||
             title
               .toLowerCase()
               .replace(/[^a-z0-9]+/g, "-")
               .replace(/^-+|-+$/g, "");
+          const local = localBySlug.get(slug.toLowerCase());
           return {
             title,
             slug,
             excerpt,
             body: String(x.body || "").trim() || undefined,
-            coverUrl,
+            coverUrl: resolveResilientAssetUrl(cmsCover, local?.coverUrl),
             topic: String(x.topic || "Update").trim() || "Update",
             href: String(x.href || "").trim() || undefined,
             featured: x.featured === true,
@@ -435,10 +497,9 @@ export async function fetchNewsletterIssues(): Promise<NewsletterIssue[]> {
         return fromCms.map(({ _order: _o, ...issue }) => issue);
       }
       return localNewsletterIssues;
-    } catch {
-      return localNewsletterIssues;
-    }
-  });
+    },
+    () => localNewsletterIssues,
+  );
 }
 
 function isUsablePersonName(name: string) {
@@ -447,11 +508,16 @@ function isUsablePersonName(name: string) {
 }
 
 export async function fetchLeadership(): Promise<LeadershipMember[]> {
-  return cachedCms("leadership:v2", async () => {
-    if (!firebaseReady()) return localLeadership;
-    try {
+  return cmsRead(
+    "leadership:v3",
+    async () => {
+      if (!firebaseReady()) return localLeadership;
       const snap = await getDocs(collection(getFirebaseDb(), COLLECTIONS.leadership));
       if (snap.empty) return localLeadership;
+
+      const localByName = new Map(
+        localLeadership.map((m) => [m.name.trim().toLowerCase(), m]),
+      );
 
       type LeadershipRow = LeadershipMember & { sortOrder: number };
       const rows = snap.docs
@@ -461,11 +527,16 @@ export async function fetchLeadership(): Promise<LeadershipMember[]> {
           const name = String(x.name || "").trim();
           if (!isUsablePersonName(name)) return null;
           const linkedin = String(x.linkedin || "").trim();
+          const local = localByName.get(name.toLowerCase());
+          const photo = resolveResilientAssetUrl(
+            x.photoUrl ? String(x.photoUrl) : "",
+            local?.photoSrc,
+          );
           return {
             name,
             title: String(x.designation || x.title || "").trim(),
             bio: String(x.bio || ""),
-            photoSrc: x.photoUrl ? String(x.photoUrl) : null,
+            photoSrc: photo || null,
             linkedin: linkedin || null,
             sortOrder: typeof x.sortOrder === "number" ? x.sortOrder : Number.MAX_SAFE_INTEGER,
           };
@@ -477,10 +548,9 @@ export async function fetchLeadership(): Promise<LeadershipMember[]> {
       rows.sort((a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name));
       // Board of Directors — CMS owns the list once Firebase has members.
       return rows.map(({ sortOrder: _sortOrder, ...member }) => member);
-    } catch {
-      return localLeadership;
-    }
-  });
+    },
+    () => localLeadership,
+  );
 }
 
 function mapBlogDoc(id: string, x: Record<string, unknown>): BlogPostMeta {
@@ -495,12 +565,22 @@ function mapBlogDoc(id: string, x: Record<string, unknown>): BlogPostMeta {
     date = new Date(Number((x.updatedAt as { seconds: number }).seconds) * 1000).toISOString();
   }
 
+  const slug = String(x.slug || id);
+  const localImage =
+    blogImagesGenerated[slug] ||
+    localBlogs.find((b) => b.slug.toLowerCase() === slug.toLowerCase())?.image ||
+    null;
+  const image = resolveResilientAssetUrl(
+    x.featuredImageUrl ? String(x.featuredImageUrl) : "",
+    localImage,
+  );
+
   return {
-    slug: String(x.slug || id),
+    slug,
     title: String(x.title || ""),
     date,
     legacyUrl: "",
-    image: x.featuredImageUrl ? String(x.featuredImageUrl) : null,
+    image: image || null,
     category: String(x.category || "General"),
     relatedServiceSlug: String(x.relatedServiceSlug || ""),
     bodyHtml: x.bodyHtml ? String(x.bodyHtml) : undefined,
@@ -514,9 +594,10 @@ function mapBlogDoc(id: string, x: Record<string, unknown>): BlogPostMeta {
  * so docs without that field are still returned. Merges CMS + local-only slugs.
  */
 export async function fetchPublishedBlogs(max = 200): Promise<BlogPostMeta[]> {
-  return cachedCms(`blogs:${max}`, async () => {
-    if (!firebaseReady()) return localBlogs.slice(0, max);
-    try {
+  return cmsRead(
+    `blogs:v2:${max}`,
+    async () => {
+      if (!firebaseReady()) return localBlogs.slice(0, max);
       // Constraint must match public read rule (status == published) or the
       // whole list query fails when drafts exist in the collection.
       const q = query(
@@ -537,10 +618,9 @@ export async function fetchPublishedBlogs(max = 200): Promise<BlogPostMeta[]> {
       const cmsSlugs = new Set(fromCms.map((b) => b.slug.toLowerCase()));
       const localOnly = localBlogs.filter((b) => !cmsSlugs.has(b.slug.toLowerCase()));
       return [...fromCms, ...localOnly].slice(0, max);
-    } catch {
-      return localBlogs.slice(0, max);
-    }
-  });
+    },
+    () => localBlogs.slice(0, max),
+  );
 }
 
 export async function fetchBlogBySlug(slug: string): Promise<BlogPostMeta | null> {
@@ -576,9 +656,10 @@ export async function fetchBlogBySlug(slug: string): Promise<BlogPostMeta | null
  * under Firestore rules when draft/closed jobs exist (admin-only docs).
  */
 export async function fetchOpenJobs() {
-  return cachedCms("careers:open:v2", async () => {
-    if (!firebaseReady()) return localJobs;
-    try {
+  return cmsRead(
+    "careers:open:v2",
+    async () => {
+      if (!firebaseReady()) return localJobs;
       const q = query(
         collection(getFirebaseDb(), COLLECTIONS.careers),
         where("status", "==", "open"),
@@ -602,10 +683,9 @@ export async function fetchOpenJobs() {
       // Admin CMS owns careers once any open job exists — drop local seed defaults.
       if (fromCms.length > 0) return fromCms;
       return localJobs;
-    } catch {
-      return localJobs;
-    }
-  });
+    },
+    () => localJobs,
+  );
 }
 
 function slugifyPartnerName(value: string) {
@@ -631,26 +711,45 @@ function asStringList(value: unknown): string[] {
   return [];
 }
 
+function isUsablePartnerLogo(logo: string) {
+  const value = logo.trim().toLowerCase();
+  if (!value) return false;
+  // Seeded / missing brand marks used this SVG (renders the word "Partner").
+  if (value.includes("wordmark-placeholder")) return false;
+  return true;
+}
+
 function withPartnerFallbacks(partner: Partner): Partner {
   const slug = partner.slug || slugifyPartnerName(partner.name);
+  const local = localPartners.find(
+    (p) => (p.slug || slugifyPartnerName(p.name)).toLowerCase() === slug.toLowerCase(),
+  );
+  const cmsLogo = isUsablePartnerLogo(partner.logo) ? partner.logo : "";
+  const localLogo = local?.logo && isUsablePartnerLogo(local.logo) ? local.logo : "";
+  const logo =
+    resolveResilientAssetUrl(cmsLogo, localLogo) || localLogo || cmsLogo || partner.logo || "";
+
   return {
     ...partner,
     slug,
-    taglines: partner.taglines ?? [],
-    keySolutions: partner.keySolutions ?? [],
-    shortDescription: partner.shortDescription ?? "",
-    overview: partner.overview ?? "",
-    heroImageUrl: partner.heroImageUrl ?? "",
-    category: partner.category ?? "",
+    logo,
+    href: partner.href && partner.href !== "#" ? partner.href : local?.href || partner.href || "#",
+    taglines: partner.taglines?.length ? partner.taglines : (local?.taglines ?? []),
+    keySolutions: partner.keySolutions?.length ? partner.keySolutions : (local?.keySolutions ?? []),
+    shortDescription: partner.shortDescription || local?.shortDescription || "",
+    overview: partner.overview || local?.overview || "",
+    heroImageUrl: resolveResilientAssetUrl(partner.heroImageUrl, local?.heroImageUrl),
+    category: partner.category || local?.category || "",
   };
 }
 
 export async function fetchPartners(): Promise<Partner[]> {
-  return cachedCms("partners:v2", async () => {
-    if (!firebaseReady()) {
-      return localPartners.map(withPartnerFallbacks);
-    }
-    try {
+  return cmsRead(
+    "partners:v5",
+    async () => {
+      if (!firebaseReady()) {
+        return localPartners.map(withPartnerFallbacks);
+      }
       const snap = await getDocs(collection(getFirebaseDb(), COLLECTIONS.partners));
       if (snap.empty) return localPartners.map(withPartnerFallbacks);
 
@@ -703,10 +802,9 @@ export async function fetchPartners(): Promise<Partner[]> {
       // (merge was why site showed partners that admin couldn't edit/delete).
       if (fromCms.length > 0) return fromCms;
       return localPartners.map(withPartnerFallbacks);
-    } catch {
-      return localPartners.map(withPartnerFallbacks);
-    }
-  });
+    },
+    () => localPartners.map(withPartnerFallbacks),
+  );
 }
 
 export async function fetchPartnerBySlug(slug: string): Promise<Partner | null> {
@@ -757,4 +855,79 @@ export async function fetchNav(docId: string): Promise<NavItemDoc[] | null> {
   } catch {
     return null;
   }
+}
+
+/** Per-link mega-menu icon overrides (upload and/or Lucide). */
+export type MegaMenuLinkIconStyle = {
+  icon?: string;
+  iconUrl?: string;
+};
+
+/** menuKey → href → style */
+export type MegaMenuIconMap = Record<string, Record<string, MegaMenuLinkIconStyle>>;
+
+function localMegaMenuIconMap(): MegaMenuIconMap {
+  const defaults = defaultMegaMenuIconLinks();
+  const out: MegaMenuIconMap = {};
+  for (const key of MEGA_MENU_ICON_KEYS) {
+    out[key] = {};
+    for (const link of defaults[key].links) {
+      out[key][link.href] = {
+        icon: link.icon,
+        iconUrl: link.logoUrl,
+      };
+    }
+  }
+  return out;
+}
+
+/**
+ * CMS mega-menu icons (navigation/megaMenus).
+ * Supports uploaded iconUrl (preferred) and Lucide preset; falls back to defaults.
+ */
+export async function fetchMegaMenuIcons(): Promise<MegaMenuIconMap> {
+  return cmsRead(
+    "navigation:megaMenus:v2",
+    async () => {
+      const fallback = localMegaMenuIconMap();
+      if (!firebaseReady()) return fallback;
+
+      const snap = await getDoc(
+        doc(getFirebaseDb(), COLLECTIONS.navigation, DOCS.navigationMegaMenus),
+      );
+      if (!snap.exists()) return fallback;
+
+      const data = snap.data() as MegaMenuIconsDoc;
+      const menus = data?.menus || {};
+      const out: MegaMenuIconMap = { ...fallback };
+
+      for (const key of MEGA_MENU_ICON_KEYS) {
+        const menuKey = key as MegaMenuIconKey;
+        const links = menus[menuKey]?.links;
+        if (!Array.isArray(links) || !links.length) continue;
+        const map: Record<string, MegaMenuLinkIconStyle> = { ...(out[menuKey] || {}) };
+        for (const link of links) {
+          const href = String(link.href || "").trim();
+          if (!href) continue;
+          const icon = String(link.icon || "").trim();
+          const iconUrl = String(link.iconUrl || "").trim();
+          const next: MegaMenuLinkIconStyle = { ...(map[href] || {}) };
+          if (iconUrl) {
+            next.iconUrl = iconUrl;
+          } else {
+            delete next.iconUrl;
+          }
+          if (icon && isNavIconKey(icon)) {
+            next.icon = icon;
+          } else if (!icon) {
+            delete next.icon;
+          }
+          map[href] = next;
+        }
+        out[menuKey] = map;
+      }
+      return out;
+    },
+    localMegaMenuIconMap,
+  );
 }

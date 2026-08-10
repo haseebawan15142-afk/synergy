@@ -37,6 +37,8 @@ export const DOCS = {
   themeTokens: "tokens",
   navigationPrimary: "primary",
   navigationFooter: "footer",
+  /** About / Industries / Insights mega-menu link icons */
+  navigationMegaMenus: "megaMenus",
 } as const;
 
 export type ContentStatus = "draft" | "published" | "archived";
@@ -80,7 +82,7 @@ export type SiteSettings = {
   contactDescription?: string;
   contactFormIntro?: string;
   contactAsideText?: string;
-  /** Media URLs — filled in Phase 2 */
+  /** Brand media — Admin → Website Settings → Brand media (public site reads these). */
   logoUrl?: string;
   darkLogoUrl?: string;
   faviconUrl?: string;
@@ -111,7 +113,10 @@ export type ContactMessage = {
   email: string;
   message: string;
   status: "unread" | "read" | "archived";
+  /** Legacy / form default — prefer `replied` + `repliedAt` for new replies. */
   replyStatus?: "none" | "replied";
+  replied?: boolean;
+  repliedAt?: TimestampLike;
   createdAt?: TimestampLike;
 };
 

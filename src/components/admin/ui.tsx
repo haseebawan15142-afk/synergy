@@ -100,9 +100,9 @@ export function SecondaryButton({
 
 export function StatusBadge({ status }: { status: string }) {
   const tone =
-    status === "published" || status === "open" || status === "active"
+    status === "published" || status === "open" || status === "active" || status === "replied"
       ? "bg-synergy-muted text-synergy-dark"
-      : status === "draft" || status === "scheduled"
+      : status === "draft" || status === "scheduled" || status === "unread"
         ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
         : "bg-surface-muted text-ink-muted";
   return (

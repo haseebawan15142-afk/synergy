@@ -80,9 +80,22 @@ function LoginForm() {
     setSubmitting(true);
     try {
       const user = await loginWithEmail(email.trim(), password);
-      const profile = await fetchAdminProfile(user.uid);
+      let profile;
+      try {
+        profile = await fetchAdminProfile(user.uid);
+      } catch (profileErr) {
+        const detail =
+          profileErr instanceof Error ? profileErr.message : "Firestore profile read failed";
+        toast.error(
+          `Signed in, but admin profile could not be loaded (${detail}). Deploy firestore.rules and ensure users/{uid}.role = admin.`,
+        );
+        setSubmitting(false);
+        return;
+      }
       if (profile?.role !== "admin") {
-        toast.error("This account is not an admin.");
+        toast.error(
+          "This account signed in, but has no admin role in Firestore (users collection).",
+        );
         setSubmitting(false);
         return;
       }
@@ -90,7 +103,15 @@ function LoginForm() {
       router.replace(next.startsWith("/admin") ? next : "/admin");
     } catch (err) {
       const message = err instanceof Error ? err.message : "Login failed";
-      toast.error(message.includes("auth/") ? "Invalid email or password" : message);
+      const code =
+        typeof err === "object" && err && "code" in err
+          ? String((err as { code?: string }).code || "")
+          : "";
+      if (code.includes("auth/") || message.includes("auth/")) {
+        toast.error("Invalid email or password");
+      } else {
+        toast.error(message || "Login failed");
+      }
       setSubmitting(false);
     }
   }

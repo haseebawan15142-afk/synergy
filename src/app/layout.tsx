@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { siteConfig } from "@/lib/content/site";
+import { fetchSiteSettings } from "@/lib/cms/public";
+import { resolveFaviconUrl, resolveOgImageUrl } from "@/lib/brand/logo";
 import "./globals.css";
 
 const inter = Inter({
@@ -18,15 +20,30 @@ const spaceGrotesk = Space_Grotesk({
   preload: true,
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: `${siteConfig.name} | IT Solutions Pakistan`,
-    template: `%s | ${siteConfig.name}`,
-  },
-  description: siteConfig.description,
-  metadataBase: new URL(siteConfig.url),
-  icons: { icon: "/brand/favicon.png" },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await fetchSiteSettings();
+  const name = settings.companyName?.trim() || siteConfig.name;
+  const description = settings.description?.trim() || siteConfig.description;
+  const favicon = resolveFaviconUrl(settings);
+  const ogImage = resolveOgImageUrl(settings);
+
+  return {
+    title: {
+      default: settings.defaultSeoTitle?.trim() || `${name} | IT Solutions Pakistan`,
+      template: `%s | ${name}`,
+    },
+    description: settings.defaultSeoDescription?.trim() || description,
+    metadataBase: new URL(siteConfig.url),
+    icons: { icon: favicon },
+    openGraph: {
+      title: name,
+      description,
+      url: siteConfig.url,
+      siteName: name,
+      ...(ogImage ? { images: [{ url: ogImage }] } : {}),
+    },
+  };
+}
 
 export const viewport: Viewport = {
   width: "device-width",

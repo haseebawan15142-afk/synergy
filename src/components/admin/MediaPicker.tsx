@@ -5,6 +5,10 @@ import { toast } from "sonner";
 import { listMedia, uploadMediaFile } from "@/lib/admin/media";
 import type { MediaAsset } from "@/lib/admin/types";
 import { MEDIA_FOLDERS } from "@/lib/admin/types";
+import {
+  ACCEPT_IMAGE_ATTR,
+  isAcceptableImageUpload,
+} from "@/lib/admin/image-convert";
 import { useAdminAuth } from "@/components/admin/AdminAuthProvider";
 import { MediaDropzone } from "@/components/admin/MediaDropzone";
 import { Field, PrimaryButton, SecondaryButton, inputClass } from "@/components/admin/ui";
@@ -58,7 +62,9 @@ export function MediaPicker({ open, folder, onClose, onSelect }: MediaPickerProp
           onProgress: setProgress,
         });
       }
-      toast.success(`Uploaded ${files.length} file(s) to Firebase (WebP for images)`);
+      toast.success(
+        `Uploaded ${files.length} file(s) — rasters saved as WebP, SVG kept as SVG`,
+      );
       await reload();
       if (last && files.length === 1) {
         onSelect(last);
@@ -108,7 +114,7 @@ export function MediaPicker({ open, folder, onClose, onSelect }: MediaPickerProp
             uploading={uploading}
             progress={progress}
             onFiles={handleFiles}
-            accept="image/*,.webp,video/*,application/pdf"
+            accept={`${ACCEPT_IMAGE_ATTR},video/*,application/pdf`}
             label="Drop images here"
             hint="PNG, JPG, WebP, or drag multiple files"
           />
@@ -180,8 +186,10 @@ export function MediaUrlField({
   async function handleFiles(files: File[]) {
     const file = files[0];
     if (!file) return;
-    if (!file.type.startsWith("image/") && file.type !== "application/pdf") {
-      toast.error("Please choose an image file (JPG, PNG, etc.). It will be saved as WebP.");
+    if (!isAcceptableImageUpload(file) && file.type !== "application/pdf") {
+      toast.error(
+        "Please choose an image (JPG, PNG, GIF, WebP, AVIF, BMP, ICO, SVG, TIFF, HEIC…). Rasters save as WebP; SVG stays SVG.",
+      );
       return;
     }
     setUploading(true);
@@ -195,8 +203,10 @@ export function MediaUrlField({
       onChange(asset.url);
       toast.success(
         asset.contentType === "image/webp"
-          ? "Uploaded to Firebase as WebP"
-          : "Uploaded to Firebase Storage",
+          ? "Converted & saved to Firebase as WebP"
+          : asset.contentType === "image/svg+xml"
+            ? "Saved SVG to Firebase Storage"
+            : "Uploaded to Firebase Storage",
       );
     } catch (err) {
       const message = err instanceof Error ? err.message : "Upload failed";
@@ -237,7 +247,7 @@ export function MediaUrlField({
         uploading={uploading}
         progress={progress}
         onFiles={handleFiles}
-        accept="image/*,.webp,.jpg,.jpeg,.png,.gif,.avif"
+        accept={ACCEPT_IMAGE_ATTR}
         label={
           phase === "converting"
             ? "Converting to WebP…"
@@ -245,7 +255,7 @@ export function MediaUrlField({
               ? "Uploading to Firebase…"
               : "Drop image here"
         }
-        hint="JPG/PNG/etc. auto-convert to WebP, then save to Firebase Storage"
+        hint="Any common image format → WebP on Firebase (SVG kept as SVG)"
       />
 
       {value ? (

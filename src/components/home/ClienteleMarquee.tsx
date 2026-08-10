@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback } from "react";
-import Image from "next/image";
 import {
   clienteleHeadline,
   clienteleIntro,
@@ -12,8 +11,10 @@ import {
 import { fetchClients } from "@/lib/cms/public";
 import { useCmsList } from "@/hooks/useCmsList";
 import { cn } from "@/lib/cn";
+import { ResilientImage } from "@/components/media/ResilientImage";
 
 function ClientCard({ client }: { client: ClientLogo }) {
+  const localLogo = localClients.find((c) => c.slug === client.slug)?.logo;
   return (
     <article
       className="relative flex h-24 w-full items-center justify-center overflow-hidden rounded-2xl bg-white px-3 shadow-soft ring-1 ring-border/60 sm:h-28"
@@ -21,8 +22,9 @@ function ClientCard({ client }: { client: ClientLogo }) {
     >
       <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-synergy" aria-hidden />
       <div className="flex h-full w-full items-center justify-center px-2 py-3">
-        <Image
+        <ResilientImage
           src={client.logo}
+          fallbackSrc={localLogo}
           alt={client.name}
           width={200}
           height={100}

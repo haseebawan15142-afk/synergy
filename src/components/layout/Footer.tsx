@@ -43,7 +43,15 @@ export async function Footer() {
       />
       <div className="page-container relative grid gap-8 py-12 sm:grid-cols-2 sm:gap-10 sm:py-14 lg:grid-cols-4 lg:gap-10 lg:py-16">
         <div className="lg:col-span-2">
-          <BrandLogo variant="footer" theme="dark" className="mb-5" />
+          <BrandLogo
+            variant="footer"
+            theme="dark"
+            className="mb-5"
+            logoUrl={settings.logoUrl}
+            darkLogoUrl={settings.darkLogoUrl}
+            footerLogoUrl={settings.footerLogoUrl}
+            companyName={settings.legalName || settings.companyName}
+          />
           <p className="max-w-md text-sm leading-relaxed text-slate-400">
             {settings.addressLine}
             {settings.addressCity ? `, ${settings.addressCity}` : ""}

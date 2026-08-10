@@ -1,12 +1,14 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
+import { ResilientImage } from "@/components/media/ResilientImage";
 
 export type MarqueeLogo = {
   name: string;
   logo: string;
+  /** Bundled fallback when CMS/Firebase logo fails. */
+  fallbackLogo?: string;
   href?: string;
 };
 
@@ -27,8 +29,9 @@ type LogoMarqueeProps = {
 function LogoCard({ item }: { item: MarqueeLogo }) {
   const inner = (
     <>
-      <Image
+      <ResilientImage
         src={item.logo}
+        fallbackSrc={item.fallbackLogo}
         alt=""
         width={160}
         height={64}

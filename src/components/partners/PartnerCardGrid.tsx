@@ -1,12 +1,21 @@
-import Image from "next/image";
 import Link from "next/link";
-import { partnerDetailPath, type Partner } from "@/lib/content/partners";
+import {
+  partnerDetailPath,
+  partners as localPartners,
+  type Partner,
+} from "@/lib/content/partners";
+import { ResilientImage, ResilientImg } from "@/components/media/ResilientImage";
 
 type PartnerCardGridProps = {
   partners: Partner[];
   title?: string;
   className?: string;
 };
+
+function localPartnerLogo(partner: Partner) {
+  const slug = (partner.slug || partner.name).toLowerCase();
+  return localPartners.find((p) => (p.slug || p.name).toLowerCase() === slug)?.logo;
+}
 
 export function PartnerCardGrid({
   partners,
@@ -31,6 +40,7 @@ export function PartnerCardGrid({
         <ul className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {partners.map((partner) => {
             const href = partnerDetailPath(partner);
+            const fallback = localPartnerLogo(partner);
             return (
               <li key={href}>
                 <Link
@@ -39,13 +49,24 @@ export function PartnerCardGrid({
                 >
                   <div className="flex h-20 items-center justify-center rounded-lg bg-white px-4 py-3">
                     {partner.logo ? (
-                      <Image
-                        src={partner.logo}
-                        alt={partner.name}
-                        width={160}
-                        height={64}
-                        className="max-h-12 w-auto max-w-full object-contain"
-                      />
+                      partner.logo.toLowerCase().endsWith(".svg") ||
+                      fallback?.toLowerCase().endsWith(".svg") ? (
+                        <ResilientImg
+                          src={partner.logo}
+                          fallbackSrc={fallback}
+                          alt={partner.name}
+                          className="max-h-12 w-auto max-w-full object-contain"
+                        />
+                      ) : (
+                        <ResilientImage
+                          src={partner.logo}
+                          fallbackSrc={fallback}
+                          alt={partner.name}
+                          width={160}
+                          height={64}
+                          className="max-h-12 w-auto max-w-full object-contain"
+                        />
+                      )
                     ) : (
                       <span className="text-sm font-semibold text-ink-muted">{partner.name}</span>
                     )}
