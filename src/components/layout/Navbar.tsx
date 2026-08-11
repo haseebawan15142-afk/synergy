@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
-import { BrandLogo } from "@/components/brand/BrandLogo";
+import { CmsBrandLogo } from "@/components/brand/CmsBrandLogo";
 import { NavLinkMotion } from "@/components/motion/NavLinkMotion";
 import { MegaMenu } from "@/components/layout/MegaMenu";
 import { NavLinkIcon } from "@/components/layout/NavLinkIcon";
@@ -28,6 +28,7 @@ import {
   type MegaMenuIconMap,
 } from "@/lib/cms/public";
 import { useCmsList } from "@/hooks/useCmsList";
+import { useOverlayFocus } from "@/hooks/useOverlayFocus";
 import type { NavItemDoc } from "@/lib/admin/types";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
@@ -35,9 +36,10 @@ import { motionDurations, motionEase } from "@/lib/motion/transitions";
 import { fadeUp } from "@/lib/motion/variants";
 
 type NavbarProps = {
-  /** From server `fetchSiteSettings` — avoids default logo flash on first paint */
+  /** From server `fetchSiteSettings` — CMS logos only (no public /brand fallback). */
   logoUrl?: string | null;
   darkLogoUrl?: string | null;
+  footerLogoUrl?: string | null;
   companyName?: string | null;
 };
 
@@ -67,13 +69,29 @@ function applyMegaMenuIcons(
   };
 }
 
-export function Navbar({ logoUrl, darkLogoUrl, companyName }: NavbarProps) {
+export function Navbar({ logoUrl, darkLogoUrl, footerLogoUrl, companyName }: NavbarProps) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [mobileSubOpen, setMobileSubOpen] = useState<string | null>(null);
   const [megaIcons, setMegaIcons] = useState<MegaMenuIconMap | null>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const mobileNavRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const reduce = useReducedMotion();
+
+  const closeMobileNav = useCallback(() => {
+    setOpen(false);
+    setMobileSubOpen(null);
+  }, []);
+
+  useOverlayFocus({
+    open,
+    containerRef: mobileNavRef,
+    triggerRef: menuButtonRef,
+    onEscape: closeMobileNav,
+    trapFocus: true,
+    initialFocus: true,
+  });
   const partnersLoader = useCallback(() => fetchPartners(), []);
   const cmsPartners = useCmsList(localPartners, partnersLoader);
   const servicesLoader = useCallback(() => fetchServices(), []);
@@ -176,6 +194,7 @@ export function Navbar({ logoUrl, darkLogoUrl, companyName }: NavbarProps) {
 
   useEffect(() => {
     setOpen(false);
+    setMobileSubOpen(null);
   }, [pathname]);
 
   const isHome = pathname === "/";
@@ -200,11 +219,12 @@ export function Navbar({ logoUrl, darkLogoUrl, companyName }: NavbarProps) {
           className="min-w-0 shrink"
         >
           <Link href="/" className="flex shrink-0 items-center gap-2 rounded-xl transition hover:opacity-90">
-            <BrandLogo
+            <CmsBrandLogo
               variant="header"
               theme={overMedia ? "dark" : "light"}
               logoUrl={logoUrl}
               darkLogoUrl={darkLogoUrl}
+              footerLogoUrl={footerLogoUrl}
               companyName={companyName}
             />
           </Link>
@@ -279,6 +299,7 @@ export function Navbar({ logoUrl, darkLogoUrl, companyName }: NavbarProps) {
             )}
           />
           <button
+            ref={menuButtonRef}
             type="button"
             className={cn(
               "inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border shadow-soft",
@@ -288,10 +309,13 @@ export function Navbar({ logoUrl, darkLogoUrl, companyName }: NavbarProps) {
             )}
             aria-expanded={open}
             aria-controls="mobile-nav"
+            aria-haspopup="dialog"
             onClick={() => setOpen((v) => !v)}
           >
-            <span className="sr-only">Menu</span>
-            <span className="text-xl leading-none">{open ? "×" : "☰"}</span>
+            <span className="sr-only">{open ? "Close menu" : "Open menu"}</span>
+            <span className="text-xl leading-none" aria-hidden>
+              {open ? "×" : "☰"}
+            </span>
           </button>
         </div>
       </div>
@@ -306,11 +330,17 @@ export function Navbar({ logoUrl, darkLogoUrl, companyName }: NavbarProps) {
               initial={reduce ? false : { opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setOpen(false)}
+              onClick={closeMobileNav}
+              tabIndex={-1}
             />
             <motion.div
+              ref={mobileNavRef}
               id="mobile-nav"
               key="mobile-nav"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Mobile navigation"
+              tabIndex={-1}
               initial={reduce ? false : { opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
@@ -349,7 +379,7 @@ export function Navbar({ logoUrl, darkLogoUrl, companyName }: NavbarProps) {
                               ? "bg-synergy-muted text-synergy-dark dark:text-synergy-glow"
                               : "text-ink hover:bg-surface-muted",
                           )}
-                          onClick={() => setOpen(false)}
+                          onClick={closeMobileNav}
                         >
                           {item.label}
                         </Link>
@@ -389,7 +419,7 @@ export function Navbar({ logoUrl, darkLogoUrl, companyName }: NavbarProps) {
                                 <Link
                                   href={menu.featured.href}
                                   className="block px-5 py-3 text-sm font-bold text-white transition hover:bg-white/10"
-                                  onClick={() => setOpen(false)}
+                                  onClick={closeMobileNav}
                                 >
                                   {menu.featured.title}
                                 </Link>
@@ -398,7 +428,7 @@ export function Navbar({ logoUrl, darkLogoUrl, companyName }: NavbarProps) {
                                     key={link.href}
                                     href={link.href}
                                     className="flex items-center gap-3 px-5 py-3 text-sm font-medium text-white/90 transition hover:bg-white/10 hover:text-white"
-                                    onClick={() => setOpen(false)}
+                                    onClick={closeMobileNav}
                                   >
                                     <span
                                       className={cn(
@@ -410,7 +440,7 @@ export function Navbar({ logoUrl, darkLogoUrl, companyName }: NavbarProps) {
                                         <ResilientImg
                                           src={link.logoUrl}
                                           alt=""
-                                          className="h-5 w-6 object-contain"
+                                          className="block h-full max-h-5 w-full max-w-full object-contain"
                                         />
                                       ) : (
                                         <NavLinkIcon
@@ -429,7 +459,7 @@ export function Navbar({ logoUrl, darkLogoUrl, companyName }: NavbarProps) {
                                   <Link
                                     href={menu.seeAll.href}
                                     className="block px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/10"
-                                    onClick={() => setOpen(false)}
+                                    onClick={closeMobileNav}
                                   >
                                     {menu.seeAll.label} →
                                   </Link>

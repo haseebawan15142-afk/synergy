@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { ThemeManager } from "@/components/admin/modules/ThemeManager";
+import { ThemeAdminPage } from "@/components/admin/modules/ThemeAdminPage";
 
 export const metadata: Metadata = { title: "Theme Customizer" };
 
 export default function Page() {
-  return <ThemeManager />;
+  return <ThemeAdminPage />;
 }

@@ -335,6 +335,58 @@ export type ThemeTokens = {
   spacing: string;
   animationsEnabled: boolean;
   darkModeDefault: "system" | "light" | "dark";
+  /** Present on the live `theme/tokens` singleton when a preset owns it. */
+  activePresetId?: string;
+};
+
+export type ThemePresetCategory = "national" | "religious" | "seasonal";
+
+/** Up to 3 hero clips for an event theme (mirrored onto activePreset for the public site). */
+export type ThemeHeroVideo = {
+  mp4: string;
+  poster?: string;
+  webm?: string;
+  label?: string;
+};
+
+/** Event / seasonal theme preset stored in `themePresets`. */
+export type ThemePreset = {
+  id: string;
+  name: string;
+  eventKey: string;
+  emoji?: string;
+  description?: string;
+  tokens: ThemeTokens;
+  bannerMessage?: string;
+  bannerEnabled?: boolean;
+  /** Event hero playlist (max 3). Used when this preset is active (not default). */
+  heroVideos?: ThemeHeroVideo[];
+  /** Recurring yearly window as "MM-DD". */
+  startDate?: string;
+  /** Recurring yearly window as "MM-DD". */
+  endDate?: string;
+  isDefault?: boolean;
+  category?: ThemePresetCategory;
+  updatedAt?: TimestampLike;
+};
+
+/** Tracks which preset last wrote the live theme singleton (public-readable). */
+export type ActiveThemePreset = {
+  presetId: string;
+  eventKey: string;
+  name?: string;
+  emoji?: string;
+  bannerMessage?: string;
+  bannerEnabled?: boolean;
+  heroVideos?: ThemeHeroVideo[];
+  activatedAt?: TimestampLike;
+};
+
+/** One-step revert snapshot (tokens + previous active preset meta). */
+export type PreviousThemeSnapshot = ThemeTokens & {
+  previousActivePresetId?: string;
+  previousPresetName?: string;
+  previousPresetEmoji?: string;
 };
 
 export type SeoPageDoc = {
@@ -353,13 +405,14 @@ export type SeoPageDoc = {
   updatedAt?: TimestampLike;
 };
 
+/** Matches design-tokens brand (site look before event presets). */
 export const DEFAULT_THEME: ThemeTokens = {
-  primary: "#0f766e",
-  secondary: "#134e4a",
-  accent: "#f59e0b",
+  primary: "#357c3c",
+  secondary: "#2a813e",
+  accent: "#14b8a6",
   text: "#0f172a",
   textMuted: "#64748b",
-  buttonBg: "#0f766e",
+  buttonBg: "#357c3c",
   buttonText: "#ffffff",
   background: "#f8fafc",
   surface: "#ffffff",

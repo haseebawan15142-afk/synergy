@@ -2,12 +2,9 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { Button } from "@/components/ui/Button";
 import { fadeUp } from "@/lib/motion/variants";
 import { motionDurations, motionEase } from "@/lib/motion/transitions";
-import { getFirebaseDb } from "@/lib/firebase/client";
-import { COLLECTIONS } from "@/lib/firebase/collections";
 
 const inputClass =
   "mt-2 w-full rounded-xl border border-border bg-surface-elevated px-4 py-3 text-ink shadow-soft transition focus:border-synergy focus:outline-none focus:ring-2 focus:ring-synergy/20";
@@ -36,16 +33,34 @@ export function ContactForm({
     const name = String(data.get("name") || "").trim();
     const email = String(data.get("email") || "").trim();
     const message = String(data.get("message") || "").trim();
+    const companyWebsite = String(data.get("companyWebsite") || "");
 
     try {
-      await addDoc(collection(getFirebaseDb(), COLLECTIONS.messages), {
-        name,
-        email,
-        message,
-        status: "unread",
-        replyStatus: "none",
-        createdAt: serverTimestamp(),
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, message, companyWebsite }),
       });
+      const payload = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        error?: string;
+        retryAfterSec?: number;
+      };
+
+      if (res.status === 429) {
+        throw new Error(
+          `Too many messages. Please try again in ${payload.retryAfterSec ?? 60} seconds.`,
+        );
+      }
+      if (!res.ok || !payload.ok) {
+        throw new Error(
+          payload.error === "invalid_email"
+            ? "Please enter a valid email address."
+            : payload.error === "message_too_long"
+              ? "Message is too long. Please shorten it and try again."
+              : "Could not send message. Please try again.",
+        );
+      }
       setSent(true);
       form.reset();
     } catch (err) {
@@ -97,6 +112,17 @@ export function ContactForm({
               </p>
             ) : null}
             <div className="mt-6 space-y-5">
+              {/* Honeypot — leave empty; hidden from sighted users and AT */}
+              <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
+                <label htmlFor="companyWebsite">Company website</label>
+                <input
+                  id="companyWebsite"
+                  name="companyWebsite"
+                  type="text"
+                  tabIndex={-1}
+                  autoComplete="off"
+                />
+              </div>
               {(["name", "email", "message"] as const).map((field) => (
                 <div key={field} className="group">
                   <label
@@ -106,13 +132,21 @@ export function ContactForm({
                     {field === "message" ? "Message" : field === "email" ? "Email" : "Name"}
                   </label>
                   {field === "message" ? (
-                    <textarea id={field} name={field} rows={5} required className={inputClass} />
+                    <textarea
+                      id={field}
+                      name={field}
+                      rows={5}
+                      required
+                      maxLength={5000}
+                      className={inputClass}
+                    />
                   ) : (
                     <input
                       id={field}
                       name={field}
                       type={field === "email" ? "email" : "text"}
                       required
+                      maxLength={field === "email" ? 254 : 120}
                       className={inputClass}
                     />
                   )}

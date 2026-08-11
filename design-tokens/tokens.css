@@ -20,6 +20,10 @@
   --color-synergy-light: #4ade80;
   --color-synergy-muted: #dcfce7;
   --color-on-synergy: #ffffff;
+  /* Space-separated RGB for Tailwind opacity modifiers (bg-synergy/20, etc.) */
+  --c-synergy-channels: 53 124 60;
+  --c-synergy-dark-channels: 42 129 62;
+  --c-accent-channels: 20 184 166;
 
   --color-accent: #14b8a6;
   --color-accent-soft: #ccfbf1;

@@ -16,8 +16,7 @@ export const siteConfig = {
   },
   social: {
     linkedin: "https://www.linkedin.com/company/synergy-computers/",
-    // TODO: Confirm Facebook slug spelling with marketing (existing site URL retained).
-    facebook: "https://www.facebook.com/SynergyCompuetsPvtLtd/",
+    facebook: "https://www.facebook.com/SynergyComputersPvtLtd/",
   },
   nav: [
     {

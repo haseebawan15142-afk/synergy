@@ -9,7 +9,7 @@ import {
   companyProfileMeta,
   whySynergyFromProfile,
 } from "@/lib/content/company-profile";
-import { fetchSiteSettings } from "@/lib/cms/public";
+import { fetchSiteSettings } from "@/lib/cms/public-server";
 
 const DEFAULT_VISION =
   "To develop and enhance the IT industry of Pakistan through innovative digital and software solutions, and to build trustworthy customer relationships with reliable services.";
@@ -22,6 +22,8 @@ export const metadata: Metadata = {
   description:
     "About Synergy Computers (Pvt.) Ltd — trusted technology partner in Pakistan since 1981.",
 };
+
+export const revalidate = 60;
 
 export default async function AboutPage() {
   const settings = await fetchSiteSettings();

@@ -1,30 +1,49 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
 import {
+  eventHeroVideoIntervalMs,
+  eventHeroVideoTransitionMs,
   heroFallbackPoster,
   heroVideoIntervalMs,
   heroVideoTransitionMs,
-  heroVideos,
+  heroVideos as defaultHeroVideos,
+  type HeroVideo,
 } from "@/lib/content/hero-videos";
+import { fetchActiveEventHeroVideos } from "@/lib/cms/public";
 import { getHeroPlaybackMode } from "@/lib/media/connection";
 import { setHeroVideoActive } from "@/lib/media/hero-video-presence";
 
 const HAVE_ENOUGH_DATA = 4;
 
+export type EventHeroSeed = {
+  presetId: string;
+  videos: HeroVideo[];
+};
+
 type VideoLayerProps = {
   clipKey: string;
   mp4: string;
   webm?: string;
-  poster: string;
+  poster?: string;
   visible: boolean;
+  transitionMs: number;
   preload: "none" | "metadata" | "auto";
   onRef: (el: HTMLVideoElement | null) => void;
 };
 
-function VideoLayer({ clipKey, mp4, webm, poster, visible, preload, onRef }: VideoLayerProps) {
+function VideoLayer({
+  clipKey,
+  mp4,
+  webm,
+  poster,
+  visible,
+  transitionMs,
+  preload,
+  onRef,
+}: VideoLayerProps) {
   return (
     <video
       key={clipKey}
@@ -34,12 +53,12 @@ function VideoLayer({ clipKey, mp4, webm, poster, visible, preload, onRef }: Vid
         "transition-opacity ease-in-out",
         visible ? "opacity-100" : "opacity-0",
       )}
-      style={{ transitionDuration: `${heroVideoTransitionMs}ms` }}
+      style={{ transitionDuration: `${transitionMs}ms` }}
       muted
       loop
       playsInline
       preload={preload}
-      poster={poster}
+      poster={poster || undefined}
       aria-hidden
     >
       {webm ? <source src={webm} type="video/webm" /> : null}
@@ -105,7 +124,23 @@ function waitForEnoughData(video: HTMLVideoElement, signal?: AbortSignal) {
   });
 }
 
-export function HeroVideoBackground() {
+function playlistKeyFor(isEvent: boolean, presetId: string, videos: HeroVideo[]) {
+  if (!isEvent) return "default";
+  return `event-${presetId}-${videos.map((v) => v.mp4).join("|")}`;
+}
+
+type HeroVideoBackgroundProps = {
+  /** Server-fetched event clips — prevents default-playlist flash on Independence themes. */
+  eventPlaylist?: EventHeroSeed | null;
+};
+
+export function HeroVideoBackground({ eventPlaylist = null }: HeroVideoBackgroundProps) {
+  const seedKey =
+    eventPlaylist?.videos?.length
+      ? playlistKeyFor(true, eventPlaylist.presetId, eventPlaylist.videos)
+      : "";
+  const hasSeed = Boolean(seedKey);
+
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRefs = useRef<[HTMLVideoElement | null, HTMLVideoElement | null]>([null, null]);
   const visibleLayerRef = useRef<0 | 1>(0);
@@ -113,18 +148,65 @@ export function HeroVideoBackground() {
   const switchingRef = useRef(false);
 
   const [mode, setMode] = useState<"pending" | "poster" | "video">("pending");
+  const [playlistReady, setPlaylistReady] = useState(hasSeed);
   const [inView, setInView] = useState(false);
   const [visibleLayer, setVisibleLayer] = useState<0 | 1>(0);
   const [layerIndices, setLayerIndices] = useState<[number, number]>([0, 1]);
   const [pendingIncoming, setPendingIncoming] = useState<0 | 1 | null>(null);
+  const [playlist, setPlaylist] = useState<HeroVideo[]>(
+    hasSeed ? eventPlaylist!.videos : [],
+  );
+  const [isEventPlaylist, setIsEventPlaylist] = useState(hasSeed);
+  const [playlistKey, setPlaylistKey] = useState(seedKey || "loading");
+
+  const intervalMs = isEventPlaylist ? eventHeroVideoIntervalMs : heroVideoIntervalMs;
+  const transitionMs = isEventPlaylist ? eventHeroVideoTransitionMs : heroVideoTransitionMs;
+
+  const applyPlaylist = useCallback((videos: HeroVideo[], isEvent: boolean, presetId = "default") => {
+    setPlaylist(videos);
+    setIsEventPlaylist(isEvent);
+    setPlaylistKey(playlistKeyFor(isEvent, presetId, videos));
+    setPlaylistReady(true);
+  }, []);
+
+  const loadPlaylist = useCallback(async () => {
+    try {
+      const active = await fetchActiveEventHeroVideos();
+      if (active?.videos?.length) {
+        applyPlaylist(active.videos, true, active.presetId);
+        return;
+      }
+    } catch {
+      /* fall through */
+    }
+    // Only after confirming there is no event playlist may defaults play.
+    applyPlaylist(defaultHeroVideos, false);
+  }, [applyPlaylist]);
 
   useEffect(() => {
     setMode(getHeroPlaybackMode());
-  }, []);
+    // Seeded event playlist is already correct; still refresh on focus for admin updates.
+    if (!hasSeed) {
+      void loadPlaylist();
+    }
+    const onFocus = () => void loadPlaylist();
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [loadPlaylist, hasSeed]);
+
+  // Reset layers when playlist changes (e.g. theme activate)
+  useEffect(() => {
+    currentIndexRef.current = 0;
+    visibleLayerRef.current = 0;
+    switchingRef.current = false;
+    setVisibleLayer(0);
+    setLayerIndices([0, Math.min(1, Math.max(playlist.length - 1, 0))]);
+    setPendingIncoming(null);
+  }, [playlistKey, playlist.length]);
 
   useEffect(() => {
     const node = containerRef.current;
-    if (!node || mode !== "video") {
+    if (!node || mode !== "video" || !playlistReady) {
       setHeroVideoActive(false);
       return;
     }
@@ -139,11 +221,11 @@ export function HeroVideoBackground() {
       observer.disconnect();
       setHeroVideoActive(false);
     };
-  }, [mode]);
+  }, [mode, playlistReady]);
 
   useEffect(() => {
-    setHeroVideoActive(mode === "video" && inView);
-  }, [mode, inView]);
+    setHeroVideoActive(mode === "video" && inView && playlistReady);
+  }, [mode, inView, playlistReady]);
 
   const playWhenReady = useCallback(async (layer: 0 | 1, signal?: AbortSignal) => {
     const video = videoRefs.current[layer];
@@ -163,9 +245,8 @@ export function HeroVideoBackground() {
     }
   }, []);
 
-  // Initial / resume playback for the visible layer (skipped while a crossfade is in flight)
   useEffect(() => {
-    if (mode !== "video" || !inView) {
+    if (mode !== "video" || !inView || !playlistReady) {
       for (const video of videoRefs.current) {
         video?.pause();
       }
@@ -177,11 +258,10 @@ export function HeroVideoBackground() {
     const controller = new AbortController();
     void playWhenReady(visibleLayerRef.current, controller.signal);
     return () => controller.abort();
-  }, [mode, inView, pendingIncoming, playWhenReady]);
+  }, [mode, inView, pendingIncoming, playWhenReady, playlistKey, playlistReady]);
 
-  // Crossfade: only reveal the incoming layer once it has HAVE_ENOUGH_DATA
   useEffect(() => {
-    if (pendingIncoming === null || mode !== "video" || !inView) return;
+    if (pendingIncoming === null || mode !== "video" || !inView || !playlistReady) return;
 
     const incoming = pendingIncoming;
     const outgoing = (incoming === 0 ? 1 : 0) as 0 | 1;
@@ -211,19 +291,19 @@ export function HeroVideoBackground() {
           out.pause();
         }
         switchingRef.current = false;
-      }, heroVideoTransitionMs + 40);
+      }, transitionMs + 40);
     })();
 
     return () => controller.abort();
-  }, [pendingIncoming, mode, inView, layerIndices, playWhenReady]);
+  }, [pendingIncoming, mode, inView, layerIndices, playWhenReady, transitionMs, playlistReady]);
 
   useEffect(() => {
-    if (mode !== "video" || !inView || heroVideos.length <= 1) return;
+    if (mode !== "video" || !inView || !playlistReady || playlist.length <= 1) return;
 
     const timer = window.setInterval(() => {
       if (switchingRef.current) return;
 
-      const next = (currentIndexRef.current + 1) % heroVideos.length;
+      const next = (currentIndexRef.current + 1) % playlist.length;
       const outgoing = visibleLayerRef.current;
       const incoming = (outgoing === 0 ? 1 : 0) as 0 | 1;
 
@@ -236,78 +316,114 @@ export function HeroVideoBackground() {
         return updated;
       });
       setPendingIncoming(incoming);
-    }, heroVideoIntervalMs);
+    }, intervalMs);
 
     return () => {
       window.clearInterval(timer);
       switchingRef.current = false;
       setPendingIncoming(null);
     };
-  }, [mode, inView]);
+  }, [mode, inView, playlist.length, intervalMs, playlistKey, playlistReady]);
+
+  const fallbackPoster = useMemo(() => {
+    const first = playlist[0]?.poster?.trim();
+    if (first) return first;
+    if (isEventPlaylist) return "";
+    return heroFallbackPoster;
+  }, [playlist, isEventPlaylist]);
 
   const overlay = <div className="pointer-events-none absolute inset-0 bg-ink/55" aria-hidden />;
 
-  if (mode === "pending") {
+  if (mode === "pending" || !playlistReady) {
     return <div className="absolute inset-0 bg-ink" aria-hidden />;
   }
 
   if (mode === "poster") {
     return (
       <div className="absolute inset-0">
+        {fallbackPoster ? (
+          <Image
+            src={fallbackPoster}
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
+            aria-hidden
+            unoptimized={fallbackPoster.startsWith("http")}
+          />
+        ) : (
+          <div className="absolute inset-0 bg-ink" aria-hidden />
+        )}
+        {overlay}
+      </div>
+    );
+  }
+
+  const activeClip = playlist[layerIndices[visibleLayer]] ?? playlist[0];
+  const layer0Clip = playlist[layerIndices[0]] ?? playlist[0];
+  const layer1Clip = playlist[layerIndices[1]] ?? playlist[Math.min(1, playlist.length - 1)];
+
+  if (!activeClip || !layer0Clip) {
+    return (
+      <div className="absolute inset-0">
+        <div className="absolute inset-0 bg-ink" aria-hidden />
+        {overlay}
+      </div>
+    );
+  }
+
+  const posterFor = (clip: HeroVideo) => {
+    const p = clip.poster?.trim();
+    if (p) return p;
+    return isEventPlaylist ? undefined : heroFallbackPoster;
+  };
+
+  return (
+    <div ref={containerRef} className="absolute inset-0" data-hero-playlist={playlistKey}>
+      {posterFor(activeClip) ? (
         <Image
-          src={heroFallbackPoster}
+          src={posterFor(activeClip)!}
           alt=""
           fill
           priority
           sizes="100vw"
           className="object-cover"
           aria-hidden
+          unoptimized={posterFor(activeClip)!.startsWith("http")}
         />
-        {overlay}
-      </div>
-    );
-  }
-
-  const activeClip = heroVideos[layerIndices[visibleLayer]] ?? heroVideos[0];
-  const layer0Clip = heroVideos[layerIndices[0]] ?? heroVideos[0];
-  const layer1Clip = heroVideos[layerIndices[1]] ?? heroVideos[1];
-
-  return (
-    <div ref={containerRef} className="absolute inset-0">
-      <Image
-        src={activeClip.poster}
-        alt=""
-        fill
-        priority
-        sizes="100vw"
-        className="object-cover"
-        aria-hidden
-      />
+      ) : (
+        <div className="absolute inset-0 bg-ink" aria-hidden />
+      )}
 
       {inView ? (
         <>
           <VideoLayer
-            clipKey={`l0-${layerIndices[0]}`}
+            clipKey={`l0-${playlistKey}-${layerIndices[0]}`}
             mp4={layer0Clip.mp4}
             webm={layer0Clip.webm}
-            poster={layer0Clip.poster}
+            poster={posterFor(layer0Clip)}
             visible={visibleLayer === 0}
+            transitionMs={transitionMs}
             preload={visibleLayer === 0 || pendingIncoming === 0 ? "auto" : "metadata"}
             onRef={(el) => {
               videoRefs.current[0] = el;
             }}
           />
-          <VideoLayer
-            clipKey={`l1-${layerIndices[1]}`}
-            mp4={layer1Clip.mp4}
-            webm={layer1Clip.webm}
-            poster={layer1Clip.poster}
-            visible={visibleLayer === 1}
-            preload={visibleLayer === 1 || pendingIncoming === 1 ? "auto" : "metadata"}
-            onRef={(el) => {
-              videoRefs.current[1] = el;
-            }}
-          />
+          {layer1Clip ? (
+            <VideoLayer
+              clipKey={`l1-${playlistKey}-${layerIndices[1]}`}
+              mp4={layer1Clip.mp4}
+              webm={layer1Clip.webm}
+              poster={posterFor(layer1Clip)}
+              visible={visibleLayer === 1}
+              transitionMs={transitionMs}
+              preload={visibleLayer === 1 || pendingIncoming === 1 ? "auto" : "metadata"}
+              onRef={(el) => {
+                videoRefs.current[1] = el;
+              }}
+            />
+          ) : null}
         </>
       ) : null}
 

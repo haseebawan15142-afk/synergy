@@ -248,7 +248,8 @@ export function WebsiteSettingsForm() {
       <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
         <h2 className="text-sm font-semibold">Brand media</h2>
         <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-          Upload once here — saved to Firebase and used site-wide. Leave empty to keep the built-in Synergy mark.
+          Upload once here — saved to Firebase and used site-wide for header, footer, and favicon.
+          Empty fields show the company name as text (no built-in /public logo fallback).
         </p>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <MediaUrlField

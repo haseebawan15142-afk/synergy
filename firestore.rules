@@ -32,6 +32,41 @@ service cloud.firestore {
       return true;
     }
 
+    function validEmail(value) {
+      return value is string
+        && value.size() >= 3
+        && value.size() <= 254
+        && value.matches('^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$');
+    }
+
+    /** Allowed public contact shape (documented; creates go via /api/contact). */
+    function isPublicContactCreate() {
+      let d = request.resource.data;
+      return d.keys().hasOnly(['name', 'email', 'message', 'status', 'replyStatus', 'createdAt'])
+        && d.name is string
+        && d.name.size() > 0
+        && d.name.size() <= 120
+        && validEmail(d.email)
+        && d.message is string
+        && d.message.size() > 0
+        && d.message.size() <= 5000
+        && d.status == 'unread'
+        && d.replyStatus == 'none'
+        && d.createdAt == request.time;
+    }
+
+    /** Allowed public newsletter shape (documented; creates go via /api/newsletter). */
+    function isPublicNewsletterCreate() {
+      let d = request.resource.data;
+      return (d.keys().hasOnly(['email', 'status', 'createdAt'])
+          || d.keys().hasOnly(['email', 'name', 'status', 'createdAt']))
+        && validEmail(d.email)
+        && d.status == 'active'
+        && d.createdAt == request.time
+        && (!('name' in d)
+          || (d.name is string && d.name.size() > 0 && d.name.size() <= 120));
+    }
+
     /* ── Admin identity ───────────────────────────────────────────── */
 
     match /users/{userId} {
@@ -48,6 +83,12 @@ service cloud.firestore {
 
     match /theme/{docId} {
       allow read: if publicCatalog();
+      allow write: if isAdmin();
+    }
+
+    /* Admin CMS theme library — signed-in staff can read; only admins write. */
+    match /themePresets/{id} {
+      allow read: if isSignedIn();
       allow write: if isAdmin();
     }
 
@@ -167,16 +208,20 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    /* ── Public form intakes (create-only for visitors) ───────────── */
-
+    /**
+     * Form intakes — public create DISABLED.
+     * Website forms use POST /api/contact and POST /api/newsletter (Admin SDK).
+     * Only admins can read / update / delete / create from the CMS client.
+     * Helpers above document the safe public shape if create is ever re-enabled:
+     *   allow create: if isPublicContactCreate();
+     *   allow create: if isPublicNewsletterCreate();
+     */
     match /messages/{id} {
-      allow create: if true;
-      allow read, update, delete: if isAdmin();
+      allow create, read, update, delete: if isAdmin();
     }
 
     match /newsletter/{id} {
-      allow create: if true;
-      allow read, update, delete: if isAdmin();
+      allow create, read, update, delete: if isAdmin();
     }
 
     /* ── Private admin ops ────────────────────────────────────────── */
@@ -190,6 +235,11 @@ service cloud.firestore {
     }
 
     match /activities/{id} {
+      allow read, write: if isAdmin();
+    }
+
+    /* Daily theme scheduler logs (admin-only). */
+    match /themeAutomationLogs/{id} {
       allow read, write: if isAdmin();
     }
   }

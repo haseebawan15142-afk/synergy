@@ -6,6 +6,7 @@ import {
   DOCS,
   type SiteSettings,
 } from "@/lib/firebase/collections";
+import { invalidateCmsCache } from "@/lib/cms/cache";
 
 export function settingsDocRef() {
   return doc(getFirebaseDb(), COLLECTIONS.settings, DOCS.settingsSite);
@@ -30,4 +31,5 @@ export async function saveSiteSettings(
     },
     { merge: true },
   );
+  invalidateCmsCache("settings");
 }

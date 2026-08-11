@@ -27,17 +27,17 @@ const config: Config = {
           strong: "rgb(var(--c-border-strong) / <alpha-value>)",
         },
         synergy: {
-          DEFAULT: "#357C3C",
-          dark: "#2A813E",
+          DEFAULT: "rgb(var(--c-synergy-channels) / <alpha-value>)",
+          dark: "rgb(var(--c-synergy-dark-channels) / <alpha-value>)",
           light: "#4ADE80",
           muted: "rgb(var(--c-synergy-muted) / <alpha-value>)",
           glow: "#86EFAC",
         },
         accent: {
-          DEFAULT: "#14B8A6",
+          DEFAULT: "rgb(var(--c-accent-channels) / <alpha-value>)",
           soft: "rgb(var(--c-accent-soft) / <alpha-value>)",
         },
-        "on-synergy": "#FFFFFF",
+        "on-synergy": "var(--color-on-synergy)",
       },
       fontFamily: {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
@@ -55,7 +55,8 @@ const config: Config = {
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "mesh-hero": "var(--mesh-hero)",
-        "gradient-brand": "linear-gradient(135deg, #357C3C 0%, #14B8A6 100%)",
+        "gradient-brand":
+          "linear-gradient(135deg, var(--color-synergy) 0%, var(--color-accent) 100%)",
         "gradient-dark": "linear-gradient(180deg, #0F172A 0%, #1E293B 100%)",
       },
       animation: {

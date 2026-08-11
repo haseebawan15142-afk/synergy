@@ -51,6 +51,7 @@ import {
 import { siteConfig } from "@/lib/content/site";
 import { blogImagesGenerated } from "@/lib/content/blog-images.generated";
 import { cachedCms } from "@/lib/cms/cache";
+import { queryCmsDocs, readCmsDoc } from "@/lib/cms/firestore-bridge";
 import { resolveResilientAssetUrl } from "@/lib/media/asset-url";
 
 function firebaseReady() {
@@ -58,9 +59,14 @@ function firebaseReady() {
 }
 
 /** Cache + stale-on-error, then bundled local content if nothing cached yet. */
-async function cmsRead<T>(key: string, loader: () => Promise<T>, fallback: () => T): Promise<T> {
+async function cmsRead<T>(
+  key: string,
+  loader: () => Promise<T>,
+  fallback: () => T,
+  ttlMs?: number,
+): Promise<T> {
   try {
-    return await cachedCms(key, loader);
+    return await cachedCms(key, loader, ttlMs);
   } catch {
     return fallback();
   }
@@ -71,11 +77,16 @@ export async function fetchSiteSettings(): Promise<SiteSettings> {
     "settings:site",
     async () => {
       if (!firebaseReady()) return mapSiteConfig();
-      const snap = await getDoc(doc(getFirebaseDb(), COLLECTIONS.settings, DOCS.settingsSite));
-      if (!snap.exists()) return mapSiteConfig();
-      return { ...DEFAULT_SITE_SETTINGS, ...mapSiteConfig(), ...(snap.data() as Partial<SiteSettings>) };
+      const data = await readCmsDoc(COLLECTIONS.settings, DOCS.settingsSite);
+      if (!data) return mapSiteConfig();
+      return {
+        ...DEFAULT_SITE_SETTINGS,
+        ...mapSiteConfig(),
+        ...(data as Partial<SiteSettings>),
+      };
     },
     mapSiteConfig,
+    60_000,
   );
 }
 
@@ -103,15 +114,15 @@ export async function fetchOffices(): Promise<OfficeLocation[]> {
     "offices:v4",
     async () => {
       if (!firebaseReady()) return localOffices;
-      const snap = await getDocs(collection(getFirebaseDb(), COLLECTIONS.offices));
-      if (snap.empty) return localOffices;
+      const rows = await queryCmsDocs(COLLECTIONS.offices);
+      if (!rows.length) return localOffices;
 
       const localById = new Map(localOffices.map((o) => [o.id, o]));
 
       type Row = OfficeLocation & { sortOrder: number };
-      const fromCms = snap.docs
+      const fromCms = rows
         .map((d): Row | null => {
-          const x = d.data();
+          const x = d.data;
           if (x.active === false) return null;
           const label = String(x.label || "").trim();
           const city = String(x.city || "").trim();
@@ -191,6 +202,7 @@ export async function fetchOffices(): Promise<OfficeLocation[]> {
       return localOffices;
     },
     () => localOffices,
+    30_000,
   );
 }
 
@@ -199,11 +211,96 @@ export async function fetchThemeTokens(): Promise<ThemeTokens> {
     "theme:tokens",
     async () => {
       if (!firebaseReady()) return DEFAULT_THEME;
-      const snap = await getDoc(doc(getFirebaseDb(), COLLECTIONS.theme, DOCS.themeTokens));
-      if (!snap.exists()) return DEFAULT_THEME;
-      return { ...DEFAULT_THEME, ...(snap.data() as Partial<ThemeTokens>) };
+      const data = await readCmsDoc(COLLECTIONS.theme, DOCS.themeTokens);
+      if (!data) return DEFAULT_THEME;
+      return { ...DEFAULT_THEME, ...(data as Partial<ThemeTokens>) };
     },
     () => DEFAULT_THEME,
+    5_000,
+  );
+}
+
+export type ActiveEventBanner = {
+  presetId: string;
+  message: string;
+  emoji?: string;
+  name?: string;
+};
+
+export type ActiveEventHeroVideos = {
+  presetId: string;
+  eventKey: string;
+  videos: { mp4: string; poster?: string; webm?: string; label?: string }[];
+};
+
+/**
+ * Public-safe banner payload from `theme/activePreset`
+ * (themePresets collection is admin-only — banner fields are mirrored on activate).
+ */
+export async function fetchActiveEventBanner(): Promise<ActiveEventBanner | null> {
+  return cmsRead(
+    "theme:active-banner",
+    async () => {
+      if (!firebaseReady()) return null;
+      const data = (await readCmsDoc(COLLECTIONS.theme, DOCS.activeThemePreset)) as {
+        presetId?: string;
+        bannerMessage?: string;
+        bannerEnabled?: boolean;
+        emoji?: string;
+        name?: string;
+      } | null;
+      if (!data) return null;
+      if (!data.bannerEnabled || !data.bannerMessage?.trim() || !data.presetId) return null;
+      return {
+        presetId: data.presetId,
+        message: data.bannerMessage.trim(),
+        emoji: data.emoji || "",
+        name: data.name || "",
+      };
+    },
+    () => null,
+    5_000,
+  );
+}
+
+/**
+ * Event theme hero playlist (max 3). Empty when default / no clips configured.
+ */
+export async function fetchActiveEventHeroVideos(): Promise<ActiveEventHeroVideos | null> {
+  return cmsRead(
+    "theme:active-hero-videos",
+    async () => {
+      if (!firebaseReady()) return null;
+      const data = (await readCmsDoc(COLLECTIONS.theme, DOCS.activeThemePreset)) as {
+        presetId?: string;
+        eventKey?: string;
+        heroVideos?: { mp4?: string; poster?: string; webm?: string; label?: string }[];
+      } | null;
+      if (!data) return null;
+      const presetId = String(data.presetId || "");
+      const eventKey = String(data.eventKey || presetId);
+      if (!presetId || presetId === "default" || eventKey === "default") return null;
+      const videos = (Array.isArray(data.heroVideos) ? data.heroVideos : [])
+        .map((v, i) => ({
+          mp4: String(v?.mp4 || "").trim(),
+          poster: String(v?.poster || "").trim(),
+          webm: String(v?.webm || "").trim() || undefined,
+          label: String(v?.label || `Event clip ${i + 1}`).trim(),
+        }))
+        .filter((v) => Boolean(v.mp4))
+        .slice(0, 3)
+        .map((v) => ({
+          mp4: v.mp4,
+          label: v.label,
+          ...(v.webm ? { webm: v.webm } : {}),
+          // Keep poster only when admin set one — never inject default public hero posters.
+          ...(v.poster ? { poster: v.poster } : {}),
+        }));
+      if (videos.length === 0) return null;
+      return { presetId, eventKey, videos };
+    },
+    () => null,
+    5_000,
   );
 }
 
@@ -221,18 +318,18 @@ function parsePipeRows(value: unknown): { title: string; description: string }[]
 
 export async function fetchServices(): Promise<Service[]> {
   return cmsRead(
-    "services:v6",
+    "services:v7",
     async () => {
       if (!firebaseReady()) return localServices;
-      const snap = await getDocs(collection(getFirebaseDb(), COLLECTIONS.services));
-      if (snap.empty) return localServices;
+      const docs = await queryCmsDocs(COLLECTIONS.services);
+      if (!docs.length) return localServices;
 
       const localBySlug = new Map(localServices.map((s) => [s.slug.toLowerCase(), s]));
 
       type Row = Service & { sortOrder: number };
-      const fromCms = snap.docs
+      const fromCms = docs
         .map((d): Row | null => {
-          const x = d.data();
+          const x = d.data;
           // Missing active = visible; explicit false hides.
           if (x.active === false) return null;
           // Missing status = published (legacy); draft/archived stay private.
@@ -270,6 +367,7 @@ export async function fetchServices(): Promise<Service[]> {
       return localServices;
     },
     () => localServices,
+    30_000,
   );
 }
 
@@ -595,19 +693,17 @@ function mapBlogDoc(id: string, x: Record<string, unknown>): BlogPostMeta {
  */
 export async function fetchPublishedBlogs(max = 200): Promise<BlogPostMeta[]> {
   return cmsRead(
-    `blogs:v2:${max}`,
+    `blogs:v3:${max}`,
     async () => {
       if (!firebaseReady()) return localBlogs.slice(0, max);
-      // Constraint must match public read rule (status == published) or the
-      // whole list query fails when drafts exist in the collection.
-      const q = query(
-        collection(getFirebaseDb(), COLLECTIONS.blogs),
-        where("status", "==", "published"),
-        limit(Math.min(max, 500)),
-      );
-      const snap = await getDocs(q);
-      const fromCms = snap.docs
-        .map((d) => mapBlogDoc(d.id, d.data() as Record<string, unknown>))
+      // Constraint must match public read rule (status == published).
+      // Server uses Admin SDK to avoid client gRPC TLS stalls.
+      const rows = await queryCmsDocs(COLLECTIONS.blogs, {
+        where: [{ field: "status", value: "published" }],
+        limitCount: Math.min(max, 500),
+      });
+      const fromCms = rows
+        .map((d) => mapBlogDoc(d.id, d.data))
         .filter((b) => b.title && b.slug)
         .sort((a, b) => {
           const ta = Date.parse(a.date) || 0;
@@ -620,6 +716,7 @@ export async function fetchPublishedBlogs(max = 200): Promise<BlogPostMeta[]> {
       return [...fromCms, ...localOnly].slice(0, max);
     },
     () => localBlogs.slice(0, max),
+    30_000,
   );
 }
 
@@ -629,18 +726,18 @@ export async function fetchBlogBySlug(slug: string): Promise<BlogPostMeta | null
 
   if (firebaseReady()) {
     try {
-      const q = query(
-        collection(getFirebaseDb(), COLLECTIONS.blogs),
-        where("slug", "==", slug.trim()),
-        where("status", "==", "published"),
-        limit(1),
-      );
-      const snap = await getDocs(q);
-      if (!snap.empty) {
-        return mapBlogDoc(snap.docs[0].id, snap.docs[0].data() as Record<string, unknown>);
+      const rows = await queryCmsDocs(COLLECTIONS.blogs, {
+        where: [
+          { field: "slug", value: slug.trim() },
+          { field: "status", value: "published" },
+        ],
+        limitCount: 1,
+      });
+      if (rows[0]) {
+        return mapBlogDoc(rows[0].id, rows[0].data);
       }
       // Fallback: slug field may differ from doc id
-      const all = await fetchPublishedBlogs(500);
+      const all = await fetchPublishedBlogs(200);
       const hit = all.find((b) => b.slug.toLowerCase() === needle);
       if (hit) return hit;
     } catch {
@@ -745,13 +842,13 @@ function withPartnerFallbacks(partner: Partner): Partner {
 
 export async function fetchPartners(): Promise<Partner[]> {
   return cmsRead(
-    "partners:v5",
+    "partners:v6",
     async () => {
       if (!firebaseReady()) {
         return localPartners.map(withPartnerFallbacks);
       }
-      const snap = await getDocs(collection(getFirebaseDb(), COLLECTIONS.partners));
-      if (snap.empty) return localPartners.map(withPartnerFallbacks);
+      const docs = await queryCmsDocs(COLLECTIONS.partners);
+      if (!docs.length) return localPartners.map(withPartnerFallbacks);
 
       type PartnerRow = Required<
         Pick<
@@ -769,9 +866,9 @@ export async function fetchPartners(): Promise<Partner[]> {
         >
       > & { sortOrder: number };
 
-      const rows = snap.docs
+      const rows = docs
         .map((d): PartnerRow | null => {
-          const x = d.data();
+          const x = d.data;
           // Missing active = visible; explicit false hides (admin delete or deactivate).
           if (x.active === false) return null;
           const name = String(x.name || "");
@@ -804,6 +901,7 @@ export async function fetchPartners(): Promise<Partner[]> {
       return localPartners.map(withPartnerFallbacks);
     },
     () => localPartners.map(withPartnerFallbacks),
+    30_000,
   );
 }
 

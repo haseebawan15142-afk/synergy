@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { FieldValue } from "firebase-admin/firestore";
-import { getAdminAuth, getAdminDb } from "@/lib/firebase/admin";
+import { requireAdminRequest } from "@/lib/auth/admin-session";
+import { getAdminDb } from "@/lib/firebase/admin";
 import { COLLECTIONS } from "@/lib/firebase/collections";
 import { isSmtpConfigured, sendSmtpMail } from "@/lib/email/smtp";
 
@@ -8,29 +9,9 @@ export const runtime = "nodejs";
 
 const MAX_REPLY_CHARS = 5000;
 
-async function requireAdmin(request: Request) {
-  const header = request.headers.get("authorization") || "";
-  const match = /^Bearer\s+(.+)$/i.exec(header);
-  const token = match?.[1]?.trim();
-  if (!token) {
-    return { error: NextResponse.json({ error: "unauthorized" }, { status: 401 }) };
-  }
-
-  try {
-    const decoded = await getAdminAuth().verifyIdToken(token);
-    const profile = await getAdminDb().collection(COLLECTIONS.users).doc(decoded.uid).get();
-    if (!profile.exists || profile.data()?.role !== "admin") {
-      return { error: NextResponse.json({ error: "forbidden" }, { status: 403 }) };
-    }
-    return { uid: decoded.uid, email: decoded.email || "" };
-  } catch {
-    return { error: NextResponse.json({ error: "unauthorized" }, { status: 401 }) };
-  }
-}
-
 export async function POST(request: Request) {
-  const auth = await requireAdmin(request);
-  if ("error" in auth && auth.error) return auth.error;
+  const auth = await requireAdminRequest(request);
+  if (!auth.ok) return auth.response;
 
   if (!isSmtpConfigured()) {
     return NextResponse.json(

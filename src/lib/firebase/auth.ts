@@ -48,11 +48,15 @@ export async function isAdminUser(uid: string) {
 }
 
 export async function setSessionCookie(token: string) {
-  await fetch("/api/admin/session", {
+  const res = await fetch("/api/admin/session", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ token }),
   });
+  if (!res.ok) {
+    const body = (await res.json().catch(() => ({}))) as { error?: string };
+    throw new Error(body.error || "Failed to create admin session");
+  }
 }
 
 export async function clearSessionCookie() {

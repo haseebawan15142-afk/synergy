@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Bot, RotateCcw, Send, Sparkles, X } from "lucide-react";
+import { useOverlayFocus } from "@/hooks/useOverlayFocus";
 import { cn } from "@/lib/cn";
 import { motionDurations, motionEase } from "@/lib/motion/transitions";
 
@@ -163,6 +164,20 @@ export function ChatWidget() {
   const [loading, setLoading] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const launcherRef = useRef<HTMLButtonElement>(null);
+
+  const closeChat = useCallback(() => setOpen(false), []);
+
+  useOverlayFocus({
+    open,
+    containerRef: dialogRef,
+    triggerRef: launcherRef,
+    onEscape: closeChat,
+    trapFocus: true,
+    // Prefer the message composer once the panel is up (hook focuses first control; we refine below).
+    initialFocus: false,
+  });
 
   // Load persisted conversation on mount.
   useEffect(() => {
@@ -204,7 +219,9 @@ export function ChatWidget() {
   }, [open, messages, loading]);
 
   useEffect(() => {
-    if (open) inputRef.current?.focus();
+    if (!open) return;
+    const id = requestAnimationFrame(() => inputRef.current?.focus({ preventScroll: true }));
+    return () => cancelAnimationFrame(id);
   }, [open]);
 
   const openChat = useCallback(() => {
@@ -289,7 +306,7 @@ export function ChatWidget() {
         <div
           className="fixed inset-0 z-[60] bg-ink/30 backdrop-blur-[2px] sm:hidden"
           aria-hidden
-          onClick={() => setOpen(false)}
+          onClick={closeChat}
         />
       ) : null}
 
@@ -304,15 +321,18 @@ export function ChatWidget() {
         <AnimatePresence initial={false}>
           {open ? (
             <motion.div
+              ref={dialogRef}
               key="chat-panel"
               initial={reduce ? false : { opacity: 0, y: 12, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 8, scale: 0.98 }}
               transition={{ duration: motionDurations.reveal, ease: motionEase }}
+              id="synergy-chat-dialog"
               className="mb-3 flex max-h-[min(70vh,32rem)] w-full flex-col overflow-hidden rounded-3xl border border-border bg-surface-elevated shadow-card"
               role="dialog"
               aria-labelledby="chat-title"
               aria-modal="true"
+              tabIndex={-1}
             >
               <header className="flex items-center justify-between gap-2 border-b border-border bg-gradient-brand px-4 py-3 text-on-synergy">
                 <div className="flex items-center gap-2.5">
@@ -343,7 +363,7 @@ export function ChatWidget() {
                     type="button"
                     className="rounded-full p-2 hover:bg-white/15"
                     aria-label="Close chat"
-                    onClick={() => setOpen(false)}
+                    onClick={closeChat}
                   >
                     <X className="h-4 w-4" aria-hidden />
                   </button>
@@ -393,13 +413,18 @@ export function ChatWidget() {
                   ))}
                 </div>
                 <div className="flex gap-2">
+                  <label htmlFor="synergy-chat-input" className="sr-only">
+                    Message Synergy Assistant
+                  </label>
                   <textarea
+                    id="synergy-chat-input"
                     ref={inputRef}
                     rows={2}
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={onKeyDown}
                     placeholder="Ask about services, support…"
+                    aria-label="Message Synergy Assistant"
                     className="min-h-[2.75rem] flex-1 resize-none rounded-xl border border-border bg-surface px-3 py-2 text-sm text-ink focus:border-synergy focus:outline-none focus:ring-2 focus:ring-synergy/20"
                     disabled={loading}
                   />
@@ -455,13 +480,16 @@ export function ChatWidget() {
         ) : null}
 
         <motion.button
+          ref={launcherRef}
           type="button"
-          onClick={() => (open ? setOpen(false) : openChat())}
+          onClick={() => (open ? closeChat() : openChat())}
           className={cn(
             "relative ml-auto flex h-14 w-14 items-center justify-center rounded-full bg-gradient-brand text-on-synergy shadow-glow transition hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-synergy",
             open && "ring-2 ring-synergy/40",
           )}
           aria-expanded={open}
+          aria-haspopup="dialog"
+          aria-controls={open ? "synergy-chat-dialog" : undefined}
           aria-label={open ? "Close Synergy Assistant" : "Open Synergy Assistant"}
           whileHover={reduce ? undefined : { scale: 1.04 }}
           whileTap={reduce ? undefined : { scale: 0.96 }}

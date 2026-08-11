@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { BrandLogo } from "@/components/brand/BrandLogo";
+import { CmsBrandLogo } from "@/components/brand/CmsBrandLogo";
 import { NewsletterForm } from "@/components/newsletter/NewsletterForm";
-import { fetchFooterNav, fetchSiteSettings } from "@/lib/cms/public";
+import { fetchFooterNav, fetchSiteSettings } from "@/lib/cms/public-server";
 
 function LinkedInIcon({ className }: { className?: string }) {
   return (
@@ -43,7 +43,7 @@ export async function Footer() {
       />
       <div className="page-container relative grid gap-8 py-12 sm:grid-cols-2 sm:gap-10 sm:py-14 lg:grid-cols-4 lg:gap-10 lg:py-16">
         <div className="lg:col-span-2">
-          <BrandLogo
+          <CmsBrandLogo
             variant="footer"
             theme="dark"
             className="mb-5"

@@ -30,6 +30,7 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ["framer-motion", "lucide-react"],
   },
+  serverExternalPackages: ["ffmpeg-static", "firebase-admin", "isomorphic-dompurify", "jsdom"],
   poweredByHeader: false,
   compress: true,
 };

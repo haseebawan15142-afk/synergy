@@ -13,11 +13,30 @@ import {
 import { getFirebaseDb } from "@/lib/firebase/client";
 import { COLLECTIONS } from "@/lib/firebase/collections";
 
-/** Firestore rejects `undefined` field values — strip them before write. */
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value) &&
+    Object.getPrototypeOf(value) === Object.prototype
+  );
+}
+
+/** Firestore rejects `undefined` (including nested) — strip before write. */
 export function stripUndefined<T extends DocumentData>(data: T): T {
   const out: DocumentData = {};
   for (const [key, value] of Object.entries(data)) {
     if (value === undefined) continue;
+    if (Array.isArray(value)) {
+      out[key] = value.map((item) =>
+        isPlainObject(item) ? stripUndefined(item as DocumentData) : item,
+      );
+      continue;
+    }
+    if (isPlainObject(value)) {
+      out[key] = stripUndefined(value as DocumentData);
+      continue;
+    }
     out[key] = value;
   }
   return out as T;

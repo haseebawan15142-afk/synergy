@@ -3,16 +3,19 @@ import { ContactForm } from "@/components/contact/ContactForm";
 import { ContactHero } from "@/components/contact/ContactHero";
 import { OfficesMap } from "@/components/contact/OfficesMap";
 import { DEFAULT_SITE_SETTINGS } from "@/lib/firebase/collections";
-import { fetchOffices, fetchSiteSettings } from "@/lib/cms/public";
+import { fetchOffices, fetchSiteSettings } from "@/lib/cms/public-server";
+
+import { siteConfig } from "@/lib/content/site";
 
 export const metadata: Metadata = {
   title: "Contact",
   description:
     "Contact Synergy Computers — Karachi HQ, branches across Pakistan, and Middle East presence.",
+  alternates: { canonical: `${siteConfig.url}/contact` },
 };
 
 /** Pick up admin CMS contact / office changes without a full redeploy. */
-export const revalidate = 30;
+export const revalidate = 60;
 
 export default async function ContactPage() {
   const [settings, cmsOffices] = await Promise.all([fetchSiteSettings(), fetchOffices()]);

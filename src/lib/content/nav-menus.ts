@@ -25,6 +25,8 @@ export type MegaMenuFeatured = {
   href: string;
   ctaLabel: string;
   image?: string | null;
+  /** Use for logos/wordmarks (e.g. Dynatrace) instead of photo-style object-cover. */
+  imageContain?: boolean;
   icon?: string;
 };
 
@@ -159,6 +161,7 @@ export const navMegaMenus: Record<string, MegaMenuConfig> = {
       href: "/partners/dynatrace",
       ctaLabel: "View partner",
       image: dynatracePartner.logo,
+      imageContain: true,
       icon: "handshake",
     },
     columns: [

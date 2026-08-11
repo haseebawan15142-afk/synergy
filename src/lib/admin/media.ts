@@ -221,8 +221,6 @@ function addBundledSiteAssetUrls(used: Set<string>) {
     if (office.landmark?.image) used.add(office.landmark.image);
     if (office.landmark?.background) used.add(office.landmark.background);
   }
-  used.add("/brand/scl-mark.png");
-  used.add("/brand/favicon.png");
 }
 
 export async function collectUsedMediaUrls(): Promise<Set<string>> {

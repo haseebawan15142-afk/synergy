@@ -1,6 +1,6 @@
-import { fetchNewsletterIssues } from "@/lib/cms/public";
 import { NewsletterEditions } from "@/components/newsletter/NewsletterEditions";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { fetchNewsletterIssues } from "@/lib/cms/public-server";
 
 export const metadata = {
   title: "Newsletter",
@@ -9,7 +9,7 @@ export const metadata = {
 };
 
 /** Pick up admin CMS newsletter changes without a full redeploy. */
-export const revalidate = 30;
+export const revalidate = 60;
 
 export default async function NewsletterPage() {
   const issues = await fetchNewsletterIssues();

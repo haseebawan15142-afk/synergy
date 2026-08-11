@@ -1,7 +1,7 @@
 export type HeroVideo = {
   mp4: string;
   webm?: string;
-  poster: string;
+  poster?: string;
   label?: string;
 };
 
@@ -41,3 +41,7 @@ export const heroVideoIntervalMs = 8000;
 
 /** Crossfade between hero clips (ms) */
 export const heroVideoTransitionMs = 1200;
+
+/** Event-theme hero: switch every 3s with a smooth crossfade */
+export const eventHeroVideoIntervalMs = 3000;
+export const eventHeroVideoTransitionMs = 900;

@@ -49,7 +49,8 @@ async function chatGroq(history: LlmMessage[]): Promise<string | null> {
   });
 
   if (!res.ok) {
-    console.error("[llm/groq]", res.status, (await res.text()).slice(0, 400));
+    // Do not log response bodies — they may echo prompts or key material.
+    console.error("[llm/groq] request failed", res.status);
     return null;
   }
 
@@ -95,7 +96,7 @@ async function chatGemini(history: LlmMessage[]): Promise<string | null> {
   );
 
   if (!res.ok) {
-    console.error("[llm/gemini]", res.status, (await res.text()).slice(0, 400));
+    console.error("[llm/gemini] request failed", res.status);
     return null;
   }
 
@@ -130,7 +131,7 @@ async function chatOpenRouter(history: LlmMessage[]): Promise<string | null> {
   });
 
   if (!res.ok) {
-    console.error("[llm/openrouter]", res.status, (await res.text()).slice(0, 400));
+    console.error("[llm/openrouter] request failed", res.status);
     return null;
   }
 

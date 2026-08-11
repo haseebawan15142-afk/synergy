@@ -3,6 +3,7 @@
 export const COLLECTIONS = {
   settings: "settings",
   theme: "theme",
+  themePresets: "themePresets",
   navigation: "navigation",
   blogs: "blogs",
   categories: "categories",
@@ -35,6 +36,12 @@ export const COLLECTIONS = {
 export const DOCS = {
   settingsSite: "site",
   themeTokens: "tokens",
+  /** Snapshot of tokens before the last preset activation (for revert). */
+  previousThemeTokens: "previousTokens",
+  /** Permanent pre-event-presets Synergy corporate baseline. */
+  originalThemeBaseline: "originalBaseline",
+  /** Which preset currently owns the live `tokens` singleton. */
+  activeThemePreset: "activePreset",
   navigationPrimary: "primary",
   navigationFooter: "footer",
   /** About / Industries / Insights mega-menu link icons */
@@ -135,7 +142,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   addressCity: "Karachi",
   addressCountry: "Pakistan",
   socialLinkedin: "https://www.linkedin.com/company/synergy-computers/",
-  socialFacebook: "https://www.facebook.com/SynergyCompuetsPvtLtd/",
+  socialFacebook: "https://www.facebook.com/SynergyComputersPvtLtd/",
   socialTwitter: "",
   socialInstagram: "",
   googleMapsUrl: "",

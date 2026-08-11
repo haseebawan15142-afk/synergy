@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getBlogBody } from "@/lib/content/blog-bodies";
+import { sanitizeBlogHtml } from "@/lib/security/sanitize-html";
 
 type BlogPostBodyProps = {
   slug: string;
@@ -10,10 +11,11 @@ type BlogPostBodyProps = {
 
 export function BlogPostBody({ slug, legacyUrl, bodyHtml }: BlogPostBodyProps) {
   if (bodyHtml?.trim()) {
+    const safeHtml = sanitizeBlogHtml(bodyHtml);
     return (
       <div
         className="prose prose-neutral max-w-none prose-headings:font-semibold prose-headings:text-ink prose-p:text-ink-body prose-a:text-synergy"
-        dangerouslySetInnerHTML={{ __html: bodyHtml }}
+        dangerouslySetInnerHTML={{ __html: safeHtml }}
       />
     );
   }

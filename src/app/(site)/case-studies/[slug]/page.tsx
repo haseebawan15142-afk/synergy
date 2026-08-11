@@ -64,8 +64,11 @@ export default async function CaseStudyPage({ params }: Props) {
 
         <div className="mt-12 flex flex-wrap gap-4 border-t border-border pt-8">
           <Button href="/contact">Discuss your project</Button>
-          <Link href="/" className="inline-flex min-h-11 items-center text-sm font-semibold text-synergy hover:text-synergy-dark">
-            ← Back to home
+          <Link
+            href="/case-studies"
+            className="inline-flex min-h-11 items-center text-sm font-semibold text-synergy hover:text-synergy-dark"
+          >
+            ← Back to case studies
           </Link>
         </div>
       </div>

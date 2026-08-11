@@ -132,8 +132,8 @@
       105deg,
       #86efac 0%,
       #4ade80 22%,
-      #14b8a6 50%,
-      #357c3c 78%,
+      var(--color-accent) 50%,
+      var(--color-synergy) 78%,
       #86efac 100%
     );
     background-size: 250% auto;
@@ -221,7 +221,13 @@
   }
 
   .nav-underline-gradient {
-    background: linear-gradient(90deg, #357c3c, #14b8a6, #4ade80, #357c3c);
+    background: linear-gradient(
+      90deg,
+      var(--color-synergy),
+      var(--color-accent),
+      #4ade80,
+      var(--color-synergy)
+    );
     background-size: 200% 100%;
     animation: gradientFlow 6s ease-in-out infinite;
   }

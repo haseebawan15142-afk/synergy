@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import {
   ArrowRight,
@@ -14,6 +14,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { focusElement } from "@/lib/a11y/focus";
 import { motionDurations, motionEase } from "@/lib/motion/transitions";
 import type { MegaMenuConfig } from "@/lib/content/nav-menus";
 import { NavLinkIcon } from "@/components/layout/NavLinkIcon";
@@ -39,6 +40,9 @@ type MegaMenuProps = {
 export function MegaMenu({ label, href, menu, active, onMedia }: MegaMenuProps) {
   const [open, setOpen] = useState(false);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLAnchorElement>(null);
+  const menuId = useId();
   const reduce = useReducedMotion();
   const FeaturedIcon = menu.featured.icon ? featuredIcons[menu.featured.icon] : undefined;
 
@@ -59,13 +63,48 @@ export function MegaMenu({ label, href, menu, active, onMedia }: MegaMenuProps) 
     closeTimer.current = setTimeout(() => setOpen(false), 120);
   };
 
+  const closeMenu = useCallback((restoreFocus = false) => {
+    clearCloseTimer();
+    setOpen(false);
+    if (restoreFocus) {
+      requestAnimationFrame(() => focusElement(triggerRef.current));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      closeMenu(true);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open, closeMenu]);
+
+  const onRootBlur = (event: React.FocusEvent<HTMLDivElement>) => {
+    const next = event.relatedTarget as Node | null;
+    if (next && rootRef.current?.contains(next)) return;
+    handleLeave();
+  };
+
   const multiCol = menu.columns.length > 1;
 
   return (
-    <div onMouseEnter={handleEnter} onMouseLeave={handleLeave}>
+    <div
+      ref={rootRef}
+      onMouseEnter={handleEnter}
+      onMouseLeave={handleLeave}
+      onFocus={handleEnter}
+      onBlur={onRootBlur}
+    >
       <Link
+        ref={triggerRef}
         href={href}
+        id={`${menuId}-trigger`}
         aria-expanded={open}
+        aria-haspopup="true"
+        aria-controls={open ? `${menuId}-panel` : undefined}
         className={cn(
           "relative flex items-center gap-1 rounded-full px-4 py-2 text-sm font-medium transition-colors xl:px-5",
           onMedia
@@ -78,7 +117,6 @@ export function MegaMenu({ label, href, menu, active, onMedia }: MegaMenuProps) 
           (active || open) &&
             "after:absolute after:inset-x-4 after:-bottom-0.5 after:h-0.5 after:rounded-full after:bg-synergy",
         )}
-        onFocus={handleEnter}
       >
         {label}
         <svg
@@ -103,6 +141,7 @@ export function MegaMenu({ label, href, menu, active, onMedia }: MegaMenuProps) 
         {open ? (
           <div className="absolute left-1/2 top-full z-50 w-[min(64rem,calc(100vw-2rem))] -translate-x-1/2 pt-3">
             <motion.div
+              id={`${menuId}-panel`}
               role="menu"
               aria-label={`${label} submenu`}
               initial={reduce ? false : { opacity: 0, y: -6 }}
@@ -149,7 +188,7 @@ export function MegaMenu({ label, href, menu, active, onMedia }: MegaMenuProps) 
                                       <ResilientImg
                                         src={link.logoUrl}
                                         alt=""
-                                        className="h-6 w-7 object-contain"
+                                        className="block h-full max-h-6 w-full max-w-full object-contain"
                                       />
                                     ) : (
                                       <NavLinkIcon
@@ -199,7 +238,12 @@ export function MegaMenu({ label, href, menu, active, onMedia }: MegaMenuProps) 
                         <img
                           src={menu.featured.image}
                           alt=""
-                          className="mb-4 h-24 w-full rounded-lg object-cover object-center ring-1 ring-white/15"
+                          className={cn(
+                            "mb-4 w-full rounded-lg ring-1 ring-white/15",
+                            menu.featured.imageContain
+                              ? "h-16 bg-white object-contain object-center p-3 sm:h-[4.5rem] sm:p-4"
+                              : "h-24 object-cover object-center",
+                          )}
                         />
                       ) : FeaturedIcon ? (
                         <span className="mb-4 flex h-11 w-11 items-center justify-center text-white">
