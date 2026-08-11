@@ -78,7 +78,11 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
         const nextProfile = await fetchAdminProfile(nextUser.uid);
         setProfile(nextProfile);
         if (nextProfile?.role === "admin") {
-          await refreshSessionCookie(nextUser);
+          try {
+            await refreshSessionCookie(nextUser);
+          } catch {
+            /* middleware may still reject; login page can remint */
+          }
         }
       } catch {
         setProfile(null);

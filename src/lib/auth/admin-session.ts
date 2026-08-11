@@ -9,7 +9,8 @@ export type AdminSession = {
   email: string;
 };
 
-const SESSION_EXPIRES_MS = 60 * 60 * 24 * 5 * 1000; // 5 days
+/** ID token lifetime (~1h). Client remints via refreshSessionCookie while the admin is active. */
+const ID_TOKEN_COOKIE_MAX_AGE_SEC = 60 * 60;
 
 async function assertFirestoreAdmin(uid: string): Promise<void> {
   const profile = await getAdminDb().collection(COLLECTIONS.users).doc(uid).get();
@@ -28,19 +29,19 @@ export async function verifyAdminIdToken(token: string): Promise<AdminSession> {
 }
 
 /**
- * Verify Firebase session cookie (preferred) or ID token, then re-check admin role.
- * Role is re-read from Firestore so demotions take effect without waiting for cookie expiry.
+ * Verify Firebase ID token (preferred for Edge middleware) or legacy session cookie,
+ * then re-check admin role in Firestore.
  */
 export async function verifyAdminCredential(token: string): Promise<AdminSession> {
   let uid = "";
   let email = "";
 
   try {
-    const decoded = await getAdminAuth().verifySessionCookie(token, true);
+    const decoded = await getAdminAuth().verifyIdToken(token, true);
     uid = decoded.uid;
     email = decoded.email || "";
   } catch {
-    const decoded = await getAdminAuth().verifyIdToken(token, true);
+    const decoded = await getAdminAuth().verifySessionCookie(token, true);
     uid = decoded.uid;
     email = decoded.email || "";
   }
@@ -49,17 +50,21 @@ export async function verifyAdminCredential(token: string): Promise<AdminSession
   return { uid, email };
 }
 
-/** Mint a Firebase session cookie after ID token + admin role verification. */
+/**
+ * After ID token + admin role verification, return the ID token for the httpOnly cookie.
+ * Edge middleware can verify ID tokens reliably (session-cookie JWKS differs / cookies are large).
+ */
 export async function createVerifiedAdminSessionCookie(idToken: string): Promise<{
   sessionCookie: string;
   expiresInMs: number;
   session: AdminSession;
 }> {
   const session = await verifyAdminIdToken(idToken);
-  const sessionCookie = await getAdminAuth().createSessionCookie(idToken, {
-    expiresIn: SESSION_EXPIRES_MS,
-  });
-  return { sessionCookie, expiresInMs: SESSION_EXPIRES_MS, session };
+  return {
+    sessionCookie: idToken,
+    expiresInMs: ID_TOKEN_COOKIE_MAX_AGE_SEC * 1000,
+    session,
+  };
 }
 
 export function getBearerToken(request: Request): string | null {
@@ -129,4 +134,4 @@ export async function requireAdminCookie(): Promise<AdminSession | null> {
   }
 }
 
-export const ADMIN_SESSION_MAX_AGE_SEC = SESSION_EXPIRES_MS / 1000;
+export const ADMIN_SESSION_MAX_AGE_SEC = ID_TOKEN_COOKIE_MAX_AGE_SEC;

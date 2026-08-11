@@ -3,6 +3,7 @@
 import { Suspense, type FormEvent, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
+  authErrorMessage,
   loginWithEmail,
   fetchAdminProfile,
   refreshSessionCookie,
@@ -35,30 +36,42 @@ function LoginForm() {
       setChecking(false);
     };
 
-    // Don't leave the UI stuck if Firebase Auth/Firestore never responds.
-    const timeout = window.setTimeout(finish, 8000);
+    // Hard cap — never leave the UI on "Checking session…" if Auth/session hangs.
+    const timeout = window.setTimeout(finish, 4_000);
 
     let unsub = () => {};
     try {
-      unsub = subscribeToAuth(async (user) => {
-        if (!user) {
-          window.clearTimeout(timeout);
-          finish();
-          return;
-        }
-        try {
-          const profile = await fetchAdminProfile(user.uid);
-          if (profile?.role === "admin") {
-            await refreshSessionCookie(user);
+      unsub = subscribeToAuth((user) => {
+        void (async () => {
+          if (!user) {
             window.clearTimeout(timeout);
-            router.replace(next.startsWith("/admin") ? next : "/admin");
+            finish();
             return;
           }
-        } catch {
-          /* ignore — show login form */
-        }
-        window.clearTimeout(timeout);
-        finish();
+          try {
+            const profile = await fetchAdminProfile(user.uid);
+            if (profile?.role !== "admin") {
+              window.clearTimeout(timeout);
+              finish();
+              return;
+            }
+            // Bound session mint so a stuck Admin SDK cannot block the login form.
+            await Promise.race([
+              refreshSessionCookie(user),
+              new Promise<never>((_, reject) =>
+                window.setTimeout(() => reject(new Error("session_timeout")), 8_000),
+              ),
+            ]);
+            window.clearTimeout(timeout);
+            // Full navigation so httpOnly cookies are included on the next /admin request.
+            window.location.assign(next.startsWith("/admin") ? next : "/admin");
+            return;
+          } catch {
+            /* show login form — user can sign in again */
+          }
+          window.clearTimeout(timeout);
+          finish();
+        })();
       });
     } catch {
       window.clearTimeout(timeout);
@@ -99,27 +112,28 @@ function LoginForm() {
         setSubmitting(false);
         return;
       }
-      toast.success("Welcome back");
-      router.replace(next.startsWith("/admin") ? next : "/admin");
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Login failed";
-      const code =
-        typeof err === "object" && err && "code" in err
-          ? String((err as { code?: string }).code || "")
-          : "";
-      if (code.includes("auth/") || message.includes("auth/")) {
-        toast.error("Invalid email or password");
-      } else {
-        toast.error(message || "Login failed");
+      try {
+        await refreshSessionCookie(user);
+      } catch (sessionErr) {
+        toast.error(authErrorMessage(sessionErr));
+        setSubmitting(false);
+        return;
       }
+      toast.success("Welcome back");
+      window.location.assign(next.startsWith("/admin") ? next : "/admin");
+    } catch (err) {
+      toast.error(authErrorMessage(err));
       setSubmitting(false);
     }
   }
 
   if (checking || ADMIN_AUTH_BYPASS) {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center text-sm text-ink-muted">
-        {ADMIN_AUTH_BYPASS ? "Auth bypass enabled — opening admin…" : "Checking session…"}
+      <div className="flex min-h-[50vh] flex-col items-center justify-center gap-2 text-sm text-ink-muted">
+        <p>{ADMIN_AUTH_BYPASS ? "Auth bypass enabled — opening admin…" : "Checking session…"}</p>
+        {!ADMIN_AUTH_BYPASS ? (
+          <p className="text-xs text-ink-muted/80">This should only take a few seconds.</p>
+        ) : null}
       </div>
     );
   }

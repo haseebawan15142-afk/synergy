@@ -1,8 +1,8 @@
 import { createRemoteJWKSet, jwtVerify, type JWTPayload } from "jose";
 
 /**
- * Edge-safe Firebase ID / session cookie JWT verification
- * (signature + audience + issuer + expiration).
+ * Edge-safe Firebase ID token verification (signature + audience + issuer + exp).
+ * Admin cookies store ID tokens (not Firebase session cookies) so this JWKS path is reliable.
  */
 const JWKS = createRemoteJWKSet(
   new URL(

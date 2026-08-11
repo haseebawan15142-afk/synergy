@@ -12,10 +12,20 @@ import { ADMIN_SESSION_COOKIE } from "@/lib/firebase/constants";
 
 export { ADMIN_SESSION_COOKIE };
 
+const SESSION_FETCH_TIMEOUT_MS = 12_000;
+
+async function fetchWithTimeout(input: RequestInfo, init?: RequestInit, ms = SESSION_FETCH_TIMEOUT_MS) {
+  const controller = new AbortController();
+  const timer = window.setTimeout(() => controller.abort(), ms);
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } finally {
+    window.clearTimeout(timer);
+  }
+}
+
 export async function loginWithEmail(email: string, password: string) {
   const credential = await signInWithEmailAndPassword(getFirebaseAuth(), email, password);
-  const token = await credential.user.getIdToken();
-  await setSessionCookie(token);
   return credential.user;
 }
 
@@ -48,11 +58,19 @@ export async function isAdminUser(uid: string) {
 }
 
 export async function setSessionCookie(token: string) {
-  const res = await fetch("/api/admin/session", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ token }),
-  });
+  let res: Response;
+  try {
+    res = await fetchWithTimeout("/api/admin/session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token }),
+    });
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw new Error("session_timeout");
+    }
+    throw error;
+  }
   if (!res.ok) {
     const body = (await res.json().catch(() => ({}))) as { error?: string };
     throw new Error(body.error || "Failed to create admin session");
@@ -60,10 +78,51 @@ export async function setSessionCookie(token: string) {
 }
 
 export async function clearSessionCookie() {
-  await fetch("/api/admin/session", { method: "DELETE" });
+  try {
+    await fetchWithTimeout("/api/admin/session", { method: "DELETE" }, 5_000);
+  } catch {
+    /* best-effort */
+  }
 }
 
 export async function refreshSessionCookie(user: User) {
   const token = await user.getIdToken(true);
   await setSessionCookie(token);
 }
+
+function authErrorMessage(err: unknown): string {
+  const code =
+    typeof err === "object" && err && "code" in err
+      ? String((err as { code?: string }).code || "")
+      : "";
+  const message = err instanceof Error ? err.message : "";
+
+  if (
+    code.includes("auth/invalid-credential") ||
+    code.includes("auth/wrong-password") ||
+    code.includes("auth/user-not-found") ||
+    code.includes("auth/invalid-email") ||
+    message.includes("auth/invalid-credential") ||
+    message.includes("auth/wrong-password")
+  ) {
+    return "Invalid email or password. Check credentials and try again.";
+  }
+  if (code.includes("auth/too-many-requests") || message.includes("too-many-requests")) {
+    return "Too many failed attempts. Wait a few minutes, then try again.";
+  }
+  if (code.includes("auth/network-request-failed") || message.includes("network-request-failed")) {
+    return "Network error reaching Firebase Auth. Check your connection.";
+  }
+  if (message === "forbidden") {
+    return "Signed in, but this account is not an admin in Firestore.";
+  }
+  if (message === "session_timeout") {
+    return "Admin session API timed out. Restart `npm run dev` (TLS wrapper) and confirm FIREBASE_ADMIN_* env vars.";
+  }
+  if (message.includes("Failed to create admin session") || message === "unauthorized") {
+    return "Could not create admin session. Check Firebase Admin env vars on the server.";
+  }
+  return message || "Login failed";
+}
+
+export { authErrorMessage };

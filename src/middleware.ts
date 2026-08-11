@@ -32,12 +32,10 @@ function redirectToLogin(request: NextRequest, pathname: string) {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Public site and non-admin APIs are untouched.
   if (!pathname.startsWith("/admin")) {
     return NextResponse.next();
   }
 
-  // Dev-only bypass (hard-disabled in production via constants).
   if (ADMIN_AUTH_BYPASS) {
     return NextResponse.next();
   }
@@ -53,13 +51,11 @@ export async function middleware(request: NextRequest) {
     return redirectToLogin(request, pathname);
   }
 
-  // 1) Cryptographically verify Firebase session/ID JWT (sig + aud + iss + exp).
   const claims = await verifyFirebaseIdTokenEdge(sessionToken);
   if (!claims?.uid) {
     return redirectToLogin(request, pathname);
   }
 
-  // 2) Verify server-minted HMAC gate that was issued only after Firestore role=admin.
   const gateOk = await verifyAdminGate(gateToken, claims.uid);
   if (!gateOk) {
     return redirectToLogin(request, pathname);

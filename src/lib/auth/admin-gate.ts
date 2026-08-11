@@ -1,19 +1,19 @@
 /**
  * Edge-safe HMAC gate proving admin role was verified server-side at session mint.
- * Always used together with a verified Firebase session/ID token — never alone.
+ * Always used together with a verified Firebase ID token — never alone.
  */
 
 import { ADMIN_GATE_COOKIE } from "@/lib/firebase/constants";
 
 export { ADMIN_GATE_COOKIE };
 
-function getGateSecret(): string {
+function normalizeSecretSource(): string {
   const explicit = process.env.ADMIN_SESSION_SECRET?.trim();
   if (explicit) return explicit;
-  // Fallback: Admin private key material (server/middleware env only — not NEXT_PUBLIC).
-  const pk = process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, "\n")?.trim();
-  if (pk) return pk;
-  return "";
+  // Fallback: normalize PEM so Node + Edge see the same bytes.
+  return (
+    process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, "\n").replace(/\r/g, "").trim() || ""
+  );
 }
 
 function toBase64Url(buffer: ArrayBuffer): string {
@@ -38,18 +38,20 @@ function timingSafeEqual(a: string, b: string): boolean {
   return out === 0;
 }
 
-async function hmacSign(message: string): Promise<string> {
-  const secret = getGateSecret();
-  if (!secret) {
+/** SHA-256 of secret source → stable raw HMAC key (avoids Edge/Node PEM quirks). */
+async function getHmacKey(): Promise<CryptoKey> {
+  const source = normalizeSecretSource();
+  if (!source) {
     throw new Error("Missing ADMIN_SESSION_SECRET (or FIREBASE_ADMIN_PRIVATE_KEY) for admin gate");
   }
-  const key = await crypto.subtle.importKey(
-    "raw",
-    new TextEncoder().encode(secret),
-    { name: "HMAC", hash: "SHA-256" },
-    false,
-    ["sign"],
-  );
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(source));
+  return crypto.subtle.importKey("raw", digest, { name: "HMAC", hash: "SHA-256" }, false, [
+    "sign",
+  ]);
+}
+
+async function hmacSign(message: string): Promise<string> {
+  const key = await getHmacKey();
   const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(message));
   return toBase64Url(sig);
 }
@@ -67,7 +69,7 @@ export async function verifyAdminGate(
   expectedUid: string,
 ): Promise<boolean> {
   if (!gateValue || !expectedUid) return false;
-  if (!getGateSecret()) return false;
+  if (!normalizeSecretSource()) return false;
 
   const parts = gateValue.split(".");
   if (parts.length !== 3) return false;
