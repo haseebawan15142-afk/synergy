@@ -179,7 +179,9 @@ export function Navbar({ logoUrl, darkLogoUrl, footerLogoUrl, companyName }: Nav
   }, [cmsPartners, cmsServices, megaIcons]);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 6);
+    // Keep home hero nav transparent until the user actually scrolls;
+    // a tiny threshold (e.g. 6px) flips to solid too early on some browsers.
+    const onScroll = () => setScrolled(window.scrollY > 40);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -202,10 +204,12 @@ export function Navbar({ logoUrl, darkLogoUrl, footerLogoUrl, companyName }: Nav
   const overMedia = isHome && !scrolled && !open;
 
   const headerClass = cn(
-    "fixed inset-x-0 top-0 z-50 border-b transition-[background-color,border-color,box-shadow] duration-300",
+    "fixed inset-x-0 top-0 z-50 border-b transition-[background-color,border-color,box-shadow,backdrop-filter] duration-300",
     overMedia
       ? "border-transparent bg-transparent shadow-none"
-      : "border-border bg-surface-elevated shadow-soft",
+      : // Explicit white solid bar after scroll (readable dark links below).
+        // Avoid relying on CMS ink tokens that can leave light text on white.
+        "border-slate-200/80 bg-white/95 shadow-soft backdrop-blur-md dark:border-border dark:bg-surface-elevated/95",
   );
 
   return (
@@ -260,8 +264,8 @@ export function Navbar({ logoUrl, darkLogoUrl, footerLogoUrl, companyName }: Nav
                       ? "bg-white/15 text-white"
                       : "text-white/90 hover:bg-white/10 hover:text-white"
                     : active
-                      ? "bg-synergy-muted text-synergy-light dark:text-synergy-glow"
-                      : "text-ink-body hover:bg-surface-muted hover:text-ink",
+                      ? "bg-synergy-muted text-synergy-dark dark:text-synergy-glow"
+                      : "text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-ink-body dark:hover:bg-surface-muted dark:hover:text-ink",
                 )}
               >
                 {item.label}
@@ -305,7 +309,7 @@ export function Navbar({ logoUrl, darkLogoUrl, footerLogoUrl, companyName }: Nav
               "inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border shadow-soft",
               overMedia
                 ? "border-white/25 bg-white/10 text-white"
-                : "border-border bg-surface-elevated text-ink",
+                : "border-slate-200 bg-white text-slate-800 shadow-soft dark:border-border dark:bg-surface-elevated dark:text-ink",
             )}
             aria-expanded={open}
             aria-controls="mobile-nav"

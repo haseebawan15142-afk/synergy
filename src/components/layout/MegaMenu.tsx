@@ -112,8 +112,8 @@ export function MegaMenu({ label, href, menu, active, onMedia }: MegaMenuProps) 
               ? "bg-white/15 text-white"
               : "text-white/90 hover:bg-white/10 hover:text-white"
             : active || open
-              ? "bg-synergy-muted text-synergy-light dark:text-synergy-glow"
-              : "text-ink-body hover:bg-surface-muted hover:text-ink",
+              ? "bg-synergy-muted text-synergy-dark dark:text-synergy-glow"
+              : "text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-ink-body dark:hover:bg-surface-muted dark:hover:text-ink",
           (active || open) &&
             "after:absolute after:inset-x-4 after:-bottom-0.5 after:h-0.5 after:rounded-full after:bg-synergy",
         )}
