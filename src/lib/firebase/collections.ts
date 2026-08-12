@@ -1,6 +1,7 @@
 /** Firestore collection / document path constants */
 
 import type { SocialLink } from "@/lib/content/social-links";
+import type { HeroVideo } from "@/lib/content/hero-videos";
 
 export const COLLECTIONS = {
   settings: "settings",
@@ -99,6 +100,8 @@ export type SiteSettings = {
   footerLogoUrl?: string;
   heroBackgroundUrl?: string;
   companyVideoUrl?: string;
+  /** Default home hero playlist (Admin → Website Settings). Event themes override when active. */
+  heroVideos?: HeroVideo[];
   ogImageUrl?: string;
   defaultSeoTitle?: string;
   defaultSeoDescription?: string;

@@ -13,6 +13,11 @@ import { getFirebaseDb } from "@/lib/firebase/client";
 import { useAdminAuth } from "@/components/admin/AdminAuthProvider";
 import { AdminPageSkeleton } from "@/components/admin/AdminSkeleton";
 import { MediaUrlField } from "@/components/admin/MediaPicker";
+import { HeroVideoSlotsEditor } from "@/components/admin/HeroVideoSlotsEditor";
+import {
+  landingHeroSlotsForAdmin,
+  normalizeLandingHeroVideos,
+} from "@/lib/content/hero-videos";
 import {
   SOCIAL_PLATFORMS,
   legacySocialLinks,
@@ -66,7 +71,11 @@ export function WebsiteSettingsForm() {
   useEffect(() => {
     getSiteSettings()
       .then((data) => {
-        setForm({ ...data, socialLinks: normalizeSocialLinks(data) });
+        setForm({
+          ...data,
+          socialLinks: normalizeSocialLinks(data),
+          heroVideos: landingHeroSlotsForAdmin(data.heroVideos),
+        });
         setPhonesText((data.phones || []).join("\n"));
       })
       .catch((err: unknown) => {
@@ -126,11 +135,14 @@ export function WebsiteSettingsForm() {
         }))
         .filter((link) => Boolean(link.url));
 
+      const heroVideos = normalizeLandingHeroVideos(form.heroVideos);
+
       await saveSiteSettings(
         {
           ...form,
           phones,
           socialLinks,
+          heroVideos,
           ...syncLegacySocialFields(socialLinks),
         },
         user?.uid,
@@ -162,8 +174,8 @@ export function WebsiteSettingsForm() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Website Settings</h1>
           <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-            Company identity, contact details, and brand media. Logo/favicon updates apply across the public site
-            (navbar, footer, partner blocks, browser tab).
+            Company identity, contact details, landing hero videos, and brand media. Updates apply across the public site
+            (navbar, footer, home hero, partner blocks, browser tab).
           </p>
         </div>
         <button
@@ -378,6 +390,20 @@ export function WebsiteSettingsForm() {
               </div>
             ))
           )}
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <h2 className="text-sm font-semibold">Landing page hero videos</h2>
+        <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+          Default home hero playlist (up to 6 clips). Upload any video format — it converts to MP4 and is stored in
+          the media library. Poster images convert to WebP. Event themes still override this playlist when activated.
+        </p>
+        <div className="mt-4">
+          <HeroVideoSlotsEditor
+            videos={form.heroVideos || []}
+            onChange={(heroVideos) => update("heroVideos", heroVideos)}
+          />
         </div>
       </section>
 

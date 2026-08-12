@@ -1,10 +1,16 @@
 import { HeroVideoBackground } from "@/components/home/HeroVideoBackground";
 import { HeroSectionContent } from "@/components/home/HeroSectionContent";
 import { HeroExperienceLayer } from "@/components/effects/HeroExperienceLayer";
-import { fetchActiveEventHeroVideos } from "@/lib/cms/public-server";
+import {
+  fetchActiveEventHeroVideos,
+  fetchLandingHeroVideos,
+} from "@/lib/cms/public-server";
 
 export async function HeroSection() {
-  const event = await fetchActiveEventHeroVideos();
+  const [event, landingVideos] = await Promise.all([
+    fetchActiveEventHeroVideos(),
+    fetchLandingHeroVideos(),
+  ]);
 
   return (
     <HeroExperienceLayer
@@ -17,6 +23,11 @@ export async function HeroSection() {
               event?.videos?.length
                 ? { presetId: event.presetId, videos: event.videos }
                 : null
+            }
+            landingPlaylist={
+              event?.videos?.length
+                ? null
+                : { videos: landingVideos }
             }
           />
           <div

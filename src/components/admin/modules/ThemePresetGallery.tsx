@@ -24,8 +24,7 @@ import {
 } from "@/lib/admin/theme-presets";
 import { applyThemeTokensToRoot } from "@/lib/theme/apply-theme";
 import { AdminPageSkeleton } from "@/components/admin/AdminSkeleton";
-import { MediaUrlField } from "@/components/admin/MediaPicker";
-import { VideoUrlField } from "@/components/admin/VideoUrlField";
+import { HeroVideoSlotsEditor } from "@/components/admin/HeroVideoSlotsEditor";
 import {
   AdminPageHeader,
   Card,
@@ -562,39 +561,15 @@ export function ThemePresetGallery({ onThemeChanged }: Props) {
                 <h3 className="text-sm font-semibold text-ink">Event hero videos (max 3)</h3>
                 <p className="mt-1 text-xs text-ink-muted">
                   When this theme is active, the home hero loops these clips every 3 seconds with a
-                  smooth crossfade. Poster image is optional — if empty, a default poster is used.
-                  Leave video empty to keep the normal site videos.
+                  smooth crossfade. Poster image is optional. Leave empty to keep Website Settings
+                  landing videos.
                 </p>
               </div>
-              {draft.heroVideos.map((clip, index) => (
-                <Card key={`hero-slot-${index}`} className="space-y-3 bg-surface-muted/20">
-                  <p className="text-xs font-bold uppercase tracking-wide text-ink-muted">
-                    Clip {index + 1}
-                  </p>
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <VideoUrlField
-                      label="Video (MP4)"
-                      folder="hero"
-                      value={clip.mp4}
-                      onChange={(url) => {
-                        const next = [...draft.heroVideos];
-                        next[index] = { ...next[index], mp4: url };
-                        setDraft({ ...draft, heroVideos: next });
-                      }}
-                    />
-                    <MediaUrlField
-                      label="Poster image (optional)"
-                      folder="hero"
-                      value={clip.poster}
-                      onChange={(url) => {
-                        const next = [...draft.heroVideos];
-                        next[index] = { ...next[index], poster: url };
-                        setDraft({ ...draft, heroVideos: next });
-                      }}
-                    />
-                  </div>
-                </Card>
-              ))}
+              <HeroVideoSlotsEditor
+                videos={draft.heroVideos}
+                max={3}
+                onChange={(heroVideos) => setDraft({ ...draft, heroVideos })}
+              />
             </div>
           ) : null}
 

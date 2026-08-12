@@ -5,6 +5,9 @@ export type HeroVideo = {
   label?: string;
 };
 
+/** Admin-managed default landing playlist (event themes still override). */
+export const MAX_LANDING_HERO_VIDEOS = 6;
+
 /**
  * Landing page hero videos — plays one after another with crossfade.
  * Run `npm run optimize:videos` after replacing source files.
@@ -45,3 +48,44 @@ export const heroVideoTransitionMs = 1200;
 /** Event-theme hero: switch every 3s with a smooth crossfade */
 export const eventHeroVideoIntervalMs = 3000;
 export const eventHeroVideoTransitionMs = 900;
+
+export function emptyLandingHeroSlot(index: number): HeroVideo {
+  return { mp4: "", poster: "", label: `Clip ${index + 1}` };
+}
+
+export function normalizeLandingHeroVideos(
+  videos: HeroVideo[] | null | undefined,
+  max = MAX_LANDING_HERO_VIDEOS,
+): HeroVideo[] {
+  if (!Array.isArray(videos)) return [];
+  return videos
+    .map((v, i) => {
+      const mp4 = String(v?.mp4 || "").trim();
+      const poster = String(v?.poster || "").trim();
+      const webm = String(v?.webm || "").trim();
+      const label = String(v?.label || `Clip ${i + 1}`).trim();
+      const row: HeroVideo = { mp4, label };
+      if (poster) row.poster = poster;
+      if (webm) row.webm = webm;
+      return row;
+    })
+    .filter((v) => Boolean(v.mp4))
+    .slice(0, max);
+}
+
+/** CMS playlist when saved; otherwise bundled landing clips so the hero never goes blank. */
+export function resolveLandingHeroVideos(videos?: HeroVideo[] | null): HeroVideo[] {
+  const fromCms = normalizeLandingHeroVideos(videos);
+  return fromCms.length ? fromCms : heroVideos;
+}
+
+export function landingHeroSlotsForAdmin(videos?: HeroVideo[] | null): HeroVideo[] {
+  const source = normalizeLandingHeroVideos(videos);
+  const seeded = source.length ? source : heroVideos;
+  return seeded.map((clip, i) => ({
+    mp4: clip.mp4 || "",
+    poster: clip.poster || "",
+    webm: clip.webm || "",
+    label: clip.label || `Clip ${i + 1}`,
+  }));
+}

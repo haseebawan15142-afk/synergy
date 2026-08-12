@@ -16,6 +16,10 @@ import {
 import { getFirebaseDb } from "@/lib/firebase/client";
 import { COLLECTIONS, DOCS, DEFAULT_SITE_SETTINGS, type SiteSettings } from "@/lib/firebase/collections";
 import {
+  resolveLandingHeroVideos,
+  type HeroVideo,
+} from "@/lib/content/hero-videos";
+import {
   DEFAULT_THEME,
   type ThemeTokens,
   type NavItemDoc,
@@ -317,6 +321,19 @@ export async function fetchActiveEventHeroVideos(): Promise<ActiveEventHeroVideo
     },
     () => null,
     5_000,
+  );
+}
+
+/** Default landing hero playlist from Website Settings (bundled clips if unset). */
+export async function fetchLandingHeroVideos(): Promise<HeroVideo[]> {
+  return cmsRead(
+    "settings:landing-hero-videos",
+    async () => {
+      const settings = await fetchSiteSettings();
+      return resolveLandingHeroVideos(settings.heroVideos);
+    },
+    () => resolveLandingHeroVideos(null),
+    60_000,
   );
 }
 

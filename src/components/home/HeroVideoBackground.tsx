@@ -9,10 +9,10 @@ import {
   heroFallbackPoster,
   heroVideoIntervalMs,
   heroVideoTransitionMs,
-  heroVideos as defaultHeroVideos,
+  resolveLandingHeroVideos,
   type HeroVideo,
 } from "@/lib/content/hero-videos";
-import { fetchActiveEventHeroVideos } from "@/lib/cms/public";
+import { fetchActiveEventHeroVideos, fetchLandingHeroVideos } from "@/lib/cms/public";
 import { getHeroPlaybackMode } from "@/lib/media/connection";
 import { setHeroVideoActive } from "@/lib/media/hero-video-presence";
 
@@ -125,21 +125,35 @@ function waitForEnoughData(video: HTMLVideoElement, signal?: AbortSignal) {
 }
 
 function playlistKeyFor(isEvent: boolean, presetId: string, videos: HeroVideo[]) {
-  if (!isEvent) return "default";
-  return `event-${presetId}-${videos.map((v) => v.mp4).join("|")}`;
+  const fingerprint = videos.map((v) => v.mp4).join("|");
+  if (!isEvent) return `default-${fingerprint || "empty"}`;
+  return `event-${presetId}-${fingerprint}`;
 }
 
 type HeroVideoBackgroundProps = {
   /** Server-fetched event clips — prevents default-playlist flash on Independence themes. */
   eventPlaylist?: EventHeroSeed | null;
+  /** Server-fetched default landing clips when no event theme is active. */
+  landingPlaylist?: { videos: HeroVideo[] } | null;
 };
 
-export function HeroVideoBackground({ eventPlaylist = null }: HeroVideoBackgroundProps) {
+export function HeroVideoBackground({
+  eventPlaylist = null,
+  landingPlaylist = null,
+}: HeroVideoBackgroundProps) {
   const seedKey =
     eventPlaylist?.videos?.length
       ? playlistKeyFor(true, eventPlaylist.presetId, eventPlaylist.videos)
-      : "";
+      : landingPlaylist?.videos?.length
+        ? playlistKeyFor(false, "default", landingPlaylist.videos)
+        : "";
   const hasSeed = Boolean(seedKey);
+  const seededVideos = eventPlaylist?.videos?.length
+    ? eventPlaylist.videos
+    : landingPlaylist?.videos?.length
+      ? landingPlaylist.videos
+      : [];
+  const seededIsEvent = Boolean(eventPlaylist?.videos?.length);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRefs = useRef<[HTMLVideoElement | null, HTMLVideoElement | null]>([null, null]);
@@ -153,10 +167,8 @@ export function HeroVideoBackground({ eventPlaylist = null }: HeroVideoBackgroun
   const [visibleLayer, setVisibleLayer] = useState<0 | 1>(0);
   const [layerIndices, setLayerIndices] = useState<[number, number]>([0, 1]);
   const [pendingIncoming, setPendingIncoming] = useState<0 | 1 | null>(null);
-  const [playlist, setPlaylist] = useState<HeroVideo[]>(
-    hasSeed ? eventPlaylist!.videos : [],
-  );
-  const [isEventPlaylist, setIsEventPlaylist] = useState(hasSeed);
+  const [playlist, setPlaylist] = useState<HeroVideo[]>(seededVideos);
+  const [isEventPlaylist, setIsEventPlaylist] = useState(seededIsEvent);
   const [playlistKey, setPlaylistKey] = useState(seedKey || "loading");
 
   const intervalMs = isEventPlaylist ? eventHeroVideoIntervalMs : heroVideoIntervalMs;
@@ -179,8 +191,12 @@ export function HeroVideoBackground({ eventPlaylist = null }: HeroVideoBackgroun
     } catch {
       /* fall through */
     }
-    // Only after confirming there is no event playlist may defaults play.
-    applyPlaylist(defaultHeroVideos, false);
+    try {
+      const landing = await fetchLandingHeroVideos();
+      applyPlaylist(resolveLandingHeroVideos(landing), false);
+    } catch {
+      applyPlaylist(resolveLandingHeroVideos(null), false);
+    }
   }, [applyPlaylist]);
 
   useEffect(() => {

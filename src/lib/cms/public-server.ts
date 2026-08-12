@@ -5,6 +5,7 @@ import { unstable_cache } from "next/cache";
 import {
   fetchActiveEventHeroVideos as fetchActiveEventHeroVideosUncached,
   fetchFooterNav as fetchFooterNavUncached,
+  fetchLandingHeroVideos as fetchLandingHeroVideosUncached,
   fetchNewsletterIssues as fetchNewsletterIssuesUncached,
   fetchOffices as fetchOfficesUncached,
   fetchPartners as fetchPartnersUncached,
@@ -22,7 +23,7 @@ import {
  */
 
 export const fetchSiteSettings = cache(
-  unstable_cache(async () => fetchSiteSettingsUncached(), ["cms:settings:site:v4"], {
+  unstable_cache(async () => fetchSiteSettingsUncached(), ["cms:settings:site:v5"], {
     revalidate: 60,
     tags: ["cms-settings"],
   }),
@@ -86,5 +87,13 @@ export const fetchActiveEventHeroVideos = cache(
     async () => fetchActiveEventHeroVideosUncached(),
     ["cms:theme:active-hero-videos:v3"],
     { revalidate: 30, tags: ["cms-theme"] },
+  ),
+);
+
+export const fetchLandingHeroVideos = cache(
+  unstable_cache(
+    async () => fetchLandingHeroVideosUncached(),
+    ["cms:settings:landing-hero-videos:v1"],
+    { revalidate: 60, tags: ["cms-settings"] },
   ),
 );
