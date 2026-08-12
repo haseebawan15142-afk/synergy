@@ -1,14 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTheme } from "next-themes";
 import { fetchThemeTokens } from "@/lib/cms/public";
 import type { ThemeTokens } from "@/lib/admin/types";
 import { applyThemeTokensToRoot } from "@/lib/theme/apply-theme";
 
-/** Applies CMS theme tokens as real design-token CSS variables on :root. */
+/**
+ * Applies CMS brand theme tokens. Surface/ink stay mode-aware via CSS
+ * (`html:not(.dark)`), so the navbar Dark toggle always works.
+ */
 export function CmsThemeStyles() {
-  const { resolvedTheme } = useTheme();
   const [tokens, setTokens] = useState<Partial<ThemeTokens> | null>(null);
 
   useEffect(() => {
@@ -31,9 +32,8 @@ export function CmsThemeStyles() {
 
   useEffect(() => {
     if (!tokens) return;
-    const mode = resolvedTheme === "dark" ? "dark" : "light";
-    applyThemeTokensToRoot(tokens, document.documentElement, { mode });
-  }, [tokens, resolvedTheme]);
+    applyThemeTokensToRoot(tokens);
+  }, [tokens]);
 
   return null;
 }

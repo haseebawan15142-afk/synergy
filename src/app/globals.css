@@ -26,6 +26,7 @@
   }
 
   .dark {
+    color-scheme: dark;
     --c-surface: 11 18 32;
     --c-surface-muted: 15 23 42;
     --c-surface-elevated: 30 41 59;

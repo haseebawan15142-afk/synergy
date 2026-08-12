@@ -31,3 +31,19 @@
   --color-canvas: var(--color-surface);
   --radius-card: 1rem;
 }
+
+html.dark {
+  color-scheme: dark;
+  --color-surface: #0b1220;
+  --color-surface-muted: #0f172a;
+  --color-surface-elevated: #1e293b;
+  --color-ink: #f8fafc;
+  --color-ink-secondary: #e2e8f0;
+  --color-ink-body: #cbd5e1;
+  --color-ink-muted: #94a3b8;
+  --color-border: #334155;
+  --color-border-strong: #475569;
+  --color-synergy-muted: #14532d;
+  --color-accent-soft: #134e4a;
+  --color-canvas: var(--color-surface);
+}
