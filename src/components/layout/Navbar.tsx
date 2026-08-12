@@ -41,6 +41,11 @@ type NavbarProps = {
   darkLogoUrl?: string | null;
   footerLogoUrl?: string | null;
   companyName?: string | null;
+  /**
+   * Server-known home route. `usePathname()` is unreliable during SSR in the site
+   * layout, which caused a solid white nav (with light link text) over the hero.
+   */
+  overHero?: boolean;
 };
 
 function applyMegaMenuIcons(
@@ -69,15 +74,26 @@ function applyMegaMenuIcons(
   };
 }
 
-export function Navbar({ logoUrl, darkLogoUrl, footerLogoUrl, companyName }: NavbarProps) {
+export function Navbar({
+  logoUrl,
+  darkLogoUrl,
+  footerLogoUrl,
+  companyName,
+  overHero = false,
+}: NavbarProps) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
   const [mobileSubOpen, setMobileSubOpen] = useState<string | null>(null);
   const [megaIcons, setMegaIcons] = useState<MegaMenuIconMap | null>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const mobileNavRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const reduce = useReducedMotion();
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
 
   const closeMobileNav = useCallback(() => {
     setOpen(false);
@@ -199,7 +215,9 @@ export function Navbar({ logoUrl, darkLogoUrl, footerLogoUrl, companyName }: Nav
     setMobileSubOpen(null);
   }, [pathname]);
 
-  const isHome = pathname === "/";
+  // SSR: trust server `overHero` (usePathname is wrong in this layout on Vercel).
+  // After hydration: trust client pathname so in-app navigations stay correct.
+  const isHome = hydrated ? pathname === "/" : overHero || pathname === "/";
   // Transparent sticky bar over hero video so media can fill the viewport
   const overMedia = isHome && !scrolled && !open;
 

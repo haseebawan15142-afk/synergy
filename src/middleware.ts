@@ -29,19 +29,28 @@ function redirectToLogin(request: NextRequest, pathname: string) {
   return response;
 }
 
+function withPathnameHeader(request: NextRequest) {
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", request.nextUrl.pathname);
+  return NextResponse.next({
+    request: { headers: requestHeaders },
+  });
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Forward pathname so the site layout can SSR the home hero nav as transparent.
   if (!pathname.startsWith("/admin")) {
-    return NextResponse.next();
+    return withPathnameHeader(request);
   }
 
   if (ADMIN_AUTH_BYPASS) {
-    return NextResponse.next();
+    return withPathnameHeader(request);
   }
 
   if (pathname === "/admin/login" || pathname.startsWith("/admin/login/")) {
-    return NextResponse.next();
+    return withPathnameHeader(request);
   }
 
   const sessionToken = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
@@ -61,9 +70,14 @@ export async function middleware(request: NextRequest) {
     return redirectToLogin(request, pathname);
   }
 
-  return NextResponse.next();
+  return withPathnameHeader(request);
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: [
+    /*
+     * Skip static assets; run on pages so x-pathname reaches the site layout.
+     */
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|mp4|webm)$).*)",
+  ],
 };
