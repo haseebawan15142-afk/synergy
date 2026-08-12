@@ -8,6 +8,8 @@ import { LocationsSection } from "@/components/careers/LocationsSection";
 import { JobsAndApplication } from "@/components/careers/JobsAndApplication";
 import { CareersCommunitySection } from "@/components/careers/CareersCommunitySection";
 import { CareersCtaSection } from "@/components/careers/CareersCtaSection";
+import { resolveSocialLinks } from "@/lib/content/social-links";
+import { fetchSiteSettings } from "@/lib/cms/public-server";
 
 export const metadata: Metadata = {
   title: "Careers",
@@ -15,7 +17,10 @@ export const metadata: Metadata = {
     "Join Synergy Computers (Pvt.) Ltd — explore open IT positions in Karachi, Lahore, Islamabad, and Gilgit, or submit a general application.",
 };
 
-export default function CareersPage() {
+export default async function CareersPage() {
+  const settings = await fetchSiteSettings();
+  const socialLinks = resolveSocialLinks(settings);
+
   return (
     <>
       <CareersHero />
@@ -25,7 +30,7 @@ export default function CareersPage() {
       <HiringProcessSection />
       <LocationsSection />
       <JobsAndApplication />
-      <CareersCommunitySection />
+      <CareersCommunitySection socialLinks={socialLinks} />
       <CareersCtaSection />
     </>
   );

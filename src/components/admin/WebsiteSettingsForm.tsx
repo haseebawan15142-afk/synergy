@@ -13,6 +13,15 @@ import { getFirebaseDb } from "@/lib/firebase/client";
 import { useAdminAuth } from "@/components/admin/AdminAuthProvider";
 import { AdminPageSkeleton } from "@/components/admin/AdminSkeleton";
 import { MediaUrlField } from "@/components/admin/MediaPicker";
+import {
+  SOCIAL_PLATFORMS,
+  legacySocialLinks,
+  newSocialLink,
+  platformLabel,
+  syncLegacySocialFields,
+  type SocialLink,
+  type SocialPlatform,
+} from "@/lib/content/social-links";
 
 function Field({
   label,
@@ -34,6 +43,19 @@ function Field({
 const inputClass =
   "w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm outline-none ring-zinc-900 focus:ring-2 dark:border-zinc-600 dark:bg-zinc-950";
 
+function normalizeSocialLinks(data: SiteSettings): SocialLink[] {
+  if (Array.isArray(data.socialLinks) && data.socialLinks.length > 0) {
+    return data.socialLinks.map((link) => ({
+      ...link,
+      id: link.id || `social-${link.platform}-${Math.random().toString(36).slice(2, 8)}`,
+      active: link.active !== false,
+      iconUrl: link.iconUrl || "",
+    }));
+  }
+  const legacy = legacySocialLinks(data);
+  return legacy.length ? legacy : [...(DEFAULT_SITE_SETTINGS.socialLinks || [])];
+}
+
 export function WebsiteSettingsForm() {
   const { user, profile } = useAdminAuth();
   const [form, setForm] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
@@ -44,7 +66,7 @@ export function WebsiteSettingsForm() {
   useEffect(() => {
     getSiteSettings()
       .then((data) => {
-        setForm(data);
+        setForm({ ...data, socialLinks: normalizeSocialLinks(data) });
         setPhonesText((data.phones || []).join("\n"));
       })
       .catch((err: unknown) => {
@@ -57,6 +79,34 @@ export function WebsiteSettingsForm() {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
+  function updateSocial(id: string, patch: Partial<SocialLink>) {
+    setForm((prev) => ({
+      ...prev,
+      socialLinks: (prev.socialLinks || []).map((link) => {
+        if (link.id !== id) return link;
+        const next = { ...link, ...patch };
+        if (patch.platform && patch.label === undefined) {
+          next.label = platformLabel(patch.platform);
+        }
+        return next;
+      }),
+    }));
+  }
+
+  function addSocial() {
+    setForm((prev) => ({
+      ...prev,
+      socialLinks: [...(prev.socialLinks || []), newSocialLink("youtube")],
+    }));
+  }
+
+  function removeSocial(id: string) {
+    setForm((prev) => ({
+      ...prev,
+      socialLinks: (prev.socialLinks || []).filter((link) => link.id !== id),
+    }));
+  }
+
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setSaving(true);
@@ -66,10 +116,22 @@ export function WebsiteSettingsForm() {
         .map((p) => p.trim())
         .filter(Boolean);
 
+      const socialLinks = (form.socialLinks || [])
+        .map((link) => ({
+          ...link,
+          url: String(link.url || "").trim(),
+          label: String(link.label || platformLabel(link.platform)).trim(),
+          iconUrl: String(link.iconUrl || "").trim(),
+          active: link.active !== false,
+        }))
+        .filter((link) => Boolean(link.url));
+
       await saveSiteSettings(
         {
           ...form,
           phones,
+          socialLinks,
+          ...syncLegacySocialFields(socialLinks),
         },
         user?.uid,
       );
@@ -228,20 +290,94 @@ export function WebsiteSettingsForm() {
       </section>
 
       <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-        <h2 className="text-sm font-semibold">Social links</h2>
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
-          <Field label="LinkedIn">
-            <input className={inputClass} value={form.socialLinkedin} onChange={(e) => update("socialLinkedin", e.target.value)} />
-          </Field>
-          <Field label="Facebook">
-            <input className={inputClass} value={form.socialFacebook} onChange={(e) => update("socialFacebook", e.target.value)} />
-          </Field>
-          <Field label="Twitter / X">
-            <input className={inputClass} value={form.socialTwitter} onChange={(e) => update("socialTwitter", e.target.value)} />
-          </Field>
-          <Field label="Instagram">
-            <input className={inputClass} value={form.socialInstagram} onChange={(e) => update("socialInstagram", e.target.value)} />
-          </Field>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h2 className="text-sm font-semibold">Social links</h2>
+            <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+              Add YouTube, Twitter, Instagram, and more here — no developer change needed. Built-in icons for common
+              platforms; optional custom icon upload if you need your own logo.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={addSocial}
+            className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium hover:bg-zinc-50 dark:border-zinc-600 dark:hover:bg-zinc-800"
+          >
+            Add link
+          </button>
+        </div>
+
+        <div className="mt-4 space-y-4">
+          {(form.socialLinks || []).length === 0 ? (
+            <p className="text-sm text-zinc-500">No social links yet. Click “Add link”.</p>
+          ) : (
+            (form.socialLinks || []).map((link) => (
+              <div
+                key={link.id}
+                className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-700"
+              >
+                <div className="grid gap-3 md:grid-cols-2">
+                  <Field label="Platform">
+                    <select
+                      className={inputClass}
+                      value={link.platform}
+                      onChange={(e) =>
+                        updateSocial(link.id, { platform: e.target.value as SocialPlatform })
+                      }
+                    >
+                      {SOCIAL_PLATFORMS.map((p) => (
+                        <option key={p.id} value={p.id}>
+                          {p.label}
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
+                  <Field label="Label">
+                    <input
+                      className={inputClass}
+                      value={link.label}
+                      onChange={(e) => updateSocial(link.id, { label: e.target.value })}
+                    />
+                  </Field>
+                  <div className="md:col-span-2">
+                    <Field label="URL">
+                      <input
+                        className={inputClass}
+                        value={link.url}
+                        placeholder="https://"
+                        onChange={(e) => updateSocial(link.id, { url: e.target.value })}
+                      />
+                    </Field>
+                  </div>
+                  <div className="md:col-span-2">
+                    <MediaUrlField
+                      label="Custom icon (optional)"
+                      folder="logos"
+                      value={link.iconUrl || ""}
+                      onChange={(value) => updateSocial(link.id, { iconUrl: value })}
+                    />
+                  </div>
+                </div>
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+                  <label className="inline-flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-300">
+                    <input
+                      type="checkbox"
+                      checked={link.active !== false}
+                      onChange={(e) => updateSocial(link.id, { active: e.target.checked })}
+                    />
+                    Show on site
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => removeSocial(link.id)}
+                    className="text-sm font-medium text-red-600 hover:underline"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </section>
 

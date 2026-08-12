@@ -105,6 +105,22 @@ function mapSiteConfig(): SiteSettings {
     addressCountry: siteConfig.address.country,
     socialLinkedin: siteConfig.social.linkedin,
     socialFacebook: siteConfig.social.facebook,
+    socialLinks: [
+      {
+        id: "default-linkedin",
+        platform: "linkedin",
+        label: "LinkedIn",
+        url: siteConfig.social.linkedin,
+        active: true,
+      },
+      {
+        id: "default-facebook",
+        platform: "facebook",
+        label: "Facebook",
+        url: siteConfig.social.facebook,
+        active: true,
+      },
+    ],
     fax: siteConfig.fax,
   };
 }

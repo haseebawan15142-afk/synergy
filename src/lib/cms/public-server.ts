@@ -22,7 +22,7 @@ import {
  */
 
 export const fetchSiteSettings = cache(
-  unstable_cache(async () => fetchSiteSettingsUncached(), ["cms:settings:site:v3"], {
+  unstable_cache(async () => fetchSiteSettingsUncached(), ["cms:settings:site:v4"], {
     revalidate: 60,
     tags: ["cms-settings"],
   }),

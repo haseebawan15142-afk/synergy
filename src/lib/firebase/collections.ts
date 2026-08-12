@@ -1,5 +1,7 @@
 /** Firestore collection / document path constants */
 
+import type { SocialLink } from "@/lib/content/social-links";
+
 export const COLLECTIONS = {
   settings: "settings",
   theme: "theme",
@@ -79,6 +81,7 @@ export type SiteSettings = {
   socialFacebook: string;
   socialTwitter: string;
   socialInstagram: string;
+  socialLinks?: SocialLink[];
   googleMapsUrl: string;
   businessHours: string;
   copyright: string;
@@ -145,6 +148,22 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   socialFacebook: "https://www.facebook.com/SynergyComputersPvtLtd/",
   socialTwitter: "",
   socialInstagram: "",
+  socialLinks: [
+    {
+      id: "default-linkedin",
+      platform: "linkedin",
+      label: "LinkedIn",
+      url: "https://www.linkedin.com/company/synergy-computers/",
+      active: true,
+    },
+    {
+      id: "default-facebook",
+      platform: "facebook",
+      label: "Facebook",
+      url: "https://www.facebook.com/SynergyComputersPvtLtd/",
+      active: true,
+    },
+  ],
   googleMapsUrl: "",
   businessHours: "Mon–Fri, 9:00 AM – 6:00 PM",
   copyright: "© Synergy Computers (Pvt.) Ltd. All rights reserved.",
