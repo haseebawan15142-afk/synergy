@@ -49,7 +49,23 @@ export function HeroVideoSlotsEditor({
               Remove
             </button>
           </div>
-          <div className="grid gap-4 md:grid-cols-2">
+          <Field label="Display length (seconds) — how long this clip plays">
+            <input
+              type="number"
+              min={1}
+              max={60}
+              step={1}
+              className={inputClass}
+              value={normalizeClipDurationSec(clip.durationSec, defaultDurationSec)}
+              onChange={(e) =>
+                patch(index, {
+                  durationSec: normalizeClipDurationSec(e.target.value, defaultDurationSec),
+                })
+              }
+            />
+            <p className="mt-1 text-[11px] text-zinc-500">1–60 seconds before switching to the next clip.</p>
+          </Field>
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
             <VideoUrlField
               label="Video"
               folder={folder}
@@ -62,24 +78,6 @@ export function HeroVideoSlotsEditor({
               value={clip.poster}
               onChange={(url) => patch(index, { poster: url })}
             />
-            <Field label="Display length (seconds)">
-              <input
-                type="number"
-                min={1}
-                max={60}
-                step={1}
-                className={inputClass}
-                value={normalizeClipDurationSec(clip.durationSec, defaultDurationSec)}
-                onChange={(e) =>
-                  patch(index, {
-                    durationSec: normalizeClipDurationSec(e.target.value, defaultDurationSec),
-                  })
-                }
-              />
-              <p className="mt-1 text-[11px] text-zinc-500">
-                How long this clip stays on the home hero before the next one (1–60s).
-              </p>
-            </Field>
           </div>
         </div>
       ))}
