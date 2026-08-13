@@ -70,9 +70,9 @@ type Draft = {
 
 function emptyHeroSlots(): ThemeHeroVideo[] {
   return [
-    { mp4: "", poster: "", label: "Clip 1" },
-    { mp4: "", poster: "", label: "Clip 2" },
-    { mp4: "", poster: "", label: "Clip 3" },
+    { mp4: "", poster: "", label: "Clip 1", durationSec: 3 },
+    { mp4: "", poster: "", label: "Clip 2", durationSec: 3 },
+    { mp4: "", poster: "", label: "Clip 3", durationSec: 3 },
   ];
 }
 
@@ -686,14 +686,15 @@ export function ThemePresetGallery({ onThemeChanged }: Props) {
               <div>
                 <h3 className="text-sm font-semibold text-ink">Event hero videos (max 3)</h3>
                 <p className="mt-1 text-xs text-ink-muted">
-                  When this theme is active, the home hero loops these clips every 3 seconds with a
-                  smooth crossfade. Poster image is optional. Leave empty to keep Website Settings
-                  landing videos.
+                  When this theme is active, the home hero loops these clips with a smooth crossfade.
+                  Set each clip’s display length in seconds. Poster is optional. Leave videos empty to
+                  keep Website Settings landing videos.
                 </p>
               </div>
               <HeroVideoSlotsEditor
                 videos={draft.heroVideos}
                 max={3}
+                defaultDurationSec={3}
                 onChange={(heroVideos) => setDraft({ ...draft, heroVideos })}
               />
             </div>

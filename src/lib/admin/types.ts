@@ -352,6 +352,8 @@ export type ThemeHeroVideo = {
   poster?: string;
   webm?: string;
   label?: string;
+  /** Seconds this clip stays visible before switching (admin-controlled). */
+  durationSec?: number;
 };
 
 /** Event / seasonal theme preset stored in `themePresets`. */

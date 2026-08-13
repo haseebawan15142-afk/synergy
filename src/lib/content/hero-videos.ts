@@ -3,10 +3,29 @@ export type HeroVideo = {
   webm?: string;
   poster?: string;
   label?: string;
+  /** How long this clip stays on screen before the next (seconds). */
+  durationSec?: number;
 };
 
 /** Admin-managed default landing playlist (event themes still override). */
 export const MAX_LANDING_HERO_VIDEOS = 6;
+
+/** Clamp admin duration to a sensible range. */
+export function normalizeClipDurationSec(
+  value: unknown,
+  fallbackSec: number,
+): number {
+  const n = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(n)) return fallbackSec;
+  return Math.min(60, Math.max(1, Math.round(n)));
+}
+
+export function clipDurationMs(
+  clip: Pick<HeroVideo, "durationSec"> | null | undefined,
+  fallbackSec: number,
+): number {
+  return normalizeClipDurationSec(clip?.durationSec, fallbackSec) * 1000;
+}
 
 /**
  * Landing page hero videos — plays one after another with crossfade.
@@ -50,7 +69,7 @@ export const eventHeroVideoIntervalMs = 3000;
 export const eventHeroVideoTransitionMs = 900;
 
 export function emptyLandingHeroSlot(index: number): HeroVideo {
-  return { mp4: "", poster: "", label: `Clip ${index + 1}` };
+  return { mp4: "", poster: "", label: `Clip ${index + 1}`, durationSec: 8 };
 }
 
 export function normalizeLandingHeroVideos(
@@ -64,7 +83,8 @@ export function normalizeLandingHeroVideos(
       const poster = String(v?.poster || "").trim();
       const webm = String(v?.webm || "").trim();
       const label = String(v?.label || `Clip ${i + 1}`).trim();
-      const row: HeroVideo = { mp4, label };
+      const durationSec = normalizeClipDurationSec(v?.durationSec, 8);
+      const row: HeroVideo = { mp4, label, durationSec };
       if (poster) row.poster = poster;
       if (webm) row.webm = webm;
       return row;
@@ -87,5 +107,6 @@ export function landingHeroSlotsForAdmin(videos?: HeroVideo[] | null): HeroVideo
     poster: clip.poster || "",
     webm: clip.webm || "",
     label: clip.label || `Clip ${i + 1}`,
+    durationSec: normalizeClipDurationSec(clip.durationSec, 8),
   }));
 }

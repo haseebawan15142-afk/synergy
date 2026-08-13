@@ -20,6 +20,7 @@ import {
   type HeroVideo,
 } from "@/lib/content/hero-videos";
 import { normalizeBannerTextStyle } from "@/lib/content/banner-style";
+import { normalizeClipDurationSec } from "@/lib/content/hero-videos";
 import type {
   BannerFontSize,
   BannerFontStyle,
@@ -317,7 +318,13 @@ export async function fetchActiveEventHeroVideos(): Promise<ActiveEventHeroVideo
       const data = (await readCmsDoc(COLLECTIONS.theme, DOCS.activeThemePreset)) as {
         presetId?: string;
         eventKey?: string;
-        heroVideos?: { mp4?: string; poster?: string; webm?: string; label?: string }[];
+        heroVideos?: {
+          mp4?: string;
+          poster?: string;
+          webm?: string;
+          label?: string;
+          durationSec?: number;
+        }[];
       } | null;
       if (!data) return null;
       const presetId = String(data.presetId || "");
@@ -329,12 +336,14 @@ export async function fetchActiveEventHeroVideos(): Promise<ActiveEventHeroVideo
           poster: String(v?.poster || "").trim(),
           webm: String(v?.webm || "").trim() || undefined,
           label: String(v?.label || `Event clip ${i + 1}`).trim(),
+          durationSec: normalizeClipDurationSec(v?.durationSec, 3),
         }))
         .filter((v) => Boolean(v.mp4))
         .slice(0, 3)
         .map((v) => ({
           mp4: v.mp4,
           label: v.label,
+          durationSec: v.durationSec,
           ...(v.webm ? { webm: v.webm } : {}),
           // Keep poster only when admin set one — never inject default public hero posters.
           ...(v.poster ? { poster: v.poster } : {}),

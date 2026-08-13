@@ -2,9 +2,11 @@
 
 import { MediaUrlField } from "@/components/admin/MediaPicker";
 import { VideoUrlField } from "@/components/admin/VideoUrlField";
+import { Field, inputClass } from "@/components/admin/ui";
 import {
   MAX_LANDING_HERO_VIDEOS,
   emptyLandingHeroSlot,
+  normalizeClipDurationSec,
   type HeroVideo,
 } from "@/lib/content/hero-videos";
 
@@ -13,6 +15,8 @@ type HeroVideoSlotsEditorProps = {
   onChange: (videos: HeroVideo[]) => void;
   folder?: string;
   max?: number;
+  /** Default seconds when a clip has no duration set (event themes use 3, landing uses 8). */
+  defaultDurationSec?: number;
 };
 
 export function HeroVideoSlotsEditor({
@@ -20,6 +24,7 @@ export function HeroVideoSlotsEditor({
   onChange,
   folder = "hero",
   max = MAX_LANDING_HERO_VIDEOS,
+  defaultDurationSec = 8,
 }: HeroVideoSlotsEditorProps) {
   function patch(index: number, next: Partial<HeroVideo>) {
     onChange(videos.map((clip, i) => (i === index ? { ...clip, ...next } : clip)));
@@ -57,6 +62,24 @@ export function HeroVideoSlotsEditor({
               value={clip.poster}
               onChange={(url) => patch(index, { poster: url })}
             />
+            <Field label="Display length (seconds)">
+              <input
+                type="number"
+                min={1}
+                max={60}
+                step={1}
+                className={inputClass}
+                value={normalizeClipDurationSec(clip.durationSec, defaultDurationSec)}
+                onChange={(e) =>
+                  patch(index, {
+                    durationSec: normalizeClipDurationSec(e.target.value, defaultDurationSec),
+                  })
+                }
+              />
+              <p className="mt-1 text-[11px] text-zinc-500">
+                How long this clip stays on the home hero before the next one (1–60s).
+              </p>
+            </Field>
           </div>
         </div>
       ))}
@@ -64,7 +87,12 @@ export function HeroVideoSlotsEditor({
       {videos.length < max ? (
         <button
           type="button"
-          onClick={() => onChange([...videos, emptyLandingHeroSlot(videos.length)])}
+          onClick={() =>
+            onChange([
+              ...videos,
+              { ...emptyLandingHeroSlot(videos.length), durationSec: defaultDurationSec },
+            ])
+          }
           className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm font-medium hover:bg-zinc-50 dark:border-zinc-600 dark:hover:bg-zinc-800"
         >
           Add clip

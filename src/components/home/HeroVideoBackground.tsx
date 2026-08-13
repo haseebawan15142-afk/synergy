@@ -4,11 +4,10 @@ import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
 import {
-  eventHeroVideoIntervalMs,
   eventHeroVideoTransitionMs,
   heroFallbackPoster,
-  heroVideoIntervalMs,
   heroVideoTransitionMs,
+  clipDurationMs,
   resolveLandingHeroVideos,
   type HeroVideo,
 } from "@/lib/content/hero-videos";
@@ -171,8 +170,8 @@ export function HeroVideoBackground({
   const [isEventPlaylist, setIsEventPlaylist] = useState(seededIsEvent);
   const [playlistKey, setPlaylistKey] = useState(seedKey || "loading");
 
-  const intervalMs = isEventPlaylist ? eventHeroVideoIntervalMs : heroVideoIntervalMs;
   const transitionMs = isEventPlaylist ? eventHeroVideoTransitionMs : heroVideoTransitionMs;
+  const fallbackDurationSec = isEventPlaylist ? 3 : 8;
 
   const applyPlaylist = useCallback((videos: HeroVideo[], isEvent: boolean, presetId = "default") => {
     setPlaylist(videos);
@@ -315,8 +314,11 @@ export function HeroVideoBackground({
 
   useEffect(() => {
     if (mode !== "video" || !inView || !playlistReady || playlist.length <= 1) return;
+    // Wait until a crossfade finishes before counting the new clip's duration.
+    if (pendingIncoming !== null || switchingRef.current) return;
 
-    const timer = window.setInterval(() => {
+    const waitMs = clipDurationMs(playlist[currentIndexRef.current], fallbackDurationSec);
+    const timer = window.setTimeout(() => {
       if (switchingRef.current) return;
 
       const next = (currentIndexRef.current + 1) % playlist.length;
@@ -332,14 +334,21 @@ export function HeroVideoBackground({
         return updated;
       });
       setPendingIncoming(incoming);
-    }, intervalMs);
+    }, waitMs);
 
     return () => {
-      window.clearInterval(timer);
-      switchingRef.current = false;
-      setPendingIncoming(null);
+      window.clearTimeout(timer);
     };
-  }, [mode, inView, playlist.length, intervalMs, playlistKey, playlistReady]);
+  }, [
+    mode,
+    inView,
+    playlist,
+    fallbackDurationSec,
+    playlistKey,
+    playlistReady,
+    pendingIncoming,
+    visibleLayer,
+  ]);
 
   const fallbackPoster = useMemo(() => {
     const first = playlist[0]?.poster?.trim();

@@ -396,12 +396,13 @@ export function WebsiteSettingsForm() {
       <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
         <h2 className="text-sm font-semibold">Landing page hero videos</h2>
         <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-          Default home hero playlist (up to 6 clips). Upload any video format — it converts to MP4 and is stored in
-          the media library. Poster images convert to WebP. Event themes still override this playlist when activated.
+          Default home hero playlist (up to 6 clips). Set each clip’s display length in seconds. Upload any video
+          format — it converts to MP4 in the media library. Event themes still override this playlist when activated.
         </p>
         <div className="mt-4">
           <HeroVideoSlotsEditor
             videos={form.heroVideos || []}
+            defaultDurationSec={8}
             onChange={(heroVideos) => update("heroVideos", heroVideos)}
           />
         </div>

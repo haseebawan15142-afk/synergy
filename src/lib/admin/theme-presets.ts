@@ -17,6 +17,7 @@ import {
 import { COLLECTIONS, DOCS } from "@/lib/firebase/collections";
 import { invalidateCmsCache } from "@/lib/cms/cache";
 import { normalizeBannerTextStyle } from "@/lib/content/banner-style";
+import { normalizeClipDurationSec } from "@/lib/content/hero-videos";
 
 export const THEME_PRESET_PREFIX = "preset_";
 
@@ -83,7 +84,8 @@ export function normalizeHeroVideos(
       const poster = String(v?.poster || "").trim();
       const webm = String(v?.webm || "").trim();
       const label = String(v?.label || `Event clip ${i + 1}`).trim();
-      const row: ThemeHeroVideo = { mp4, label };
+      const durationSec = normalizeClipDurationSec(v?.durationSec, 3);
+      const row: ThemeHeroVideo = { mp4, label, durationSec };
       if (poster) row.poster = poster;
       if (webm) row.webm = webm;
       return row;
