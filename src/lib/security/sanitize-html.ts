@@ -60,8 +60,19 @@ export function sanitizeBlogHtml(dirty: string): string {
     ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):|[^a-z]|[a-z+.\-]+(?:[^a-z+.\-:]|$))/i,
   });
 
+  // Drop inline images that are not Firebase Storage (no synergy.net.pk / local leftovers).
+  const withoutForeignImages = clean.replace(/<img\b[^>]*>/gi, (tag) => {
+    const srcMatch = tag.match(/\bsrc\s*=\s*["']([^"']+)["']/i);
+    const src = (srcMatch?.[1] || "").toLowerCase();
+    const isFirebase =
+      src.includes("firebasestorage.googleapis.com") ||
+      src.includes("storage.googleapis.com") ||
+      src.includes(".firebasestorage.app");
+    return isFirebase ? tag : "";
+  });
+
   // Harden links opened in a new tab (TipTap may set target=_blank).
-  return clean.replaceAll(/<a\b([^>]*)>/gi, (_match, attrs: string) => {
+  return withoutForeignImages.replaceAll(/<a\b([^>]*)>/gi, (_match, attrs: string) => {
     let next = attrs;
     if (/\btarget\s*=/i.test(next) && !/\brel\s*=/i.test(next)) {
       next += ' rel="noopener noreferrer"';

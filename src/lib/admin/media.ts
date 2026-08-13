@@ -28,7 +28,6 @@ import {
   isAcceptableImageUpload,
   shouldConvertToWebp,
 } from "@/lib/admin/image-convert";
-import { blogImagesGenerated } from "@/lib/content/blog-images.generated";
 import { partners as localPartners } from "@/lib/content/partners";
 import { clients as localClients } from "@/lib/content/clients";
 import { services as localServices } from "@/lib/content/services";
@@ -54,7 +53,6 @@ const STORAGE_FOLDER_TO_PUBLIC: Record<string, string[]> = {
   clients: ["/images/clients/"],
   "services/heroes": ["/images/services/heroes/"],
   services: ["/images/services/"],
-  blogs: ["/images/blog/"],
   leadership: ["/images/leadership/"],
   careers: ["/images/careers/"],
   gallery: ["/images/case-studies/", "/images/dynatrace/"],
@@ -197,11 +195,8 @@ export async function syncStorageToMediaIndex(options?: {
 /**
  * Collect every media-like URL currently referenced across CMS collections + site settings.
  */
-/** Bundled public-site assets (blogs use these even when CMS has no Firebase URL). */
+/** Bundled public-site assets (non-blog). Blog covers are Firebase-only. */
 function addBundledSiteAssetUrls(used: Set<string>) {
-  for (const url of Object.values(blogImagesGenerated)) {
-    if (url) used.add(url);
-  }
   for (const partner of localPartners) {
     if (partner.logo) used.add(partner.logo);
     if (partner.heroImageUrl) used.add(partner.heroImageUrl);
@@ -317,7 +312,7 @@ function assetIsUsed(asset: MediaAsset, used: Set<string>) {
     }
   }
 
-  // Seeded Storage copy of a bundled site file, e.g. blogs/foo.webp ↔ /images/blog/foo.webp
+  // Seeded Storage copy of a bundled site file, e.g. partners/logo.webp ↔ /images/partners/...
   const fileName = (asset.name || asset.path.split("/").pop() || "").trim();
   if (fileName) {
     const folder = asset.folder || folderFromPath(asset.path);

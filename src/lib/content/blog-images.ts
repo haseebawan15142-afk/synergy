@@ -1,30 +1,15 @@
-import { blogImagesGenerated } from "./blog-images.generated";
+import { isRemoteStorageUrl } from "@/lib/media/asset-url";
 import type { BlogPostMeta } from "./blog-posts";
 
-const categoryFallback: Record<string, string> = {
-  "Data availability": "/images/blog/data-availability-solutions-trends-2025.webp",
-  RPA: "/images/blog/robotic-process-automation-solutions.webp",
-  Infrastructure: "/images/blog/infrastructure-solutions-provider.webp",
-  Storage: "/images/blog/object-storage-providers-pakistan.webp",
-  Observability: "/images/blog/ai-powered-observability-dynatrace-pakistan.webp",
-  "Managed IT": "/images/blog/future-of-managed-it-solution-providers-in-pakistan.webp",
-  Security: "/images/blog/security-solutions.webp",
-  Cloud: "/images/blog/trusted-it-solution-partners-2025.webp",
-  "Enterprise IT": "/images/blog/it-solution-partners-pakistan-business-transformation.webp",
-};
-
 /**
- * Resolve the display image for a blog card/detail.
- * Admin/CMS `post.image` (Firebase Storage URL) always wins — never override
- * with local legacy maps or category placeholders.
+ * Blog cover/card image — Firebase Storage only.
+ * Local `/images/blog` and legacy synergy.net.pk URLs are intentionally ignored.
  */
 export function getBlogPostImage(
   post: Pick<BlogPostMeta, "slug" | "image" | "category">,
 ): string | null {
-  if (post.image?.trim()) return post.image.trim();
-
-  const local = blogImagesGenerated[post.slug];
-  if (local) return local;
-
-  return categoryFallback[post.category] ?? null;
+  const image = String(post.image || "").trim();
+  if (!image) return null;
+  if (!isRemoteStorageUrl(image)) return null;
+  return image;
 }

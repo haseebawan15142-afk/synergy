@@ -60,7 +60,7 @@ import {
   type OfficeLocation,
 } from "@/lib/content/company-profile";
 import { siteConfig } from "@/lib/content/site";
-import { blogImagesGenerated } from "@/lib/content/blog-images.generated";
+import { isRemoteStorageUrl } from "@/lib/media/asset-url";
 import { cachedCms } from "@/lib/cms/cache";
 import { queryCmsDocs, readCmsDoc } from "@/lib/cms/firestore-bridge";
 import { resolveResilientAssetUrl } from "@/lib/media/asset-url";
@@ -729,21 +729,16 @@ function mapBlogDoc(id: string, x: Record<string, unknown>): BlogPostMeta {
   }
 
   const slug = String(x.slug || id);
-  const localImage =
-    blogImagesGenerated[slug] ||
-    localBlogs.find((b) => b.slug.toLowerCase() === slug.toLowerCase())?.image ||
-    null;
-  const image = resolveResilientAssetUrl(
-    x.featuredImageUrl ? String(x.featuredImageUrl) : "",
-    localImage,
-  );
+  // Featured image: Firebase Storage only (no local / synergy.net.pk fallbacks).
+  const featured = String(x.featuredImageUrl || x.imageUrl || x.image || "").trim();
+  const image = isRemoteStorageUrl(featured) ? featured : null;
 
   return {
     slug,
     title: String(x.title || ""),
     date,
     legacyUrl: "",
-    image: image || null,
+    image,
     category: String(x.category || "General"),
     relatedServiceSlug: String(x.relatedServiceSlug || ""),
     bodyHtml: x.bodyHtml ? String(x.bodyHtml) : undefined,

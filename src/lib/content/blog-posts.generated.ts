@@ -26,7 +26,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "Cohesity Partner in Pakistan - Why Backup Completion Is Not Recovery Readiness",
     "date": "June 25, 2026",
     "legacyUrl": "https://synergy.net.pk/blog-cohesity-partner-pakistan-backup-vs-recovery-readiness",
-    "image": "https://synergy.net.pk/img/Solution48-1.webp",
+    "image": "",
     "category": "Data availability",
     "relatedServiceSlug": "data-backup-recovery"
   },
@@ -35,7 +35,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "Choosing the Right Observability Partner: Why Implementation Expertise Matters as Much as the Tool",
     "date": "June 16, 2026",
     "legacyUrl": "https://synergy.net.pk/blog-observability-implementation-partner-pakistan-dynatrace",
-    "image": "https://synergy.net.pk/img/Solution47-1.webp",
+    "image": "",
     "category": "Observability",
     "relatedServiceSlug": "managed-it"
   },
@@ -44,7 +44,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "BMC Helix Partner in Pakistan - Why Service Desks Keep Solving the Same Problems",
     "date": "June 8, 2026",
     "legacyUrl": "https://synergy.net.pk/blog-bmc-helix-partner-pakistan-service-desk-recurring-issues",
-    "image": "https://synergy.net.pk/img/Solution46-1.webp",
+    "image": "",
     "category": "Managed IT",
     "relatedServiceSlug": "managed-it"
   },
@@ -53,7 +53,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "Why AI-Powered Observability Is No Longer Optional: A Look at Dynatrace",
     "date": "May 22, 2026",
     "legacyUrl": "https://synergy.net.pk/blog-ai-powered-observability-dynatrace-pakistan",
-    "image": "https://synergy.net.pk/img/Solution45-1.webp",
+    "image": "",
     "category": "Observability",
     "relatedServiceSlug": "managed-it"
   },
@@ -62,7 +62,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "Supermicro Partner in Pakistan addressing hidden infrastructure inefficiencies",
     "date": "May 13, 2026",
     "legacyUrl": "https://synergy.net.pk/blog-supermicro-partner-pakistan-infrastructure-utilization-imbalance",
-    "image": "https://synergy.net.pk/img/Solution44-1.webp",
+    "image": "",
     "category": "Infrastructure",
     "relatedServiceSlug": "network-infrastructure"
   },
@@ -71,7 +71,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "Pure Storage Partners in Pakistan helping enterprises address storage latency before it becomes a business risk",
     "date": "April 25, 2026",
     "legacyUrl": "https://synergy.net.pk/blog-storage-latency-enterprise-performance-guide",
-    "image": "https://synergy.net.pk/img/solution-5-2.jpg",
+    "image": "",
     "category": "Storage",
     "relatedServiceSlug": "data-backup-recovery"
   },
@@ -80,7 +80,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "Object Storage Providers in Pakistan helping enterprises regain control over distributed data environments",
     "date": "April 18, 2026",
     "legacyUrl": "https://synergy.net.pk/blog-object-storage-providers-pakistan-enterprise-data-management",
-    "image": "https://synergy.net.pk/img/Solution-38-2.png",
+    "image": "",
     "category": "Storage",
     "relatedServiceSlug": "data-backup-recovery"
   },
@@ -89,7 +89,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "Nutanix partners in Pakistan helping enterprises reduce infrastructure overhead without increasing operational risk",
     "date": "April 11, 2026",
     "legacyUrl": "https://synergy.net.pk/blog-nutanix-partners-pakistan-it-costs",
-    "image": "https://synergy.net.pk/img/solution-21-2.png",
+    "image": "",
     "category": "Infrastructure",
     "relatedServiceSlug": "network-infrastructure"
   },
@@ -98,7 +98,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "IT Solution Partners in Pakistan helping enterprises establish clear ownership across complex IT environments",
     "date": "April 4, 2026",
     "legacyUrl": "https://synergy.net.pk/blog-it-solution-partners-in-pakistan-helping-enterprises-establish-clear-ownership-across-complex-it-environments",
-    "image": "https://synergy.net.pk/img/solution-12-2.jpg",
+    "image": "",
     "category": "Enterprise IT",
     "relatedServiceSlug": "on-site-it-support"
   },
@@ -107,7 +107,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "IT Solution Partners in Pakistan helping enterprises regain control over fragmented technology environments",
     "date": "March 28, 2026",
     "legacyUrl": "https://synergy.net.pk/blog-it-solution-partners-pakistan-it-management-guide",
-    "image": "https://synergy.net.pk/img/Solution-43-1.png",
+    "image": "",
     "category": "Enterprise IT",
     "relatedServiceSlug": "on-site-it-support"
   },
@@ -116,7 +116,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "Object Storage Providers in Pakistan addressing the challenge of unstructured data growth in modern enterprises",
     "date": "March 25, 2026",
     "legacyUrl": "https://synergy.net.pk/blog-object-storage-providers-pakistan-unstructured-data-guide",
-    "image": "https://synergy.net.pk/img/Solution-42-1.png",
+    "image": "",
     "category": "Storage",
     "relatedServiceSlug": "data-backup-recovery"
   },
@@ -125,7 +125,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "Nutanix partners in Pakistan are supporting enterprises transitioning from siloed infrastructure to unified platforms",
     "date": "March 23, 2026",
     "legacyUrl": "https://synergy.net.pk/blog-nutanix-partners-pakistan-infrastructure-guide",
-    "image": "https://synergy.net.pk/img/Solution-41-1.png",
+    "image": "",
     "category": "Infrastructure",
     "relatedServiceSlug": "network-infrastructure"
   },
@@ -134,7 +134,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "Pure Storage Partners in Pakistan helping enterprises rethink storage performance and data center efficiency",
     "date": "March 20, 2026",
     "legacyUrl": "https://synergy.net.pk/blog-pure-storage-partners-in-pakistan-helping-enterprises-rethink-storage-performance-and-data-center-efficiency",
-    "image": "https://synergy.net.pk/img/Solution-40-1.png",
+    "image": "",
     "category": "Storage",
     "relatedServiceSlug": "data-backup-recovery"
   },
@@ -143,7 +143,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "Pure Storage partners in Pakistan supporting modern enterprise storage strategies",
     "date": "February 27, 2026",
     "legacyUrl": "https://synergy.net.pk/blog-pure-storage-partners-in-pakistan-enterprise-storage-strategy",
-    "image": "https://synergy.net.pk/img/Solution-39-1.png",
+    "image": "",
     "category": "Storage",
     "relatedServiceSlug": "data-backup-recovery"
   },
@@ -152,7 +152,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "Object Storage Providers in Pakistan supporting long term data growth strategies",
     "date": "February 19, 2026",
     "legacyUrl": "https://synergy.net.pk/blog-object-storage-providers-in-pakistan-data-growth-strategy",
-    "image": "https://synergy.net.pk/img/Solution-38-1.png",
+    "image": "",
     "category": "Storage",
     "relatedServiceSlug": "data-backup-recovery"
   },
@@ -161,7 +161,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "Nutanix partners in Pakistan helping enterprises simplify infrastructure management",
     "date": "February 11, 2026",
     "legacyUrl": "https://synergy.net.pk/blog-nutanix-partners-in-pakistan-simplify-infrastructure-management",
-    "image": "https://synergy.net.pk/img/Solution-37-1.png",
+    "image": "",
     "category": "Infrastructure",
     "relatedServiceSlug": "network-infrastructure"
   },
@@ -170,7 +170,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "IT Solution Partners in Pakistan and the shift away from fragmented IT management",
     "date": "February 02, 2026",
     "legacyUrl": "https://synergy.net.pk/blog-it-partners-in-pakistan-ending-fragmented-it-management",
-    "image": "https://synergy.net.pk/img/Solution-36-1.png",
+    "image": "",
     "category": "Enterprise IT",
     "relatedServiceSlug": "on-site-it-support"
   },
@@ -179,7 +179,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "IT Solution Partners in Pakistan and the Shift Away from Patchwork IT Management",
     "date": "January 26, 2026",
     "legacyUrl": "https://synergy.net.pk/blog-it-solution-partners-in-pakistan-and-the-shift-away-from-patchwork-it-management",
-    "image": "https://synergy.net.pk/img/Solution-35-1.png",
+    "image": "",
     "category": "Enterprise IT",
     "relatedServiceSlug": "on-site-it-support"
   },
@@ -188,7 +188,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "Nutanix Partners in Pakistan: How Enterprises Are Simplifying Infrastructure Without Losing Control",
     "date": "January 9, 2026",
     "legacyUrl": "https://synergy.net.pk/blog-nutanix-partners-in-pakistan-how-enterprises-are-simplifying-infrastructure-without-losing-control",
-    "image": "https://synergy.net.pk/img/Solution-34-1.png",
+    "image": "",
     "category": "Infrastructure",
     "relatedServiceSlug": "network-infrastructure"
   },
@@ -197,7 +197,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "Pure Storage partners in Pakistan are helping enterprises adopt predictable, high-performance storage to improve reliability and scalability",
     "date": "December 19, 2025",
     "legacyUrl": "https://synergy.net.pk/blog-pure-storage-partners-in-pakistan-and-the-shift-toward-predictable-enterprise-storage-performance",
-    "image": "https://synergy.net.pk/img/Solution-33-1.png",
+    "image": "",
     "category": "Storage",
     "relatedServiceSlug": "data-backup-recovery"
   },
@@ -206,7 +206,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "Object Storage Providers in Pakistan and the Growing Challenge of Enterprise Data Management",
     "date": "December 07, 2025",
     "legacyUrl": "https://synergy.net.pk/blog-object-storage-providers-in-pakistan-and-the-growing-challenge-of-enterprise-data-management",
-    "image": "https://synergy.net.pk/img/solution-32-1.png",
+    "image": "",
     "category": "Storage",
     "relatedServiceSlug": "data-backup-recovery"
   },
@@ -215,7 +215,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "Why Businesses Are Switching to Object Storage Providers in Pakistan for Secure Cloud Data Management",
     "date": "Octuber 12, 2025",
     "legacyUrl": "https://synergy.net.pk/blog-businesses-are-switching-to-object-storage-providers-in-pakistan",
-    "image": "https://synergy.net.pk/img/Solution-27-1.png",
+    "image": "",
     "category": "Storage",
     "relatedServiceSlug": "data-backup-recovery"
   },
@@ -224,7 +224,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "The Future of Managed IT Solution Providers in Pakistan",
     "date": "Octuber 10, 2025",
     "legacyUrl": "https://synergy.net.pk/blog-future-of-managed-it-solution-providers-in-pakistan",
-    "image": "https://synergy.net.pk/img/Solution-26-1.png",
+    "image": "",
     "category": "Managed IT",
     "relatedServiceSlug": "managed-it"
   },
@@ -233,7 +233,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "How Nutanix Partners in Pakistan Are Powering Enterprise Cloud Transformation",
     "date": "Octuber 08, 2025",
     "legacyUrl": "https://synergy.net.pk/blog-how-nutanix-partners-powering-enterprise-cloud-transformation-in-pakistan",
-    "image": "https://synergy.net.pk/img/Solution-25-1.png",
+    "image": "",
     "category": "Infrastructure",
     "relatedServiceSlug": "network-infrastructure"
   },
@@ -242,7 +242,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "Pure Storage Partners in Pakistan Redefining Enterprise Data Performance",
     "date": "Octuber 06, 2025",
     "legacyUrl": "https://synergy.net.pk/blog-pure-storage-partners-in-pakistan-redefining-enterprise-data-performance",
-    "image": "https://synergy.net.pk/img/Solution-24-1.png",
+    "image": "",
     "category": "Storage",
     "relatedServiceSlug": "data-backup-recovery"
   },
@@ -251,7 +251,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "IT Solution Partners in Pakistan Driving Business Transformation Beyond Technology",
     "date": "September 14, 2025",
     "legacyUrl": "https://synergy.net.pk/blog-it-solution-partners-pakistan-business-transformation",
-    "image": "https://synergy.net.pk/img/solution-31-1.jpg",
+    "image": "",
     "category": "Enterprise IT",
     "relatedServiceSlug": "on-site-it-support"
   },
@@ -260,7 +260,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "Nutanix Partners in Pakistan Helping Enterprises Navigate Digital Transformation",
     "date": "September 12, 2025",
     "legacyUrl": "https://synergy.net.pk/blog-nutanix-partners-pakistan-digital-transformation",
-    "image": "https://synergy.net.pk/img/solution-30-1.jpg",
+    "image": "",
     "category": "Infrastructure",
     "relatedServiceSlug": "network-infrastructure"
   },
@@ -269,7 +269,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "Why Businesses Are Turning to Object Storage Providers in Pakistan",
     "date": "September 10, 2025",
     "legacyUrl": "https://synergy.net.pk/blog-object-storage-providers-pakistan",
-    "image": "https://synergy.net.pk/img/Solution-29-1.png",
+    "image": "",
     "category": "Storage",
     "relatedServiceSlug": "data-backup-recovery"
   },
@@ -278,7 +278,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "Pure Storage Partners in Pakistan Delivering the Future of Data Resilience",
     "date": "September 8, 2025",
     "legacyUrl": "https://synergy.net.pk/blog-pure-storage-partners-pakistan-data-resilience",
-    "image": "https://synergy.net.pk/img/Solution-28-1.png",
+    "image": "",
     "category": "Storage",
     "relatedServiceSlug": "data-backup-recovery"
   },
@@ -287,7 +287,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "Why Enterprises Are Choosing Nutanix Partners in Pakistan to Simplify Hybrid Cloud Infrastructure",
     "date": "Jully 14, 2025",
     "legacyUrl": "https://synergy.net.pk/blog-object-storage-providers-in-pakistan",
-    "image": "https://synergy.net.pk/img/solution-19-1.jpg",
+    "image": "",
     "category": "Infrastructure",
     "relatedServiceSlug": "network-infrastructure"
   },
@@ -305,7 +305,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "Why Financial Firms Are Choosing Pure Storage Partners in Pakistan for Fast & Secure Infrastructure",
     "date": "Jully 9, 2025",
     "legacyUrl": "https://synergy.net.pk/blog-why-financial-firms-choosing-pure-storage-partners",
-    "image": "https://synergy.net.pk/img/solution-21-1.png",
+    "image": "",
     "category": "Storage",
     "relatedServiceSlug": "data-backup-recovery"
   },
@@ -314,7 +314,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "Setting the Scene for IT Infrastructure and Security in Pakistan",
     "date": "Jully 7, 2025",
     "legacyUrl": "https://synergy.net.pk/blog-it-solution-partners-in-pakistan-driving-enterprise-success",
-    "image": "https://synergy.net.pk/img/solution-20-1.png",
+    "image": "",
     "category": "Infrastructure",
     "relatedServiceSlug": "network-infrastructure"
   },
@@ -323,7 +323,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "How Pure Storage Partners in Pakistan Help Financial Firms Stay Compliant and Fast",
     "date": "Jun 13, 2025",
     "legacyUrl": "https://synergy.net.pk/blog-how-pure-storage-partners-in-pakistan-help-financial-firms",
-    "image": "https://synergy.net.pk/img/solution-18-1.jpg",
+    "image": "",
     "category": "Storage",
     "relatedServiceSlug": "data-backup-recovery"
   },
@@ -332,7 +332,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "How Nutanix Partners in Pakistan Are Driving Digital Transformation Across Enterprises",
     "date": "Jun 11, 2025",
     "legacyUrl": "https://synergy.net.pk/blog-how-nutanix-partners-in-pakistan-driving-digital-transformation",
-    "image": "https://synergy.net.pk/img/solution-17-1.png",
+    "image": "",
     "category": "Infrastructure",
     "relatedServiceSlug": "network-infrastructure"
   },
@@ -341,7 +341,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "What Pakistani Enterprises Need to Know About Object Storage Providers in Pakistan",
     "date": "May 19, 2025",
     "legacyUrl": "https://synergy.net.pk/blog-object-storage-providers-cloud-storage",
-    "image": "https://synergy.net.pk/img/solution-14-1.jpg",
+    "image": "",
     "category": "Storage",
     "relatedServiceSlug": "data-backup-recovery"
   },
@@ -350,7 +350,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "How Managed & Enterprise IT Services in Pakistan Are Transforming Business Operations",
     "date": "May 19, 2025",
     "legacyUrl": "https://synergy.net.pk/blog-managed-and-enterprise-it-services",
-    "image": "https://synergy.net.pk/img/solution-13-1.jpg",
+    "image": "",
     "category": "Enterprise IT",
     "relatedServiceSlug": "on-site-it-support"
   },
@@ -359,7 +359,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "Emerging Technologies Offered by IT Solution Partners in Pakistan",
     "date": "May 19, 2025",
     "legacyUrl": "https://synergy.net.pk/blog-trusted-it-solution-partners-2025",
-    "image": "https://synergy.net.pk/img/solution-12-1.jpg",
+    "image": "",
     "category": "Enterprise IT",
     "relatedServiceSlug": "on-site-it-support"
   },
@@ -368,7 +368,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "Top 5 Reasons Enterprises Choose a Pure Storage Partner in Pakistan Over Global Vendors",
     "date": "May 17, 2025",
     "legacyUrl": "https://synergy.net.pk/blog-choose-pure-storage-partner-over-global-vendors",
-    "image": "https://synergy.net.pk/img/solution-16-1.jpeg",
+    "image": "",
     "category": "Storage",
     "relatedServiceSlug": "data-backup-recovery"
   },
@@ -377,7 +377,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "Top 5 Benefits of Collaborating with Nutanix Partners in Pakistan",
     "date": "May 17, 2025",
     "legacyUrl": "https://synergy.net.pk/blog-benefits-of-collaborating-with-nutanix-partners",
-    "image": "https://synergy.net.pk/img/solution-15-1.jpeg",
+    "image": "",
     "category": "Infrastructure",
     "relatedServiceSlug": "network-infrastructure"
   },
@@ -386,7 +386,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "How Leading Infrastructure Solutions Providers Are Setting New Trends in 2025",
     "date": "April 16, 2025",
     "legacyUrl": "https://synergy.net.pk/blog-infrastructure-solutions-providers-2025",
-    "image": "https://synergy.net.pk/img/solution-11-1.jpg",
+    "image": "",
     "category": "Infrastructure",
     "relatedServiceSlug": "network-infrastructure"
   },
@@ -395,7 +395,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "Data Availability Solutions: 2025 Trends Every IT Leader Should Watch",
     "date": "April 14, 2025",
     "legacyUrl": "https://synergy.net.pk/blog-data-availability-solutions-trends-2025",
-    "image": "https://synergy.net.pk/img/solution-10-1.png",
+    "image": "",
     "category": "Data availability",
     "relatedServiceSlug": "data-backup-recovery"
   },
@@ -404,7 +404,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "How Robotic Process Automation Solutions Deliver High ROI and Transform Business Operations",
     "date": "March 28, 2025",
     "legacyUrl": "https://synergy.net.pk/blog-how-robotic-process-automation-solutions-deliver-high-roi",
-    "image": "https://synergy.net.pk/img/solution-9-1.jpg",
+    "image": "",
     "category": "RPA",
     "relatedServiceSlug": "microsoft-365-cloud"
   },
@@ -413,7 +413,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "Understanding the ROI of Robotic Process Automation Solutions and Achieving Threefold Efficiency Gains",
     "date": "March 26, 2025",
     "legacyUrl": "https://synergy.net.pk/blog-understanding-the-roi-of-robotic-process-automation-solutions",
-    "image": "https://synergy.net.pk/img/solution-8-1.jpg",
+    "image": "",
     "category": "RPA",
     "relatedServiceSlug": "microsoft-365-cloud"
   },
@@ -422,7 +422,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "Why Businesses in Pakistan Need a Reliable Infrastructure Solutions Provider",
     "date": "March 24, 2025",
     "legacyUrl": "https://synergy.net.pk/blog-why-businesses-in-pakistan-need-a-reliable-infrastructure-solutions-provider",
-    "image": "https://synergy.net.pk/img/solution-7-1.png",
+    "image": "",
     "category": "Infrastructure",
     "relatedServiceSlug": "network-infrastructure"
   },
@@ -431,7 +431,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "title": "The Hidden Cost of Downtime: Why Data Availability Solutions Are a Business Imperative",
     "date": "March 22, 2025",
     "legacyUrl": "https://synergy.net.pk/blog-the-hidden-cost-of-downtime-why-data-availability-solutions-are-a-business-imperative",
-    "image": "https://synergy.net.pk/img/solution-6-1.webp",
+    "image": "",
     "category": "Data availability",
     "relatedServiceSlug": "data-backup-recovery"
   },
