@@ -513,24 +513,37 @@ export function ThemePresetGallery({ onThemeChanged }: Props) {
                 }
               />
             </Field>
-            <Field label="Emoji (text fallback)">
-              <input
-                className={inputClass}
-                value={draft.emoji}
-                onChange={(e) => setDraft({ ...draft, emoji: e.target.value })}
-                placeholder="🇵🇰 or Win + . (emoji picker)"
+          </div>
+
+          <div className="mb-6 rounded-xl border border-border bg-surface-muted/30 p-4">
+            <h3 className="text-sm font-semibold text-ink">Theme icon</h3>
+            <p className="mt-1 text-xs text-ink-muted">
+              Upload a high-quality PNG, WebP, or SVG (same Library + dropzone as logos). This shows on the
+              public banner and theme cards. Text emoji is only a fallback.
+            </p>
+            <div className="mt-4">
+              <MediaUrlField
+                label="Upload / Library icon"
+                folder="icons"
+                value={draft.emojiUrl}
+                onChange={(url) => setDraft({ ...draft, emojiUrl: url })}
               />
-              <p className="mt-1 text-[11px] text-ink-muted">
-                Used only when no custom icon is uploaded. Windows:{" "}
-                <kbd className="rounded border border-border px-1">Win</kbd> +{" "}
-                <kbd className="rounded border border-border px-1">.</kbd>
-              </p>
+            </div>
+            <div className="mt-4">
+              <Field label="Text emoji fallback (optional)">
+                <input
+                  className={inputClass}
+                  value={draft.emoji}
+                  onChange={(e) => setDraft({ ...draft, emoji: e.target.value })}
+                  placeholder="Only used if no icon uploaded — Win + . for picker"
+                />
+              </Field>
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {THEME_EMOJI_SUGGESTIONS.map((emo) => (
                   <button
                     key={emo}
                     type="button"
-                    className="rounded-lg border border-border bg-surface-muted px-2 py-1 text-lg hover:border-synergy/50"
+                    className="rounded-lg border border-border bg-surface-elevated px-2 py-1 text-lg hover:border-synergy/50"
                     onClick={() => setDraft({ ...draft, emoji: emo })}
                     aria-label={`Use emoji ${emo}`}
                   >
@@ -538,19 +551,10 @@ export function ThemePresetGallery({ onThemeChanged }: Props) {
                   </button>
                 ))}
               </div>
-            </Field>
-            <div className="md:col-span-2">
-              <MediaUrlField
-                label="Custom icon / logo (high quality — preferred)"
-                folder="icons"
-                value={draft.emojiUrl}
-                onChange={(url) => setDraft({ ...draft, emojiUrl: url })}
-              />
-              <p className="mt-1 text-[11px] text-ink-muted">
-                Upload PNG, WebP, or SVG (transparent background recommended). If set, this replaces the
-                text emoji on the site banner and theme cards.
-              </p>
             </div>
+          </div>
+
+          <div className="mb-4 grid gap-4 md:grid-cols-2">
             <Field label="Category">
               <select
                 className={inputClass}
