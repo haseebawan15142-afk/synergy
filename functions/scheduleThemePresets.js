@@ -135,7 +135,11 @@ async function activatePreset(db, preset, reason) {
           const poster = String(v?.poster || "").trim();
           const webm = String(v?.webm || "").trim();
           const label = String(v?.label || `Event clip ${i + 1}`).trim();
-          const row = { mp4, label };
+          const durationRaw = Number(v?.durationSec);
+          const durationSec = Number.isFinite(durationRaw)
+            ? Math.min(60, Math.max(1, Math.round(durationRaw)))
+            : 3;
+          const row = { mp4, label, durationSec };
           if (poster) row.poster = poster;
           if (webm) row.webm = webm;
           return row;

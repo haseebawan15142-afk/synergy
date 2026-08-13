@@ -85,8 +85,8 @@ export const fetchNewsletterIssues = cache(
 export const fetchActiveEventHeroVideos = cache(
   unstable_cache(
     async () => fetchActiveEventHeroVideosUncached(),
-    ["cms:theme:active-hero-videos:v3"],
-    { revalidate: 30, tags: ["cms-theme"] },
+    ["cms:theme:active-hero-videos:v4"],
+    { revalidate: 10, tags: ["cms-theme"] },
   ),
 );
 

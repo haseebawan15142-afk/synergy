@@ -16,6 +16,7 @@ import {
 } from "@/lib/admin/crud";
 import { COLLECTIONS, DOCS } from "@/lib/firebase/collections";
 import { invalidateCmsCache } from "@/lib/cms/cache";
+import { requestPublicCmsRevalidate } from "@/lib/cms/revalidate-client";
 import { normalizeBannerTextStyle } from "@/lib/content/banner-style";
 import { normalizeClipDurationSec } from "@/lib/content/hero-videos";
 
@@ -240,6 +241,7 @@ export async function saveThemePreset(
       eventKey,
     });
     invalidateCmsCache("theme");
+    void requestPublicCmsRevalidate(["cms-theme"]);
   }
 
   try {
@@ -337,6 +339,7 @@ export async function activateThemePreset(preset: ThemePreset): Promise<void> {
   };
   await upsertSingleton(COLLECTIONS.theme, DOCS.activeThemePreset, activePayload);
   invalidateCmsCache("theme");
+  void requestPublicCmsRevalidate(["cms-theme"]);
 }
 
 /** One-step revert to the snapshot taken before the last Activate. */
@@ -395,6 +398,7 @@ export async function revertPreviousTheme(): Promise<boolean> {
     activatedAt: new Date().toISOString(),
   });
   invalidateCmsCache("theme");
+  void requestPublicCmsRevalidate(["cms-theme"]);
   return true;
 }
 

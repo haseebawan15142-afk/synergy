@@ -261,7 +261,7 @@ export type ActiveEventBanner = {
 export type ActiveEventHeroVideos = {
   presetId: string;
   eventKey: string;
-  videos: { mp4: string; poster?: string; webm?: string; label?: string }[];
+  videos: HeroVideo[];
 };
 
 /**

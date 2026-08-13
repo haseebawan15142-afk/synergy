@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchActiveEventBanner } from "@/lib/cms/public";
+import { subscribeLiveEventBanner } from "@/lib/cms/live-active-theme";
 import {
   bannerTextStyleClassName,
   DEFAULT_BANNER_TEXT_STYLE,
@@ -14,6 +14,7 @@ const SESSION_KEY = "synergy-event-banner-dismissed";
 /**
  * Slim dismissible event greeting. Fail-silent: renders nothing when inactive.
  * Fixed under the navbar so it doesn't shift page layout.
+ * Live Firestore sync — theme Activate updates open tabs without reload.
  */
 export function EventBanner() {
   const [message, setMessage] = useState("");
@@ -24,32 +25,32 @@ export function EventBanner() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    let cancelled = false;
-    fetchActiveEventBanner()
-      .then((banner) => {
-        if (cancelled || !banner?.message) return;
-        try {
-          if (sessionStorage.getItem(`${SESSION_KEY}:${banner.presetId}`) === "1") return;
-        } catch {
-          /* private mode */
+    return subscribeLiveEventBanner((banner) => {
+      if (!banner?.message) {
+        setVisible(false);
+        setMessage("");
+        setPresetId("");
+        return;
+      }
+      try {
+        if (sessionStorage.getItem(`${SESSION_KEY}:${banner.presetId}`) === "1") {
+          setVisible(false);
+          return;
         }
-        setMessage(banner.message);
-        setEmoji(banner.emoji || "");
-        setEmojiUrl(banner.emojiUrl || "");
-        setPresetId(banner.presetId);
-        setTextStyle({
-          fontSize: banner.fontSize || DEFAULT_BANNER_TEXT_STYLE.fontSize,
-          fontWeight: banner.fontWeight || DEFAULT_BANNER_TEXT_STYLE.fontWeight,
-          fontStyle: banner.fontStyle || DEFAULT_BANNER_TEXT_STYLE.fontStyle,
-        });
-        setVisible(true);
-      })
-      .catch(() => {
-        /* fail silent */
+      } catch {
+        /* private mode */
+      }
+      setMessage(banner.message);
+      setEmoji(banner.emoji || "");
+      setEmojiUrl(banner.emojiUrl || "");
+      setPresetId(banner.presetId);
+      setTextStyle({
+        fontSize: banner.fontSize || DEFAULT_BANNER_TEXT_STYLE.fontSize,
+        fontWeight: banner.fontWeight || DEFAULT_BANNER_TEXT_STYLE.fontWeight,
+        fontStyle: banner.fontStyle || DEFAULT_BANNER_TEXT_STYLE.fontStyle,
       });
-    return () => {
-      cancelled = true;
-    };
+      setVisible(true);
+    });
   }, []);
 
   if (!visible || !message) return null;

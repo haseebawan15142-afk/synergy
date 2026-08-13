@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   alternates: { canonical: siteConfig.url },
 };
 
-export const revalidate = 60;
+export const revalidate = 15;
 
 export default function HomePage() {
   return (

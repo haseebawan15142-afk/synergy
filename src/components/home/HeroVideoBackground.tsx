@@ -8,14 +8,16 @@ import {
   heroFallbackPoster,
   heroVideoTransitionMs,
   clipDurationMs,
-  resolveLandingHeroVideos,
   type HeroVideo,
 } from "@/lib/content/hero-videos";
-import { fetchActiveEventHeroVideos, fetchLandingHeroVideos } from "@/lib/cms/public";
+import { fetchLandingHeroVideos } from "@/lib/cms/public";
+import { subscribeLiveHeroPlaylist } from "@/lib/cms/live-active-theme";
 import { getHeroPlaybackMode } from "@/lib/media/connection";
 import { setHeroVideoActive } from "@/lib/media/hero-video-presence";
 
-const HAVE_ENOUGH_DATA = 4;
+/** Start playback once the browser has the current frame — don't wait for a deep buffer. */
+const HAVE_CURRENT_DATA = 2;
+const READY_TIMEOUT_MS = 4500;
 
 export type EventHeroSeed = {
   presetId: string;
@@ -66,8 +68,8 @@ function VideoLayer({
   );
 }
 
-function waitForEnoughData(video: HTMLVideoElement, signal?: AbortSignal) {
-  if (video.readyState >= HAVE_ENOUGH_DATA) {
+function waitForPlayable(video: HTMLVideoElement, signal?: AbortSignal) {
+  if (video.readyState >= HAVE_CURRENT_DATA) {
     return Promise.resolve();
   }
 
@@ -80,7 +82,8 @@ function waitForEnoughData(video: HTMLVideoElement, signal?: AbortSignal) {
     let settled = false;
 
     const cleanup = () => {
-      video.removeEventListener("canplaythrough", done);
+      window.clearTimeout(timeoutId);
+      video.removeEventListener("canplay", done);
       video.removeEventListener("loadeddata", onLoadedData);
       video.removeEventListener("error", fail);
       signal?.removeEventListener("abort", onAbort);
@@ -88,14 +91,13 @@ function waitForEnoughData(video: HTMLVideoElement, signal?: AbortSignal) {
 
     const done = () => {
       if (settled) return;
-      if (video.readyState < HAVE_ENOUGH_DATA) return;
       settled = true;
       cleanup();
       resolve();
     };
 
     const onLoadedData = () => {
-      if (video.readyState >= HAVE_ENOUGH_DATA) done();
+      if (video.readyState >= HAVE_CURRENT_DATA) done();
     };
 
     const fail = () => {
@@ -112,21 +114,42 @@ function waitForEnoughData(video: HTMLVideoElement, signal?: AbortSignal) {
       reject(new DOMException("Aborted", "AbortError"));
     };
 
-    video.addEventListener("canplaythrough", done);
+    const timeoutId = window.setTimeout(() => {
+      // Prefer a slightly delayed start over hanging on Firebase Storage buffering.
+      done();
+    }, READY_TIMEOUT_MS);
+
+    video.addEventListener("canplay", done);
     video.addEventListener("loadeddata", onLoadedData);
     video.addEventListener("error", fail, { once: true });
     signal?.addEventListener("abort", onAbort, { once: true });
 
-    if (video.readyState >= HAVE_ENOUGH_DATA) {
+    if (video.readyState >= HAVE_CURRENT_DATA) {
       done();
     }
   });
 }
 
 function playlistKeyFor(isEvent: boolean, presetId: string, videos: HeroVideo[]) {
-  const fingerprint = videos.map((v) => v.mp4).join("|");
+  const fingerprint = videos
+    .map((v) => `${v.mp4}@${v.durationSec ?? ""}@${v.poster || ""}`)
+    .join("|");
   if (!isEvent) return `default-${fingerprint || "empty"}`;
   return `event-${presetId}-${fingerprint}`;
+}
+
+function preloadHeroClip(url: string) {
+  if (!url || typeof document === "undefined") return;
+  const links = document.head.querySelectorAll("link[data-hero-preload]");
+  for (const node of links) {
+    if (node.getAttribute("data-hero-preload") === url) return;
+  }
+  const link = document.createElement("link");
+  link.rel = "preload";
+  link.as = "video";
+  link.href = url;
+  link.setAttribute("data-hero-preload", url);
+  document.head.appendChild(link);
 }
 
 type HeroVideoBackgroundProps = {
@@ -169,45 +192,34 @@ export function HeroVideoBackground({
   const [playlist, setPlaylist] = useState<HeroVideo[]>(seededVideos);
   const [isEventPlaylist, setIsEventPlaylist] = useState(seededIsEvent);
   const [playlistKey, setPlaylistKey] = useState(seedKey || "loading");
+  const lastPlaylistKeyRef = useRef(seedKey || "loading");
 
   const transitionMs = isEventPlaylist ? eventHeroVideoTransitionMs : heroVideoTransitionMs;
   const fallbackDurationSec = isEventPlaylist ? 3 : 8;
 
   const applyPlaylist = useCallback((videos: HeroVideo[], isEvent: boolean, presetId = "default") => {
-    setPlaylist(videos);
-    setIsEventPlaylist(isEvent);
-    setPlaylistKey(playlistKeyFor(isEvent, presetId, videos));
+    const nextKey = playlistKeyFor(isEvent, presetId, videos);
+    if (lastPlaylistKeyRef.current !== nextKey) {
+      lastPlaylistKeyRef.current = nextKey;
+      setPlaylist(videos);
+      setIsEventPlaylist(isEvent);
+      setPlaylistKey(nextKey);
+    }
     setPlaylistReady(true);
+    const first = videos[0]?.mp4;
+    if (first) preloadHeroClip(first);
   }, []);
-
-  const loadPlaylist = useCallback(async () => {
-    try {
-      const active = await fetchActiveEventHeroVideos();
-      if (active?.videos?.length) {
-        applyPlaylist(active.videos, true, active.presetId);
-        return;
-      }
-    } catch {
-      /* fall through */
-    }
-    try {
-      const landing = await fetchLandingHeroVideos();
-      applyPlaylist(resolveLandingHeroVideos(landing), false);
-    } catch {
-      applyPlaylist(resolveLandingHeroVideos(null), false);
-    }
-  }, [applyPlaylist]);
 
   useEffect(() => {
     setMode(getHeroPlaybackMode());
-    // Seeded event playlist is already correct; still refresh on focus for admin updates.
-    if (!hasSeed) {
-      void loadPlaylist();
-    }
-    const onFocus = () => void loadPlaylist();
-    window.addEventListener("focus", onFocus);
-    return () => window.removeEventListener("focus", onFocus);
-  }, [loadPlaylist, hasSeed]);
+    const unsub = subscribeLiveHeroPlaylist(
+      (live) => {
+        applyPlaylist(live.videos, live.isEvent, live.presetId);
+      },
+      () => fetchLandingHeroVideos(),
+    );
+    return unsub;
+  }, [applyPlaylist]);
 
   // Reset layers when playlist changes (e.g. theme activate)
   useEffect(() => {
@@ -228,7 +240,7 @@ export function HeroVideoBackground({
 
     const observer = new IntersectionObserver(
       ([entry]) => setInView(entry?.isIntersecting ?? false),
-      { rootMargin: "50px", threshold: 0.05 },
+      { rootMargin: "400px", threshold: 0.01 },
     );
 
     observer.observe(node);
@@ -248,10 +260,14 @@ export function HeroVideoBackground({
 
     try {
       video.preload = "auto";
-      await waitForEnoughData(video, signal);
+      await waitForPlayable(video, signal);
       if (signal?.aborted) return false;
 
-      video.currentTime = 0;
+      try {
+        video.currentTime = 0;
+      } catch {
+        /* ignore seek errors on fresh elements */
+      }
       await video.play();
       return true;
     } catch (err) {
@@ -327,6 +343,9 @@ export function HeroVideoBackground({
 
       switchingRef.current = true;
       currentIndexRef.current = next;
+
+      const nextClip = playlist[next];
+      if (nextClip?.mp4) preloadHeroClip(nextClip.mp4);
 
       setLayerIndices((layers) => {
         const updated = [...layers] as [number, number];
@@ -430,7 +449,7 @@ export function HeroVideoBackground({
             poster={posterFor(layer0Clip)}
             visible={visibleLayer === 0}
             transitionMs={transitionMs}
-            preload={visibleLayer === 0 || pendingIncoming === 0 ? "auto" : "metadata"}
+            preload="auto"
             onRef={(el) => {
               videoRefs.current[0] = el;
             }}

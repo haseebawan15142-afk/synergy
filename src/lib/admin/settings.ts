@@ -7,6 +7,7 @@ import {
   type SiteSettings,
 } from "@/lib/firebase/collections";
 import { invalidateCmsCache } from "@/lib/cms/cache";
+import { requestPublicCmsRevalidate } from "@/lib/cms/revalidate-client";
 
 export function settingsDocRef() {
   return doc(getFirebaseDb(), COLLECTIONS.settings, DOCS.settingsSite);
@@ -32,4 +33,5 @@ export async function saveSiteSettings(
     { merge: true },
   );
   invalidateCmsCache("settings");
+  void requestPublicCmsRevalidate(["cms-settings"]);
 }
