@@ -8,20 +8,19 @@ export function getHeroPlaybackMode(): HeroPlaybackMode {
     return "poster";
   }
 
-  const mobile = window.matchMedia("(max-width: 767px)").matches;
   const conn = (
     navigator as Navigator & {
       connection?: { saveData?: boolean; effectiveType?: string };
     }
   ).connection;
 
+  // Only bail out on explicitly constrained networks — mobile 4G/Wi‑Fi plays video.
   const slowConnection =
     conn?.saveData === true ||
     conn?.effectiveType === "slow-2g" ||
-    conn?.effectiveType === "2g" ||
-    conn?.effectiveType === "3g";
+    conn?.effectiveType === "2g";
 
-  if (mobile || slowConnection) {
+  if (slowConnection) {
     return "poster";
   }
 

@@ -70,7 +70,12 @@ export function HeroVideoSlotsEditor({
               label="Video"
               folder={folder}
               value={clip.mp4}
-              onChange={(url) => patch(index, { mp4: url })}
+              onChange={(url, meta) =>
+                patch(index, {
+                  mp4: url,
+                  ...(meta?.posterUrl ? { poster: meta.posterUrl } : {}),
+                })
+              }
             />
             <MediaUrlField
               label="Poster image (optional)"

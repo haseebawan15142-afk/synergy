@@ -8,9 +8,14 @@ import {
   convertVideoForFirebase,
   isAcceptableVideoUpload,
 } from "@/lib/admin/video-convert";
+import { extractPosterFromVideoFile } from "@/lib/admin/video-poster";
 import { useAdminAuth } from "@/components/admin/AdminAuthProvider";
 import { MediaPicker } from "@/components/admin/MediaPicker";
 import { Field, SecondaryButton, inputClass } from "@/components/admin/ui";
+
+export type VideoUrlChangeMeta = {
+  posterUrl?: string;
+};
 
 /** URL + library + any-format video upload (converted to MP4 for web). */
 export function VideoUrlField({
@@ -22,13 +27,13 @@ export function VideoUrlField({
   label: string;
   value?: string;
   folder?: string;
-  onChange: (url: string) => void;
+  onChange: (url: string, meta?: VideoUrlChangeMeta) => void;
 }) {
   const { user } = useAdminAuth();
   const [open, setOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [phase, setPhase] = useState<"converting" | "uploading" | null>(null);
+  const [phase, setPhase] = useState<"converting" | "poster" | "uploading" | null>(null);
 
   async function handleFile(file: File | undefined) {
     if (!file) return;
@@ -43,11 +48,10 @@ export function VideoUrlField({
       let uploadFile = file;
       try {
         uploadFile = await convertVideoForFirebase(file, {
-          onProgress: (pct) => setProgress(Math.min(60, pct)),
+          onProgress: (pct) => setProgress(Math.min(50, pct)),
         });
-        toast.message("Converted to MP4 for web");
+        toast.message("Converted to web MP4 (720p, faststart)");
       } catch (convertErr) {
-        // Still try original bytes if already browser-playable
         if (file.type === "video/mp4" || file.type === "video/webm") {
           toast.message("Using original video (convert skipped)");
           uploadFile = file;
@@ -56,13 +60,29 @@ export function VideoUrlField({
         }
       }
 
+      setPhase("poster");
+      setProgress(55);
+      let posterUrl: string | undefined;
+      try {
+        const posterFile = await extractPosterFromVideoFile(uploadFile);
+        if (posterFile) {
+          const posterAsset = await uploadMediaFile(posterFile, folder, {
+            createdBy: user?.uid,
+            onProgress: (pct) => setProgress(55 + Math.round(pct * 0.15)),
+          });
+          posterUrl = posterAsset.url;
+        }
+      } catch {
+        /* poster optional — video still uploads */
+      }
+
       setPhase("uploading");
       const asset = await uploadMediaFile(uploadFile, folder, {
         createdBy: user?.uid,
-        onProgress: (pct) => setProgress(60 + Math.round(pct * 0.4)),
+        onProgress: (pct) => setProgress(70 + Math.round(pct * 0.3)),
       });
-      onChange(asset.url);
-      toast.success("Video saved to Firebase");
+      onChange(asset.url, posterUrl ? { posterUrl } : undefined);
+      toast.success(posterUrl ? "Video + poster saved" : "Video saved to Firebase");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Upload failed");
     } finally {
@@ -102,8 +122,10 @@ export function VideoUrlField({
         {uploading
           ? phase === "converting"
             ? `Converting to MP4… ${progress}%`
-            : `Uploading… ${progress}%`
-          : "Any video format → converts to MP4"}
+            : phase === "poster"
+              ? `Creating poster… ${progress}%`
+              : `Uploading… ${progress}%`
+          : "Any video → MP4 + auto poster (instant first paint)"}
       </label>
       <MediaPicker
         open={open}
