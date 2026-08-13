@@ -2,6 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { fetchActiveEventBanner } from "@/lib/cms/public";
+import {
+  bannerTextStyleClassName,
+  DEFAULT_BANNER_TEXT_STYLE,
+  type BannerTextStyle,
+} from "@/lib/content/banner-style";
 import { cn } from "@/lib/cn";
 
 const SESSION_KEY = "synergy-event-banner-dismissed";
@@ -13,7 +18,9 @@ const SESSION_KEY = "synergy-event-banner-dismissed";
 export function EventBanner() {
   const [message, setMessage] = useState("");
   const [emoji, setEmoji] = useState("");
+  const [emojiUrl, setEmojiUrl] = useState("");
   const [presetId, setPresetId] = useState("");
+  const [textStyle, setTextStyle] = useState<BannerTextStyle>(DEFAULT_BANNER_TEXT_STYLE);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -28,7 +35,13 @@ export function EventBanner() {
         }
         setMessage(banner.message);
         setEmoji(banner.emoji || "");
+        setEmojiUrl(banner.emojiUrl || "");
         setPresetId(banner.presetId);
+        setTextStyle({
+          fontSize: banner.fontSize || DEFAULT_BANNER_TEXT_STYLE.fontSize,
+          fontWeight: banner.fontWeight || DEFAULT_BANNER_TEXT_STYLE.fontWeight,
+          fontStyle: banner.fontStyle || DEFAULT_BANNER_TEXT_STYLE.fontStyle,
+        });
         setVisible(true);
       })
       .catch(() => {
@@ -44,15 +57,29 @@ export function EventBanner() {
   return (
     <div
       className={cn(
-        "fixed inset-x-0 top-16 z-40 flex h-10 items-center justify-center gap-2 px-10",
-        "bg-synergy text-center text-xs font-semibold text-on-synergy sm:text-sm",
+        "fixed inset-x-0 top-16 z-40 flex min-h-10 items-center justify-center gap-2 px-10 py-2",
+        "bg-synergy text-center text-on-synergy",
+        bannerTextStyleClassName(textStyle),
         "shadow-soft",
       )}
       role="status"
     >
-      <span className="truncate">
-        {emoji ? `${emoji} ` : ""}
-        {message}
+      <span className="inline-flex min-w-0 max-w-full items-center justify-center gap-2 truncate">
+        {emojiUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={emojiUrl}
+            alt=""
+            className="h-5 w-5 shrink-0 object-contain sm:h-6 sm:w-6"
+            width={24}
+            height={24}
+          />
+        ) : emoji ? (
+          <span className="shrink-0" aria-hidden>
+            {emoji}
+          </span>
+        ) : null}
+        <span className="truncate">{message}</span>
       </span>
       <button
         type="button"

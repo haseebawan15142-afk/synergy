@@ -23,8 +23,19 @@ import {
   saveThemePreset,
 } from "@/lib/admin/theme-presets";
 import { applyThemeTokensToRoot } from "@/lib/theme/apply-theme";
+import {
+  BANNER_FONT_SIZES,
+  BANNER_FONT_STYLES,
+  BANNER_FONT_WEIGHTS,
+  DEFAULT_BANNER_TEXT_STYLE,
+  THEME_EMOJI_SUGGESTIONS,
+  type BannerFontSize,
+  type BannerFontStyle,
+  type BannerFontWeight,
+} from "@/lib/content/banner-style";
 import { AdminPageSkeleton } from "@/components/admin/AdminSkeleton";
 import { HeroVideoSlotsEditor } from "@/components/admin/HeroVideoSlotsEditor";
+import { MediaUrlField } from "@/components/admin/MediaPicker";
 import {
   AdminPageHeader,
   Card,
@@ -42,9 +53,13 @@ type Draft = {
   name: string;
   eventKey: string;
   emoji: string;
+  emojiUrl: string;
   description: string;
   bannerMessage: string;
   bannerEnabled: boolean;
+  bannerFontSize: BannerFontSize;
+  bannerFontWeight: BannerFontWeight;
+  bannerFontStyle: BannerFontStyle;
   startDate: string;
   endDate: string;
   isDefault: boolean;
@@ -82,9 +97,13 @@ function emptyDraft(): Draft {
     name: "",
     eventKey: "",
     emoji: "🎨",
+    emojiUrl: "",
     description: "",
     bannerMessage: "",
     bannerEnabled: false,
+    bannerFontSize: DEFAULT_BANNER_TEXT_STYLE.fontSize,
+    bannerFontWeight: DEFAULT_BANNER_TEXT_STYLE.fontWeight,
+    bannerFontStyle: DEFAULT_BANNER_TEXT_STYLE.fontStyle,
     startDate: "",
     endDate: "",
     isDefault: false,
@@ -322,7 +341,18 @@ export function ThemePresetGallery({ onThemeChanged }: Props) {
                     <div>
                       <h3 className="text-base font-semibold text-ink">
                         <span className="mr-1.5" aria-hidden>
-                          {preset.emoji || "🎨"}
+                          {preset.emojiUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={preset.emojiUrl}
+                              alt=""
+                              className="h-8 w-8 object-contain"
+                              width={32}
+                              height={32}
+                            />
+                          ) : (
+                            preset.emoji || "🎨"
+                          )}
                         </span>
                         {preset.name}
                       </h3>
@@ -391,9 +421,16 @@ export function ThemePresetGallery({ onThemeChanged }: Props) {
                           name: preset.name,
                           eventKey: preset.eventKey,
                           emoji: preset.emoji || "",
+                          emojiUrl: preset.emojiUrl || "",
                           description: preset.description || "",
                           bannerMessage: preset.bannerMessage || "",
                           bannerEnabled: Boolean(preset.bannerEnabled),
+                          bannerFontSize:
+                            preset.bannerFontSize || DEFAULT_BANNER_TEXT_STYLE.fontSize,
+                          bannerFontWeight:
+                            preset.bannerFontWeight || DEFAULT_BANNER_TEXT_STYLE.fontWeight,
+                          bannerFontStyle:
+                            preset.bannerFontStyle || DEFAULT_BANNER_TEXT_STYLE.fontStyle,
                           startDate: preset.startDate || "",
                           endDate: preset.endDate || "",
                           isDefault: Boolean(preset.isDefault),
@@ -476,13 +513,44 @@ export function ThemePresetGallery({ onThemeChanged }: Props) {
                 }
               />
             </Field>
-            <Field label="Emoji">
+            <Field label="Emoji (text fallback)">
               <input
                 className={inputClass}
                 value={draft.emoji}
                 onChange={(e) => setDraft({ ...draft, emoji: e.target.value })}
+                placeholder="🇵🇰 or Win + . (emoji picker)"
               />
+              <p className="mt-1 text-[11px] text-ink-muted">
+                Used only when no custom icon is uploaded. Windows:{" "}
+                <kbd className="rounded border border-border px-1">Win</kbd> +{" "}
+                <kbd className="rounded border border-border px-1">.</kbd>
+              </p>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {THEME_EMOJI_SUGGESTIONS.map((emo) => (
+                  <button
+                    key={emo}
+                    type="button"
+                    className="rounded-lg border border-border bg-surface-muted px-2 py-1 text-lg hover:border-synergy/50"
+                    onClick={() => setDraft({ ...draft, emoji: emo })}
+                    aria-label={`Use emoji ${emo}`}
+                  >
+                    {emo}
+                  </button>
+                ))}
+              </div>
             </Field>
+            <div className="md:col-span-2">
+              <MediaUrlField
+                label="Custom icon / logo (high quality — preferred)"
+                folder="icons"
+                value={draft.emojiUrl}
+                onChange={(url) => setDraft({ ...draft, emojiUrl: url })}
+              />
+              <p className="mt-1 text-[11px] text-ink-muted">
+                Upload PNG, WebP, or SVG (transparent background recommended). If set, this replaces the
+                text emoji on the site banner and theme cards.
+              </p>
+            </div>
             <Field label="Category">
               <select
                 className={inputClass}
@@ -528,6 +596,60 @@ export function ThemePresetGallery({ onThemeChanged }: Props) {
                 value={draft.bannerMessage}
                 onChange={(e) => setDraft({ ...draft, bannerMessage: e.target.value })}
               />
+            </Field>
+            <Field label="Banner font size">
+              <select
+                className={inputClass}
+                value={draft.bannerFontSize}
+                onChange={(e) =>
+                  setDraft({
+                    ...draft,
+                    bannerFontSize: e.target.value as BannerFontSize,
+                  })
+                }
+              >
+                {BANNER_FONT_SIZES.map((opt) => (
+                  <option key={opt.id} value={opt.id}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Banner font weight">
+              <select
+                className={inputClass}
+                value={draft.bannerFontWeight}
+                onChange={(e) =>
+                  setDraft({
+                    ...draft,
+                    bannerFontWeight: e.target.value as BannerFontWeight,
+                  })
+                }
+              >
+                {BANNER_FONT_WEIGHTS.map((opt) => (
+                  <option key={opt.id} value={opt.id}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Banner font style">
+              <select
+                className={inputClass}
+                value={draft.bannerFontStyle}
+                onChange={(e) =>
+                  setDraft({
+                    ...draft,
+                    bannerFontStyle: e.target.value as BannerFontStyle,
+                  })
+                }
+              >
+                {BANNER_FONT_STYLES.map((opt) => (
+                  <option key={opt.id} value={opt.id}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
             </Field>
             <Field label="Banner enabled">
               <select
@@ -622,9 +744,13 @@ export function ThemePresetGallery({ onThemeChanged }: Props) {
                     name: draft.name,
                     eventKey: draft.eventKey,
                     emoji: draft.emoji,
+                    emojiUrl: draft.emojiUrl,
                     description: draft.description,
                     bannerMessage: draft.bannerMessage,
                     bannerEnabled: draft.bannerEnabled,
+                    bannerFontSize: draft.bannerFontSize,
+                    bannerFontWeight: draft.bannerFontWeight,
+                    bannerFontStyle: draft.bannerFontStyle,
                     startDate: draft.startDate,
                     endDate: draft.endDate,
                     isDefault: draft.isDefault,

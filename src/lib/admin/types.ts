@@ -1,4 +1,9 @@
 import type { ContentStatus, TimestampLike } from "@/lib/firebase/collections";
+import type {
+  BannerFontSize,
+  BannerFontStyle,
+  BannerFontWeight,
+} from "@/lib/content/banner-style";
 
 export type MediaAsset = {
   id?: string;
@@ -355,10 +360,16 @@ export type ThemePreset = {
   name: string;
   eventKey: string;
   emoji?: string;
+  /** Optional high-quality icon (PNG/WebP/SVG). Preferred over text emoji when set. */
+  emojiUrl?: string;
   description?: string;
   tokens: ThemeTokens;
   bannerMessage?: string;
   bannerEnabled?: boolean;
+  /** Banner typography (Admin → Theme). Mirrored onto activePreset when live. */
+  bannerFontSize?: BannerFontSize;
+  bannerFontWeight?: BannerFontWeight;
+  bannerFontStyle?: BannerFontStyle;
   /** Event hero playlist (max 3). Used when this preset is active (not default). */
   heroVideos?: ThemeHeroVideo[];
   /** Recurring yearly window as "MM-DD". */
@@ -376,8 +387,12 @@ export type ActiveThemePreset = {
   eventKey: string;
   name?: string;
   emoji?: string;
+  emojiUrl?: string;
   bannerMessage?: string;
   bannerEnabled?: boolean;
+  bannerFontSize?: BannerFontSize;
+  bannerFontWeight?: BannerFontWeight;
+  bannerFontStyle?: BannerFontStyle;
   heroVideos?: ThemeHeroVideo[];
   activatedAt?: TimestampLike;
 };

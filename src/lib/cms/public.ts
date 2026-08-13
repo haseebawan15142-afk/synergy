@@ -19,6 +19,12 @@ import {
   resolveLandingHeroVideos,
   type HeroVideo,
 } from "@/lib/content/hero-videos";
+import { normalizeBannerTextStyle } from "@/lib/content/banner-style";
+import type {
+  BannerFontSize,
+  BannerFontStyle,
+  BannerFontWeight,
+} from "@/lib/content/banner-style";
 import {
   DEFAULT_THEME,
   type ThemeTokens,
@@ -244,7 +250,11 @@ export type ActiveEventBanner = {
   presetId: string;
   message: string;
   emoji?: string;
+  emojiUrl?: string;
   name?: string;
+  fontSize?: BannerFontSize;
+  fontWeight?: BannerFontWeight;
+  fontStyle?: BannerFontStyle;
 };
 
 export type ActiveEventHeroVideos = {
@@ -267,15 +277,28 @@ export async function fetchActiveEventBanner(): Promise<ActiveEventBanner | null
         bannerMessage?: string;
         bannerEnabled?: boolean;
         emoji?: string;
+        emojiUrl?: string;
         name?: string;
+        bannerFontSize?: string;
+        bannerFontWeight?: string;
+        bannerFontStyle?: string;
       } | null;
       if (!data) return null;
       if (!data.bannerEnabled || !data.bannerMessage?.trim() || !data.presetId) return null;
+      const style = normalizeBannerTextStyle({
+        fontSize: data.bannerFontSize as ActiveEventBanner["fontSize"],
+        fontWeight: data.bannerFontWeight as ActiveEventBanner["fontWeight"],
+        fontStyle: data.bannerFontStyle as ActiveEventBanner["fontStyle"],
+      });
       return {
         presetId: data.presetId,
         message: data.bannerMessage.trim(),
         emoji: data.emoji || "",
+        emojiUrl: String(data.emojiUrl || "").trim(),
         name: data.name || "",
+        fontSize: style.fontSize,
+        fontWeight: style.fontWeight,
+        fontStyle: style.fontStyle,
       };
     },
     () => null,

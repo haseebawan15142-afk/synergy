@@ -16,6 +16,7 @@ import {
 } from "@/lib/admin/crud";
 import { COLLECTIONS, DOCS } from "@/lib/firebase/collections";
 import { invalidateCmsCache } from "@/lib/cms/cache";
+import { normalizeBannerTextStyle } from "@/lib/content/banner-style";
 
 export const THEME_PRESET_PREFIX = "preset_";
 
@@ -134,15 +135,24 @@ function asPreset(row: PresetRow): ThemePreset | null {
     (row.id.startsWith(THEME_PRESET_PREFIX)
       ? row.id.slice(THEME_PRESET_PREFIX.length)
       : row.id);
+  const bannerStyle = normalizeBannerTextStyle({
+    fontSize: row.bannerFontSize,
+    fontWeight: row.bannerFontWeight,
+    fontStyle: row.bannerFontStyle,
+  });
   return {
     id: row.id.startsWith(THEME_PRESET_PREFIX) ? eventKey : row.id,
     name: row.name || eventKey,
     eventKey,
     emoji: row.emoji || "",
+    emojiUrl: String(row.emojiUrl || "").trim(),
     description: row.description || "",
     tokens: pickThemeTokens(row.tokens),
     bannerMessage: row.bannerMessage || "",
     bannerEnabled: Boolean(row.bannerEnabled),
+    bannerFontSize: bannerStyle.fontSize,
+    bannerFontWeight: bannerStyle.fontWeight,
+    bannerFontStyle: bannerStyle.fontStyle,
     heroVideos: normalizeHeroVideos(row.heroVideos),
     startDate: row.startDate || "",
     endDate: row.endDate || "",
@@ -180,15 +190,24 @@ export async function saveThemePreset(
   const eventKey = themePresetDocId(input.eventKey);
   const id = themePresetDocId(input.id || eventKey);
   const asDefault = Boolean(input.isDefault) || eventKey === "default";
+  const bannerStyle = normalizeBannerTextStyle({
+    fontSize: input.bannerFontSize,
+    fontWeight: input.bannerFontWeight,
+    fontStyle: input.bannerFontStyle,
+  });
   const payload = {
     kind: "preset" as const,
     name: input.name.trim(),
     eventKey,
     emoji: input.emoji || "",
+    emojiUrl: String(input.emojiUrl || "").trim(),
     description: input.description || "",
     tokens: asDefault ? originalSynergyTheme() : pickThemeTokens(input.tokens),
     bannerMessage: input.bannerMessage || "",
     bannerEnabled: Boolean(input.bannerEnabled),
+    bannerFontSize: bannerStyle.fontSize,
+    bannerFontWeight: bannerStyle.fontWeight,
+    bannerFontStyle: bannerStyle.fontStyle,
     heroVideos: asDefault ? [] : normalizeHeroVideos(input.heroVideos),
     startDate: asDefault ? "" : input.startDate || "",
     endDate: asDefault ? "" : input.endDate || "",
@@ -208,8 +227,12 @@ export async function saveThemePreset(
       ...active,
       name: payload.name,
       emoji: payload.emoji,
+      emojiUrl: payload.emojiUrl,
       bannerMessage: payload.bannerMessage,
       bannerEnabled: Boolean(payload.bannerEnabled) && Boolean(payload.bannerMessage?.trim()),
+      bannerFontSize: payload.bannerFontSize,
+      bannerFontWeight: payload.bannerFontWeight,
+      bannerFontStyle: payload.bannerFontStyle,
       heroVideos: payload.heroVideos,
       presetId: id,
       eventKey,
@@ -245,10 +268,14 @@ export async function duplicateThemePreset(preset: ThemePreset): Promise<string>
     name: `${preset.name} (copy)`,
     eventKey,
     emoji: preset.emoji,
+    emojiUrl: preset.emojiUrl,
     description: preset.description,
     tokens: pickThemeTokens(preset.tokens),
     bannerMessage: preset.bannerMessage,
     bannerEnabled: Boolean(preset.bannerEnabled),
+    bannerFontSize: preset.bannerFontSize,
+    bannerFontWeight: preset.bannerFontWeight,
+    bannerFontStyle: preset.bannerFontStyle,
     heroVideos: normalizeHeroVideos(preset.heroVideos),
     startDate: preset.startDate,
     endDate: preset.endDate,
@@ -286,13 +313,23 @@ export async function activateThemePreset(preset: ThemePreset): Promise<void> {
     ? []
     : normalizeHeroVideos(preset.heroVideos);
 
+  const bannerStyle = normalizeBannerTextStyle({
+    fontSize: preset.bannerFontSize,
+    fontWeight: preset.bannerFontWeight,
+    fontStyle: preset.bannerFontStyle,
+  });
+
   const activePayload: ActiveThemePreset = {
     presetId,
     eventKey: themePresetDocId(preset.eventKey || preset.id),
     name: preset.name,
     emoji: preset.emoji || "",
+    emojiUrl: String(preset.emojiUrl || "").trim(),
     bannerMessage: preset.bannerMessage || "",
     bannerEnabled: Boolean(preset.bannerEnabled) && Boolean(preset.bannerMessage?.trim()),
+    bannerFontSize: bannerStyle.fontSize,
+    bannerFontWeight: bannerStyle.fontWeight,
+    bannerFontStyle: bannerStyle.fontStyle,
     heroVideos,
     activatedAt: new Date().toISOString(),
   };
@@ -314,12 +351,28 @@ export async function revertPreviousTheme(): Promise<boolean> {
     ...tokens,
     activePresetId: prevId,
   });
-  // Re-hydrate hero playlist from the previous preset doc when possible.
+  // Re-hydrate hero playlist + banner style from the previous preset doc when possible.
   let heroVideos: ThemeHeroVideo[] = [];
+  let bannerStyle = normalizeBannerTextStyle(null);
+  let bannerMessage = "";
+  let bannerEnabled = false;
+  let emoji = previous.previousPresetEmoji || "";
+  let emojiUrl = "";
+  let name = previous.previousPresetName || "";
   if (prevId && prevId !== "default") {
     try {
       const prevPreset = await getById<ThemePreset>(COLLECTIONS.themePresets, prevId);
       heroVideos = normalizeHeroVideos(prevPreset?.heroVideos);
+      bannerStyle = normalizeBannerTextStyle({
+        fontSize: prevPreset?.bannerFontSize,
+        fontWeight: prevPreset?.bannerFontWeight,
+        fontStyle: prevPreset?.bannerFontStyle,
+      });
+      bannerMessage = prevPreset?.bannerMessage || "";
+      bannerEnabled = Boolean(prevPreset?.bannerEnabled) && Boolean(bannerMessage.trim());
+      emoji = prevPreset?.emoji || emoji;
+      emojiUrl = String(prevPreset?.emojiUrl || "").trim();
+      name = prevPreset?.name || name;
     } catch {
       heroVideos = [];
     }
@@ -328,10 +381,14 @@ export async function revertPreviousTheme(): Promise<boolean> {
   await upsertSingleton(COLLECTIONS.theme, DOCS.activeThemePreset, {
     presetId: prevId,
     eventKey: prevId,
-    name: previous.previousPresetName || "",
-    emoji: previous.previousPresetEmoji || "",
-    bannerMessage: "",
-    bannerEnabled: false,
+    name,
+    emoji,
+    emojiUrl,
+    bannerMessage,
+    bannerEnabled,
+    bannerFontSize: bannerStyle.fontSize,
+    bannerFontWeight: bannerStyle.fontWeight,
+    bannerFontStyle: bannerStyle.fontStyle,
     heroVideos,
     activatedAt: new Date().toISOString(),
   });
