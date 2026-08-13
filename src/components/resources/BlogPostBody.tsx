@@ -11,13 +11,20 @@ type BlogPostBodyProps = {
 
 export function BlogPostBody({ slug, legacyUrl, bodyHtml }: BlogPostBodyProps) {
   if (bodyHtml?.trim()) {
-    const safeHtml = sanitizeBlogHtml(bodyHtml);
-    return (
-      <div
-        className="prose prose-neutral max-w-none prose-headings:font-semibold prose-headings:text-ink prose-p:text-ink-body prose-a:text-synergy"
-        dangerouslySetInnerHTML={{ __html: safeHtml }}
-      />
-    );
+    let safeHtml = "";
+    try {
+      safeHtml = sanitizeBlogHtml(bodyHtml);
+    } catch {
+      safeHtml = "";
+    }
+    if (safeHtml.trim()) {
+      return (
+        <div
+          className="prose prose-neutral max-w-none prose-headings:font-semibold prose-headings:text-ink prose-p:text-ink-body prose-a:text-synergy"
+          dangerouslySetInnerHTML={{ __html: safeHtml }}
+        />
+      );
+    }
   }
 
   const blocks = getBlogBody(slug);
