@@ -750,34 +750,34 @@ function mapBlogDoc(id: string, x: Record<string, unknown>): BlogPostMeta {
  * Published blogs for the public site.
  * Uses status==published query (matches Firestore rules). Avoids orderBy(publishedAt)
  * so docs without that field are still returned. Merges CMS + local-only slugs.
+ *
+ * Intentionally NOT passed through cmsRead/cachedCms — that in-memory Map can stay
+ * stale across admin publishes (and may be duplicated across Next bundles).
  */
 export async function fetchPublishedBlogs(max = 200): Promise<BlogPostMeta[]> {
-  return cmsRead(
-    `blogs:v3:${max}`,
-    async () => {
-      if (!firebaseReady()) return localBlogs.slice(0, max);
-      // Constraint must match public read rule (status == published).
-      // Server uses Admin SDK to avoid client gRPC TLS stalls.
-      const rows = await queryCmsDocs(COLLECTIONS.blogs, {
-        where: [{ field: "status", value: "published" }],
-        limitCount: Math.min(max, 500),
+  try {
+    if (!firebaseReady()) return localBlogs.slice(0, max);
+    // Fetch all published docs first (no orderBy — status-only query matches rules),
+    // then sort + slice. Limiting the query to `max` drops newer posts arbitrarily.
+    const rows = await queryCmsDocs(COLLECTIONS.blogs, {
+      where: [{ field: "status", value: "published" }],
+      limitCount: 500,
+    });
+    const fromCms = rows
+      .map((d) => mapBlogDoc(d.id, d.data))
+      .filter((b) => b.title && b.slug)
+      .sort((a, b) => {
+        const ta = Date.parse(a.date) || 0;
+        const tb = Date.parse(b.date) || 0;
+        return tb - ta;
       });
-      const fromCms = rows
-        .map((d) => mapBlogDoc(d.id, d.data))
-        .filter((b) => b.title && b.slug)
-        .sort((a, b) => {
-          const ta = Date.parse(a.date) || 0;
-          const tb = Date.parse(b.date) || 0;
-          return tb - ta;
-        });
 
-      const cmsSlugs = new Set(fromCms.map((b) => b.slug.toLowerCase()));
-      const localOnly = localBlogs.filter((b) => !cmsSlugs.has(b.slug.toLowerCase()));
-      return [...fromCms, ...localOnly].slice(0, max);
-    },
-    () => localBlogs.slice(0, max),
-    30_000,
-  );
+    const cmsSlugs = new Set(fromCms.map((b) => b.slug.toLowerCase()));
+    const localOnly = localBlogs.filter((b) => !cmsSlugs.has(b.slug.toLowerCase()));
+    return [...fromCms, ...localOnly].slice(0, max);
+  } catch {
+    return localBlogs.slice(0, max);
+  }
 }
 
 export async function fetchBlogBySlug(slug: string): Promise<BlogPostMeta | null> {

@@ -9,6 +9,7 @@ import {
   logActivity,
   updateDocById,
 } from "@/lib/admin/crud";
+import { publishAdminCmsChange } from "@/lib/cms/publish-admin-change";
 import { useAdminAuth } from "@/components/admin/AdminAuthProvider";
 import { AdminPageSkeleton } from "@/components/admin/AdminSkeleton";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
@@ -143,6 +144,15 @@ export function CrudManager<T extends CrudRecord>({
         entity: collection,
         entityId: savedId,
       });
+      const slugPath =
+        typeof payload.slug === "string" && payload.slug
+          ? collection === "services"
+            ? [`/services/${payload.slug}`]
+            : collection === "partners"
+              ? [`/partners/${payload.slug}`]
+              : []
+          : [];
+      await publishAdminCmsChange(collection, slugPath);
       toast.success("Saved");
       setForm(null);
       await load();
@@ -165,6 +175,7 @@ export function CrudManager<T extends CrudRecord>({
         entity: collection,
         entityId: deleting.id,
       });
+      await publishAdminCmsChange(collection);
       toast.success("Deleted");
       setDeleting(null);
       await load();

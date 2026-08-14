@@ -12,8 +12,9 @@ export const metadata: Metadata = {
   alternates: { canonical: `${siteConfig.url}/resources` },
 };
 
-/** Pick up admin CMS blog changes without a full redeploy. */
-export const revalidate = 60;
+/** Always read latest published blogs after admin edits (no stale ISR shell). */
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export default async function ResourcesPage() {
   const posts = await fetchPublishedBlogs(80);

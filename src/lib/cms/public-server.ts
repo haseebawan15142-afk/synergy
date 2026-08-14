@@ -19,6 +19,9 @@ import {
  * - React `cache()` — dedupe within one request (layout + page + metadata)
  * - `unstable_cache` — Next Data Cache across requests (ISR-friendly)
  *
+ * Blogs stay uncached here so admin publish is visible immediately; the
+ * /resources routes also use force-dynamic + revalidateTag("cms-blogs").
+ *
  * Client components must keep using `@/lib/cms/public` (browser Firestore).
  */
 
@@ -36,23 +39,8 @@ export const fetchOffices = cache(
   }),
 );
 
-const publishedBlogsLoaders = new Map<number, () => Promise<Awaited<ReturnType<typeof fetchPublishedBlogsUncached>>>>();
-
-function publishedBlogsCached(max: number) {
-  const key = Math.min(Math.max(1, max), 500);
-  let loader = publishedBlogsLoaders.get(key);
-  if (!loader) {
-    loader = unstable_cache(
-      async () => fetchPublishedBlogsUncached(key),
-      [`cms:blogs:published:v3:${key}`],
-      { revalidate: 60, tags: ["cms-blogs"] },
-    );
-    publishedBlogsLoaders.set(key, loader);
-  }
-  return loader();
-}
-
-export const fetchPublishedBlogs = cache(async (max = 80) => publishedBlogsCached(max));
+/** Fresh Firestore read every request (admin publish must show immediately). */
+export const fetchPublishedBlogs = cache(async (max = 80) => fetchPublishedBlogsUncached(max));
 
 export const fetchServices = cache(
   unstable_cache(async () => fetchServicesUncached(), ["cms:services:v3"], {

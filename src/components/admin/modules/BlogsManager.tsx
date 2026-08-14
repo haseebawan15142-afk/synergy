@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import type { BlogDoc } from "@/lib/admin/types";
 import { createDoc, deleteDocById, estimateReadingTime, listOrdered, logActivity, slugify, updateDocById } from "@/lib/admin/crud";
 import { COLLECTIONS } from "@/lib/firebase/collections";
+import { publishAdminCmsChange } from "@/lib/cms/publish-admin-change";
 import { useAdminAuth } from "@/components/admin/AdminAuthProvider";
 import { AdminPageSkeleton } from "@/components/admin/AdminSkeleton";
 import { ConfirmDialog } from "@/components/admin/ConfirmDialog";
@@ -45,9 +46,10 @@ export function BlogsManager() {
       entity: COLLECTIONS.blogs,
       entityId: savedId,
     });
+    await publishAdminCmsChange(COLLECTIONS.blogs, data.slug ? [`/resources/${data.slug}`] : []);
     toast.success("Blog saved"); setForm(null); await load();
   } catch (e) { toast.error(e instanceof Error ? e.message : "Save failed"); } finally { setSaving(false); } }
-  async function remove() { if (!deleting?.id) return; try { await deleteDocById(COLLECTIONS.blogs, deleting.id); toast.success("Blog deleted"); setDeleting(null); await load(); } catch (e) { toast.error(e instanceof Error ? e.message : "Delete failed"); } }
+  async function remove() { if (!deleting?.id) return; try { await deleteDocById(COLLECTIONS.blogs, deleting.id); await publishAdminCmsChange(COLLECTIONS.blogs, deleting.slug ? [`/resources/${deleting.slug}`] : []); toast.success("Blog deleted"); setDeleting(null); await load(); } catch (e) { toast.error(e instanceof Error ? e.message : "Delete failed"); } }
   if (loading) return <AdminPageSkeleton />;
   return <div className="space-y-6"><AdminPageHeader title="Blogs" description="Create, schedule, and optimize editorial content." actions={<PrimaryButton onClick={() => setForm({ ...empty })}>Add blog</PrimaryButton>} />
     <Card className="p-3"><input className={inputClass} value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search blogs…" /></Card>
