@@ -10,10 +10,14 @@ type BlogPostBodyProps = {
 };
 
 export function BlogPostBody({ slug, legacyUrl, bodyHtml }: BlogPostBodyProps) {
-  if (bodyHtml?.trim()) {
+  // Tiny CMS stubs (title-only) should not hide the full local article text.
+  const cmsHtml = String(bodyHtml || "").trim();
+  const useCmsHtml = cmsHtml.length >= 200;
+
+  if (useCmsHtml) {
     let safeHtml = "";
     try {
-      safeHtml = sanitizeBlogHtml(bodyHtml);
+      safeHtml = sanitizeBlogHtml(cmsHtml);
     } catch {
       safeHtml = "";
     }

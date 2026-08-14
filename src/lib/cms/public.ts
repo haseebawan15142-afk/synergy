@@ -786,20 +786,22 @@ export async function fetchBlogBySlug(slug: string): Promise<BlogPostMeta | null
 
   if (firebaseReady()) {
     try {
-      const rows = await queryCmsDocs(COLLECTIONS.blogs, {
-        where: [
-          { field: "slug", value: slug.trim() },
-          { field: "status", value: "published" },
-        ],
-        limitCount: 1,
-      });
-      if (rows[0]) {
-        return mapBlogDoc(rows[0].id, rows[0].data);
+      // Fast path: many legacy docs use slug as document id.
+      const direct = await readCmsDoc(COLLECTIONS.blogs, slug.trim());
+      if (direct && String(direct.status || "") === "published") {
+        return mapBlogDoc(slug.trim(), direct);
       }
-      // Fallback: slug field may differ from doc id
-      const all = await fetchPublishedBlogs(200);
-      const hit = all.find((b) => b.slug.toLowerCase() === needle);
-      if (hit) return hit;
+
+      const rows = await queryCmsDocs(COLLECTIONS.blogs, {
+        where: [{ field: "status", value: "published" }],
+        limitCount: 500,
+      });
+      const hit = rows.find(
+        (row) =>
+          row.id.toLowerCase() === needle ||
+          String(row.data.slug || "").toLowerCase() === needle,
+      );
+      if (hit) return mapBlogDoc(hit.id, hit.data);
     } catch {
       /* fall through to local */
     }

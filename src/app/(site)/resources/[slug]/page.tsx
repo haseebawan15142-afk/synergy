@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { fetchBlogBySlug, fetchPublishedBlogs, fetchServices } from "@/lib/cms/public";
+import { fetchBlogBySlug, fetchServices } from "@/lib/cms/public";
 import { BlogPostBody } from "@/components/resources/BlogPostBody";
 import { getBlogPostImage } from "@/lib/content/blog-images";
 import { PageHeader } from "@/components/ui/PageHeader";
@@ -14,29 +13,38 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 export const dynamicParams = true;
 
-export async function generateStaticParams() {
-  const posts = await fetchPublishedBlogs(300);
-  return posts.map((p) => ({ slug: p.slug }));
-}
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const post = await fetchBlogBySlug(slug);
-  if (!post) return {};
-  return {
-    title: post.title,
-    description: post.excerpt || post.title,
-    alternates: { canonical: `/resources/${post.slug}` },
-  };
+  try {
+    const post = await fetchBlogBySlug(slug);
+    if (!post) return {};
+    return {
+      title: post.title,
+      description: post.excerpt || post.title,
+      alternates: { canonical: `/resources/${post.slug}` },
+    };
+  } catch {
+    return {};
+  }
 }
 
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
-  const post = await fetchBlogBySlug(slug);
+  let post;
+  try {
+    post = await fetchBlogBySlug(slug);
+  } catch {
+    post = null;
+  }
   if (!post) notFound();
 
-  const services = await fetchServices();
-  const relatedService = services.find((s) => s.slug === post.relatedServiceSlug);
+  let relatedService = null;
+  try {
+    const services = await fetchServices();
+    relatedService = services.find((s) => s.slug === post.relatedServiceSlug) || null;
+  } catch {
+    relatedService = null;
+  }
   const image = getBlogPostImage(post);
 
   return (
@@ -48,14 +56,11 @@ export default async function BlogPostPage({ params }: Props) {
       <div className="page-container max-w-3xl section-y-tight !py-10">
         {image ? (
           <div className="relative mb-8 aspect-[16/10] overflow-hidden rounded-2xl border border-border/80 shadow-card sm:aspect-[2/1]">
-            <Image
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
               src={image}
               alt={post.title}
-              fill
-              priority
-              sizes="(max-width: 768px) 100vw, 768px"
-              className="object-cover"
-              unoptimized
+              className="absolute inset-0 h-full w-full object-cover"
             />
           </div>
         ) : null}

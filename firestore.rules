@@ -211,10 +211,6 @@ service cloud.firestore {
     /**
      * Form intakes — public create DISABLED.
      * Website forms use POST /api/contact and POST /api/newsletter (Admin SDK).
-     * Only admins can read / update / delete / create from the CMS client.
-     * Helpers above document the safe public shape if create is ever re-enabled:
-     *   allow create: if isPublicContactCreate();
-     *   allow create: if isPublicNewsletterCreate();
      */
     match /messages/{id} {
       allow create, read, update, delete: if isAdmin();
