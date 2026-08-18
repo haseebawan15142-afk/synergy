@@ -16,7 +16,7 @@ type Message = {
 };
 
 const WELCOME_CONTENT =
-  "Hi — I'm Synergy Assistant for Synergy Computers (Pvt.) Ltd.\n\nAsk me about:\n• IT services (backup, cloud, managed IT, on-site support)\n• Technology partners (Veritas, Dell, Dynatrace, etc.)\n• Industries we serve in Pakistan\n• Contact & quotes";
+  "Hi — I'm Synergy Assistant for Synergy Computers (Pvt.) Ltd.\n\nAsk me about our IT services, technology partners, industries we serve in Pakistan, or how to get in touch for a quote.";
 
 const QUICK_REPLIES = [
   "What services do you offer?",
@@ -25,7 +25,7 @@ const QUICK_REPLIES = [
   "Contact info",
 ];
 
-const STORAGE_KEY = "synergy_chat_messages_v1";
+const STORAGE_KEY = "synergy_chat_messages_v2";
 const OPENED_KEY = "synergy_chat_opened_v1";
 
 function newId() {

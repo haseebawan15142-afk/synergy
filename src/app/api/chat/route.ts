@@ -130,7 +130,7 @@ export async function POST(request: Request) {
     }
   }
 
-  const local = replyFromLocalKnowledge(userText);
+  const local = await replyFromLocalKnowledge(userText);
   return NextResponse.json({
     reply: local.reply,
     source: "local",

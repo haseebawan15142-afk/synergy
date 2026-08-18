@@ -7,10 +7,11 @@ import { ceoMessage } from "@/lib/content/ceo-message";
 import { dynatracePartner } from "@/lib/content/dynatrace-partner";
 import { problemCards } from "@/lib/content/problems";
 import { industries } from "@/lib/content/industries";
-import { partners } from "@/lib/content/partners";
+import { partners as localPartners } from "@/lib/content/partners";
 import { services } from "@/lib/content/services";
 import { siteConfig } from "@/lib/content/site";
 import { boardOfDirectors, companyProfileMeta, officeLocationsDetailed } from "@/lib/content/company-profile";
+import { fetchPartners } from "@/lib/cms/public";
 
 export type LocalReply = {
   reply: string;
@@ -53,14 +54,21 @@ Try asking:
 Email: ${siteConfig.email} | Phone: ${siteConfig.phones[0]} | /contact`;
 
 /** Works without an API key — answers from Synergy site content only. */
-export function replyFromLocalKnowledge(userMessage: string): LocalReply {
+export async function replyFromLocalKnowledge(userMessage: string): Promise<LocalReply> {
   const q = normalize(userMessage);
   if (!q) return { reply: FALLBACK_REPLY, matched: false };
+
+  let partners = localPartners;
+  try {
+    partners = await fetchPartners();
+  } catch {
+    partners = localPartners;
+  }
 
   if (includesAny(q, ["hello", "hi", "hey", "salam", "assalam", "good morning", "good evening"])) {
     return {
       matched: true,
-      reply: `Hello! I'm Synergy Assistant for ${siteConfig.legalName} — Pakistan's enterprise IT partner for 40+ years.\n\nI can help with:\n• Our services (infrastructure, backup, cloud, managed IT, on-site support)\n• Technology partners (Veritas, Dell, Dynatrace, and more)\n• Industries we serve\n• Contact & quotes\n\nWhat would you like to know?`,
+      reply: `Hello! I'm Synergy Assistant for ${siteConfig.legalName} — Pakistan's enterprise IT partner for 40+ years.\n\nI can help with our services, technology partners, the industries we serve, and how to reach the team for a quote. What would you like to know?`,
     };
   }
 
@@ -319,7 +327,7 @@ export function replyFromLocalKnowledge(userMessage: string): LocalReply {
   const topicReplies: { terms: string[]; reply: string }[] = [
     {
       terms: ["backup", "recovery", "data availability", "veritas", "cohesity", "restore", "ransomware"],
-      reply: `Synergy provides data backup & recovery and data availability solutions with partners such as Veritas and enterprise storage vendors.\n\nService: /services/data-backup-recovery\nContact: ${siteConfig.email}`,
+      reply: `Synergy provides data backup & recovery and data availability solutions with leading data-protection partners.\n\nService: /services/data-backup-recovery\nContact: ${siteConfig.email}`,
     },
     {
       terms: ["cloud", "microsoft", "365", "m365", "azure", "office 365", "teams", "sharepoint"],
@@ -413,8 +421,8 @@ export function replyFromLocalKnowledge(userMessage: string): LocalReply {
 }
 
 /** Snippets for LLM context based on the user's latest message. */
-export function buildLocalContextForQuery(userMessage: string): string {
-  const local = replyFromLocalKnowledge(userMessage);
+export async function buildLocalContextForQuery(userMessage: string): Promise<string> {
+  const local = await replyFromLocalKnowledge(userMessage);
   if (local.matched) {
     return `Relevant Synergy knowledge for this question:\n${local.reply}`;
   }

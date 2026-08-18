@@ -11,15 +11,16 @@ type OpenAiStyleMessage = {
   content: string;
 };
 
-function toApiMessages(history: LlmMessage[]): OpenAiStyleMessage[] {
+async function toApiMessages(history: LlmMessage[]): Promise<OpenAiStyleMessage[]> {
   const lastUser = [...history].reverse().find((m) => m.role === "user");
   const userQuery = lastUser?.content ?? "";
-  const localContext = buildLocalContextForQuery(userQuery);
+  const localContext = await buildLocalContextForQuery(userQuery);
+  const system = await buildChatSystemPrompt(userQuery);
 
   return [
     {
       role: "system",
-      content: `${buildChatSystemPrompt(userQuery)}\n\n${localContext}`,
+      content: `${system}\n\n${localContext}`,
     },
     ...history.map((m) => ({
       role: m.role as "user" | "assistant",
@@ -32,7 +33,7 @@ async function chatGroq(history: LlmMessage[]): Promise<string | null> {
   const apiKey = process.env.GROQ_API_KEY?.trim();
   if (!apiKey) return null;
 
-  const model = process.env.GROQ_MODEL?.trim() || "llama-3.3-70b-versatile";
+  const model = process.env.GROQ_MODEL?.trim() || "openai/gpt-oss-20b";
 
   const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
@@ -42,14 +43,13 @@ async function chatGroq(history: LlmMessage[]): Promise<string | null> {
     },
     body: JSON.stringify({
       model,
-      messages: toApiMessages(history),
+      messages: await toApiMessages(history),
       max_tokens: 900,
-      temperature: 0.25,
+      temperature: 0.55,
     }),
   });
 
   if (!res.ok) {
-    // Do not log response bodies — they may echo prompts or key material.
     console.error("[llm/groq] request failed", res.status);
     return null;
   }
@@ -67,6 +67,7 @@ async function chatGemini(history: LlmMessage[]): Promise<string | null> {
   const model = process.env.GEMINI_MODEL?.trim() || "gemini-2.0-flash";
   const lastUser = [...history].reverse().find((m) => m.role === "user");
   const userQuery = lastUser?.content ?? "";
+  const system = await buildChatSystemPrompt(userQuery);
 
   const contents = history.map((m) => ({
     role: m.role === "assistant" ? "model" : "user",
@@ -82,13 +83,13 @@ async function chatGemini(history: LlmMessage[]): Promise<string | null> {
         systemInstruction: {
           parts: [
             {
-              text: `${buildChatSystemPrompt(userQuery)}\n\n${buildLocalContextForQuery(userQuery)}`,
+              text: `${system}\n\n${await buildLocalContextForQuery(userQuery)}`,
             },
           ],
         },
         contents,
         generationConfig: {
-          temperature: 0.25,
+          temperature: 0.55,
           maxOutputTokens: 900,
         },
       }),
@@ -124,9 +125,9 @@ async function chatOpenRouter(history: LlmMessage[]): Promise<string | null> {
     },
     body: JSON.stringify({
       model,
-      messages: toApiMessages(history),
+      messages: await toApiMessages(history),
       max_tokens: 900,
-      temperature: 0.25,
+      temperature: 0.55,
     }),
   });
 

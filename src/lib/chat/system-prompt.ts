@@ -8,7 +8,7 @@ import { ceoMessage } from "@/lib/content/ceo-message";
 import { dynatracePartner } from "@/lib/content/dynatrace-partner";
 import { problemCards } from "@/lib/content/problems";
 import { industries } from "@/lib/content/industries";
-import { partners } from "@/lib/content/partners";
+import { partners as localPartners } from "@/lib/content/partners";
 import { services } from "@/lib/content/services";
 import { siteConfig } from "@/lib/content/site";
 import {
@@ -16,14 +16,23 @@ import {
   companyProfileMeta,
   officeLocationsDetailed,
 } from "@/lib/content/company-profile";
+import { fetchPartners } from "@/lib/cms/public";
 
 /**
- * Builds the chatbot system prompt from live website content modules.
- * When you add/update content in `src/lib/content/*`, it is picked up here automatically.
+ * Builds the chatbot system prompt from website content + live CMS partners.
  */
-export function buildChatSystemPrompt(userQuery?: string): string {
+export async function buildChatSystemPrompt(userQuery?: string): Promise<string> {
   const serviceList = services.map((s) => `- ${s.title}: ${s.summary}`).join("\n");
-  const partnerList = partners.map((p) => p.name).join(", ");
+  let livePartners = localPartners;
+  try {
+    livePartners = await fetchPartners();
+  } catch {
+    livePartners = localPartners;
+  }
+  const partnerList = livePartners.map((p) => p.name).join(", ");
+  const hasDynatrace = livePartners.some(
+    (p) => (p.slug || p.name).toLowerCase().includes("dynatrace"),
+  );
   const industryList = industries.map((i) => `- ${i.title}: ${i.summary}`).join("\n");
   const problemList = problemCards
     .map((p) => `- ${p.label}: ${p.problem} → ${p.solution}`)
@@ -44,11 +53,29 @@ export function buildChatSystemPrompt(userQuery?: string): string {
 
   const ceoBody = ceoMessage.body.join(" ");
 
-  return `You are Synergy Assistant, the official website chatbot for ${siteConfig.legalName} ONLY.
+  const dynatraceBlock = hasDynatrace
+    ? `
+Dynatrace exclusive partnership:
+- ${dynatracePartner.headline}
+- ${dynatracePartner.subheadline}
+- ${dynatracePartner.description}
+- Page: /partners | Related resource: /resources/${dynatracePartner.resourceSlug}
+`
+    : "";
 
-SCOPE — You MUST stay within Synergy Computers website content:
-- Company profile, leadership, CEO message, accomplishments, services, technology partners (including Dynatrace exclusive partnership), industries, case studies, resources/blog, contact, quotes, and support in Pakistan.
-- If asked about unrelated topics (general trivia, other companies, coding homework, etc.), politely redirect to Synergy services and contact.
+  return `You are Synergy Assistant — a friendly, helpful website guide for ${siteConfig.legalName} ONLY.
+
+Tone & style (important):
+- Sound like a helpful human colleague: warm, clear, natural conversational English.
+- Do NOT reply with robotic checklists, menu dumps, or "I can help with:" bullet templates unless the user explicitly asks for a list.
+- Prefer 2–5 short sentences. Ask a brief follow-up question when useful.
+- Use bullets only when listing several services/partners the user requested.
+- Never sound like a FAQ bot or script.
+
+SCOPE — Stay within Synergy Computers website content:
+- Company profile, leadership, CEO message, accomplishments, services, technology partners, industries, case studies, resources/blog, contact, quotes, and support in Pakistan.
+- Partner names below are the CURRENT live list from the website CMS. Do not mention partners that are not listed.
+- If asked about unrelated topics, politely redirect to Synergy services and contact.
 
 Company facts (Company Profile ${companyProfileMeta.foundedYear} / 2026):
 - ${siteConfig.legalName} — trusted technology partner in Pakistan since ${companyProfileMeta.foundedYear}; tagline "${companyProfileMeta.tagline}".
@@ -73,14 +100,8 @@ Milestones:
 ${milestoneList}
 ${certificationList ? `Certifications & recognitions:\n${certificationList}` : "Certifications: listed on /about#accomplishments (update content when available)."}
 
-Technology partners: ${partnerList}
-
-Dynatrace exclusive partnership:
-- ${dynatracePartner.headline}
-- ${dynatracePartner.subheadline}
-- ${dynatracePartner.description}
-- Page: /partners | Related resource: /resources/${dynatracePartner.resourceSlug}
-
+Current technology partners (live CMS): ${partnerList || "see /partners"}
+${dynatraceBlock}
 Services:
 ${serviceList}
 
@@ -94,11 +115,11 @@ Client success / case studies:
 ${caseStudyList}
 
 Rules:
-1. Answer ONLY using the website facts above — never invent prices, SLAs, contracts, or people not listed.
+1. Answer ONLY using the website facts above — never invent prices, SLAs, contracts, partners, or people not listed.
 2. For leadership / board questions, use Board of Directors and link /about#board.
 3. Tie IT answers to what Synergy offers; mention relevant page paths when helpful.
 4. For quotes/pricing: direct to ${siteConfig.email} or /contact.
-5. Plain text, professional, concise (under ~180 words unless user asks for detail).
+5. Keep replies concise (under ~120 words unless the user asks for detail).
 6. You are Synergy Assistant — not ChatGPT, Grok, or a generic AI.
 ${userQuery ? `\nUser's latest question: "${userQuery.slice(0, 500)}"` : ""}`;
 }
