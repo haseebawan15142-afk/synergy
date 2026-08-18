@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { replyFromLocalKnowledge } from "@/lib/chat/local-assistant";
 import { hasLlmConfigured, replyFromLlm } from "@/lib/chat/llm";
+import { loadChatSiteKnowledge } from "@/lib/chat/site-knowledge";
 import { takeRateLimit } from "@/lib/security/rate-limit";
 import { readLimitedJson } from "@/lib/security/read-limited-json";
 
@@ -114,10 +115,13 @@ export async function POST(request: Request) {
   const lastUser = [...trimmed].reverse().find((m) => m.role === "user");
   const userText = lastUser?.content ?? "";
 
+  // Live Admin CMS catalog (partners/services) so deletes/updates are visible to chat.
+  const knowledge = await loadChatSiteKnowledge();
+
   // When Groq (or other LLM) is configured, use AI first — still constrained to Synergy facts via system prompt
   if (hasLlmConfigured()) {
     try {
-      const llm = await replyFromLlm(trimmed);
+      const llm = await replyFromLlm(trimmed, knowledge);
       if (llm.reply) {
         return NextResponse.json({
           reply: llm.reply,
@@ -130,7 +134,7 @@ export async function POST(request: Request) {
     }
   }
 
-  const local = replyFromLocalKnowledge(userText);
+  const local = replyFromLocalKnowledge(userText, knowledge);
   return NextResponse.json({
     reply: local.reply,
     source: "local",

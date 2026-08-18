@@ -1,6 +1,7 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { requireAdminRequest } from "@/lib/auth/admin-session";
+import { invalidateCmsCache } from "@/lib/cms/cache";
 
 export const runtime = "nodejs";
 
@@ -15,9 +16,20 @@ const ALLOWED_TAGS = new Set([
   "cms-newsletter",
 ]);
 
+const TAG_TO_CACHE_PREFIX: Record<string, string> = {
+  "cms-theme": "theme",
+  "cms-settings": "settings",
+  "cms-blogs": "blogs",
+  "cms-offices": "offices",
+  "cms-services": "services",
+  "cms-partners": "partners",
+  "cms-nav": "nav",
+  "cms-newsletter": "newsletter",
+};
+
 /**
  * Bust Next Data Cache / ISR after admin publishes CMS content.
- * Admin browser `invalidateCmsCache` cannot clear the server cache alone.
+ * Also clears the server in-memory CMS map so chat + SSR see deletes immediately.
  */
 export async function POST(request: Request) {
   const auth = await requireAdminRequest(request);
@@ -45,6 +57,8 @@ export async function POST(request: Request) {
 
   for (const tag of tags) {
     revalidateTag(tag);
+    const prefix = TAG_TO_CACHE_PREFIX[tag];
+    if (prefix) invalidateCmsCache(prefix);
   }
 
   // Always refresh shell + home; blogs also need /resources.
