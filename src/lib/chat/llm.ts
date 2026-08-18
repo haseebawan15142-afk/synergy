@@ -1,6 +1,5 @@
 import { buildChatSystemPrompt } from "@/lib/chat/system-prompt";
 import { buildLocalContextForQuery } from "@/lib/chat/local-assistant";
-import type { ChatSiteKnowledge } from "@/lib/chat/site-knowledge";
 
 export type LlmMessage = {
   role: "user" | "assistant";
@@ -12,18 +11,15 @@ type OpenAiStyleMessage = {
   content: string;
 };
 
-function toApiMessages(
-  history: LlmMessage[],
-  knowledge: ChatSiteKnowledge,
-): OpenAiStyleMessage[] {
+function toApiMessages(history: LlmMessage[]): OpenAiStyleMessage[] {
   const lastUser = [...history].reverse().find((m) => m.role === "user");
   const userQuery = lastUser?.content ?? "";
-  const localContext = buildLocalContextForQuery(userQuery, knowledge);
+  const localContext = buildLocalContextForQuery(userQuery);
 
   return [
     {
       role: "system",
-      content: `${buildChatSystemPrompt(knowledge, userQuery)}\n\n${localContext}`,
+      content: `${buildChatSystemPrompt(userQuery)}\n\n${localContext}`,
     },
     ...history.map((m) => ({
       role: m.role as "user" | "assistant",
@@ -32,10 +28,7 @@ function toApiMessages(
   ];
 }
 
-async function chatGroq(
-  history: LlmMessage[],
-  knowledge: ChatSiteKnowledge,
-): Promise<string | null> {
+async function chatGroq(history: LlmMessage[]): Promise<string | null> {
   const apiKey = process.env.GROQ_API_KEY?.trim();
   if (!apiKey) return null;
 
@@ -49,13 +42,14 @@ async function chatGroq(
     },
     body: JSON.stringify({
       model,
-      messages: toApiMessages(history, knowledge),
+      messages: toApiMessages(history),
       max_tokens: 900,
       temperature: 0.25,
     }),
   });
 
   if (!res.ok) {
+    // Do not log response bodies — they may echo prompts or key material.
     console.error("[llm/groq] request failed", res.status);
     return null;
   }
@@ -66,10 +60,7 @@ async function chatGroq(
   return data.choices?.[0]?.message?.content?.trim() ?? null;
 }
 
-async function chatGemini(
-  history: LlmMessage[],
-  knowledge: ChatSiteKnowledge,
-): Promise<string | null> {
+async function chatGemini(history: LlmMessage[]): Promise<string | null> {
   const apiKey = process.env.GEMINI_API_KEY?.trim();
   if (!apiKey) return null;
 
@@ -91,7 +82,7 @@ async function chatGemini(
         systemInstruction: {
           parts: [
             {
-              text: `${buildChatSystemPrompt(knowledge, userQuery)}\n\n${buildLocalContextForQuery(userQuery, knowledge)}`,
+              text: `${buildChatSystemPrompt(userQuery)}\n\n${buildLocalContextForQuery(userQuery)}`,
             },
           ],
         },
@@ -116,10 +107,7 @@ async function chatGemini(
   return text?.trim() ?? null;
 }
 
-async function chatOpenRouter(
-  history: LlmMessage[],
-  knowledge: ChatSiteKnowledge,
-): Promise<string | null> {
+async function chatOpenRouter(history: LlmMessage[]): Promise<string | null> {
   const apiKey = process.env.OPENROUTER_API_KEY?.trim();
   if (!apiKey) return null;
 
@@ -136,7 +124,7 @@ async function chatOpenRouter(
     },
     body: JSON.stringify({
       model,
-      messages: toApiMessages(history, knowledge),
+      messages: toApiMessages(history),
       max_tokens: 900,
       temperature: 0.25,
     }),
@@ -162,20 +150,17 @@ export function hasLlmConfigured(): boolean {
 }
 
 /** Try Groq → Gemini → OpenRouter (first configured wins). */
-export async function replyFromLlm(
-  history: LlmMessage[],
-  knowledge: ChatSiteKnowledge,
-): Promise<{
+export async function replyFromLlm(history: LlmMessage[]): Promise<{
   reply: string | null;
   provider: "groq" | "gemini" | "openrouter" | null;
 }> {
-  const groq = await chatGroq(history, knowledge);
+  const groq = await chatGroq(history);
   if (groq) return { reply: groq, provider: "groq" };
 
-  const gemini = await chatGemini(history, knowledge);
+  const gemini = await chatGemini(history);
   if (gemini) return { reply: gemini, provider: "gemini" };
 
-  const openRouter = await chatOpenRouter(history, knowledge);
+  const openRouter = await chatOpenRouter(history);
   if (openRouter) return { reply: openRouter, provider: "openrouter" };
 
   return { reply: null, provider: null };
