@@ -271,7 +271,7 @@ export function WebsiteSettingsForm() {
               className={inputClass}
               value={form.contactTitle || ""}
               onChange={(e) => update("contactTitle", e.target.value)}
-              placeholder="Contact us"
+              placeholder="Contact Us"
             />
           </Field>
           <Field label="Page description">

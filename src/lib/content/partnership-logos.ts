@@ -23,7 +23,7 @@ export const partnershipLogos: PartnershipLogo[] = [
   { name: "Supermicro", slug: "supermicro", logo: "/images/partners/profile/supermicro.webp", href: "/partners/supermicro" },
   { name: "Oracle", slug: "oracle", logo: "/images/partners/profile/oracle.webp", href: "/partners/oracle" },
   { name: "Hexagon", slug: "hexagon", logo: "/images/partners/profile/hexagon.webp", href: "/partners/hexagon" },
-  { name: "Cohesity", slug: "cohesity", logo: "/images/partners/profile/cohesity.webp", href: "/partners/cohesity" },
+  { name: "Cohesity", slug: "cohesity", logo: "/brand/cohesity/wordmark.svg", href: "/partners/cohesity" },
   { name: "Convene", slug: "convene", logo: "/images/partners/profile/convene.webp", href: "/partners/convene" },
   { name: "Red Hat", slug: "red-hat", logo: "/images/partners/profile/red-hat.webp", href: "/partners/red-hat" },
   { name: "Pure Storage", slug: "pure-storage", logo: "/images/partners/profile/pure-storage.webp", href: "/partners/pure-storage" },

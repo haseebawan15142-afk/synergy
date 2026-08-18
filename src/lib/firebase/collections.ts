@@ -172,7 +172,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   copyright: "© Synergy Computers (Pvt.) Ltd. All rights reserved.",
   mission: "",
   vision: "",
-  contactTitle: "Contact us",
+  contactTitle: "Contact Us",
   contactDescription: "Reach our team for sales, support, and project inquiries.",
   contactFormIntro: "Send a message and we'll respond as soon as we can.",
   contactAsideText:

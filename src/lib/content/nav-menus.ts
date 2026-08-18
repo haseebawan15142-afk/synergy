@@ -5,19 +5,6 @@ import { dynatracePartner } from "@/lib/content/dynatrace-partner";
 import { getRecentBlogPosts } from "@/lib/content/blog-posts";
 import { resolveNavIconKey, withNavIcons, type NavIconKey } from "@/lib/content/nav-icons";
 
-export type MegaMenuLink = {
-  label: string;
-  href: string;
-  icon?: NavIconKey;
-  /** Partner / brand mark image — shown instead of Lucide icon when set */
-  logoUrl?: string;
-};
-
-export type MegaMenuColumn = {
-  heading: string;
-  links: MegaMenuLink[];
-};
-
 export type MegaMenuFeatured = {
   eyebrow?: string;
   title: string;
@@ -28,6 +15,21 @@ export type MegaMenuFeatured = {
   /** Use for logos/wordmarks (e.g. Dynatrace) instead of photo-style object-cover. */
   imageContain?: boolean;
   icon?: string;
+};
+
+export type MegaMenuLink = {
+  label: string;
+  href: string;
+  icon?: NavIconKey;
+  /** Partner / brand mark image — shown instead of Lucide icon when set */
+  logoUrl?: string;
+  /** When set, hovering this link updates the mega-menu featured panel */
+  preview?: MegaMenuFeatured;
+};
+
+export type MegaMenuColumn = {
+  heading: string;
+  links: MegaMenuLink[];
 };
 
 export type MegaMenuConfig = {
@@ -49,6 +51,58 @@ const [industriesLeft, industriesRight] = half(industries);
 const featuredIndustry = industries.find((i) => i.slug === "healthcare") ?? industries[0];
 
 const recentPost = getRecentBlogPosts(1)[0];
+
+/** Featured panel payload for a partner row in the Partners mega menu. */
+export function partnerFeaturedPreview(partner: {
+  name: string;
+  slug?: string;
+  logo?: string;
+  category?: string;
+  shortDescription?: string;
+  taglines?: string[];
+}): MegaMenuFeatured {
+  if (partner.slug === "dynatrace") {
+    return {
+      eyebrow: dynatracePartner.badge,
+      title: dynatracePartner.headline,
+      description: dynatracePartner.subheadline,
+      href: "/partners/dynatrace",
+      ctaLabel: "View partner",
+      image: dynatracePartner.logo,
+      imageContain: true,
+      icon: "handshake",
+    };
+  }
+
+  return {
+    eyebrow: partner.category || "Technology principal",
+    title: partner.taglines?.[0] || `Synergy × ${partner.name}`,
+    description:
+      partner.shortDescription ||
+      `Synergy Computers delivers ${partner.name} solutions for enterprises across Pakistan.`,
+    href: partnerDetailPath(partner),
+    ctaLabel: "View partner",
+    image: partner.logo,
+    imageContain: true,
+    icon: "handshake",
+  };
+}
+
+export function partnerNavLink(partner: {
+  name: string;
+  slug?: string;
+  logo?: string;
+  category?: string;
+  shortDescription?: string;
+  taglines?: string[];
+}): MegaMenuLink {
+  return {
+    label: partner.name,
+    href: partnerDetailPath(partner),
+    logoUrl: partner.logo,
+    preview: partnerFeaturedPreview(partner),
+  };
+}
 
 function serviceLinks(list: typeof services) {
   return withNavIcons(
@@ -167,11 +221,7 @@ export const navMegaMenus: Record<string, MegaMenuConfig> = {
     columns: [
       {
         heading: "Technology principals",
-        links: partners.slice(0, 5).map((p) => ({
-          label: p.name,
-          href: partnerDetailPath(p),
-          logoUrl: p.logo,
-        })),
+        links: partners.slice(0, 5).map((p) => partnerNavLink(p)),
       },
     ],
     seeAll: { label: "See all partners", href: "/partners" },

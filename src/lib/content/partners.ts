@@ -395,7 +395,7 @@ export const partners: Partner[] = [
   {
     name: "Cohesity",
     slug: "cohesity",
-    logo: "/images/partners/profile/cohesity.webp",
+    logo: "/brand/cohesity/wordmark.svg",
     href: "https://www.cohesity.com/",
     category: "Data Security",
     shortDescription:

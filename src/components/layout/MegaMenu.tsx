@@ -16,7 +16,7 @@ import {
 import { cn } from "@/lib/cn";
 import { focusElement } from "@/lib/a11y/focus";
 import { motionDurations, motionEase } from "@/lib/motion/transitions";
-import type { MegaMenuConfig } from "@/lib/content/nav-menus";
+import type { MegaMenuConfig, MegaMenuFeatured } from "@/lib/content/nav-menus";
 import { NavLinkIcon } from "@/components/layout/NavLinkIcon";
 import { ResilientImg } from "@/components/media/ResilientImage";
 
@@ -39,12 +39,13 @@ type MegaMenuProps = {
 
 export function MegaMenu({ label, href, menu, active, onMedia }: MegaMenuProps) {
   const [open, setOpen] = useState(false);
+  const [featured, setFeatured] = useState<MegaMenuFeatured>(menu.featured);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLAnchorElement>(null);
   const menuId = useId();
   const reduce = useReducedMotion();
-  const FeaturedIcon = menu.featured.icon ? featuredIcons[menu.featured.icon] : undefined;
+  const FeaturedIcon = featured.icon ? featuredIcons[featured.icon] : undefined;
 
   const clearCloseTimer = () => {
     if (closeTimer.current) {
@@ -55,21 +56,33 @@ export function MegaMenu({ label, href, menu, active, onMedia }: MegaMenuProps) 
 
   const handleEnter = () => {
     clearCloseTimer();
+    setFeatured(menu.featured);
     setOpen(true);
   };
 
   const handleLeave = () => {
     clearCloseTimer();
-    closeTimer.current = setTimeout(() => setOpen(false), 120);
+    closeTimer.current = setTimeout(() => {
+      setOpen(false);
+      setFeatured(menu.featured);
+    }, 120);
   };
 
-  const closeMenu = useCallback((restoreFocus = false) => {
-    clearCloseTimer();
-    setOpen(false);
-    if (restoreFocus) {
-      requestAnimationFrame(() => focusElement(triggerRef.current));
-    }
-  }, []);
+  const closeMenu = useCallback(
+    (restoreFocus = false) => {
+      clearCloseTimer();
+      setOpen(false);
+      setFeatured(menu.featured);
+      if (restoreFocus) {
+        requestAnimationFrame(() => focusElement(triggerRef.current));
+      }
+    },
+    [menu.featured],
+  );
+
+  useEffect(() => {
+    if (!open) setFeatured(menu.featured);
+  }, [menu.featured, open]);
 
   useEffect(() => {
     if (!open) return;
@@ -89,6 +102,9 @@ export function MegaMenu({ label, href, menu, active, onMedia }: MegaMenuProps) 
   };
 
   const multiCol = menu.columns.length > 1;
+  const hasPreviewLinks = menu.columns.some((column) =>
+    column.links.some((link) => Boolean(link.preview)),
+  );
 
   return (
     <div
@@ -171,42 +187,64 @@ export function MegaMenu({ label, href, menu, active, onMedia }: MegaMenuProps) 
                           </p>
                           <div className="mt-2 h-px w-10 bg-white/80" aria-hidden />
                           <ul className="mt-4 space-y-0.5">
-                            {column.links.map((link) => (
-                              <li key={link.href}>
-                                <Link
-                                  href={link.href}
-                                  role="menuitem"
-                                  className="group flex items-center gap-3 rounded-lg px-2 py-2.5 text-sm font-medium text-white/90 transition-colors hover:bg-white/10 hover:text-white"
-                                >
-                                  <span
+                            {column.links.map((link) => {
+                              const isPreviewActive =
+                                hasPreviewLinks && featured.href === link.href;
+                              return (
+                                <li key={link.href}>
+                                  <Link
+                                    href={link.href}
+                                    role="menuitem"
+                                    onMouseEnter={() => {
+                                      if (link.preview) setFeatured(link.preview);
+                                    }}
+                                    onFocus={() => {
+                                      if (link.preview) setFeatured(link.preview);
+                                    }}
                                     className={cn(
-                                      "flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden text-white transition",
-                                      link.logoUrl && "rounded-md bg-white/95 p-1",
+                                      "group flex items-center gap-3 rounded-lg px-2 py-2.5 text-sm font-medium transition-colors",
+                                      isPreviewActive
+                                        ? "bg-white/15 text-white"
+                                        : "text-white/90 hover:bg-white/10 hover:text-white",
                                     )}
                                   >
-                                    {link.logoUrl ? (
-                                      <ResilientImg
-                                        src={link.logoUrl}
-                                        alt=""
-                                        className="block h-full max-h-6 w-full max-w-full object-contain"
-                                      />
-                                    ) : (
-                                      <NavLinkIcon
-                                        href={link.href}
-                                        label={link.label}
-                                        icon={link.icon}
-                                        size={18}
-                                      />
-                                    )}
-                                  </span>
-                                  <span className="min-w-0 flex-1 leading-snug">{link.label}</span>
-                                  <ChevronRight
-                                    className="h-4 w-4 shrink-0 text-white/40 transition group-hover:translate-x-0.5 group-hover:text-white"
-                                    aria-hidden
-                                  />
-                                </Link>
-                              </li>
-                            ))}
+                                    <span
+                                      className={cn(
+                                        "flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden text-white transition",
+                                        link.logoUrl && "rounded-md bg-white/95 p-1",
+                                      )}
+                                    >
+                                      {link.logoUrl ? (
+                                        <ResilientImg
+                                          src={link.logoUrl}
+                                          alt=""
+                                          className="block h-full max-h-6 w-full max-w-full object-contain"
+                                        />
+                                      ) : (
+                                        <NavLinkIcon
+                                          href={link.href}
+                                          label={link.label}
+                                          icon={link.icon}
+                                          size={18}
+                                        />
+                                      )}
+                                    </span>
+                                    <span className="min-w-0 flex-1 leading-snug">
+                                      {link.label}
+                                    </span>
+                                    <ChevronRight
+                                      className={cn(
+                                        "h-4 w-4 shrink-0 transition group-hover:translate-x-0.5",
+                                        isPreviewActive
+                                          ? "text-white"
+                                          : "text-white/40 group-hover:text-white",
+                                      )}
+                                      aria-hidden
+                                    />
+                                  </Link>
+                                </li>
+                              );
+                            })}
                           </ul>
                         </div>
                       ))}
@@ -228,43 +266,51 @@ export function MegaMenu({ label, href, menu, active, onMedia }: MegaMenuProps) 
                   </div>
 
                   <Link
-                    href={menu.featured.href}
+                    href={featured.href}
                     role="menuitem"
                     className="group flex flex-col justify-between gap-5 border-t border-white/15 bg-black/20 px-6 py-7 transition-colors hover:bg-black/30 sm:px-7 lg:border-l lg:border-t-0"
                   >
                     <div>
-                      {menu.featured.image ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={menu.featured.image}
-                          alt=""
-                          className={cn(
-                            "mb-4 w-full rounded-lg ring-1 ring-white/15",
-                            menu.featured.imageContain
-                              ? "h-16 bg-white object-contain object-center p-3 sm:h-[4.5rem] sm:p-4"
-                              : "h-24 object-cover object-center",
-                          )}
-                        />
+                      {featured.image ? (
+                        featured.imageContain ? (
+                          <div className="mb-4 flex h-16 items-center rounded-lg bg-white px-4 py-3 ring-1 ring-white/15 sm:h-[4.5rem] sm:px-5 sm:py-4">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              key={featured.image}
+                              src={featured.image}
+                              alt=""
+                              className="h-full w-auto max-w-full object-contain object-left"
+                            />
+                          </div>
+                        ) : (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            key={featured.image}
+                            src={featured.image}
+                            alt=""
+                            className="mb-4 h-24 w-full rounded-lg object-cover object-center ring-1 ring-white/15"
+                          />
+                        )
                       ) : FeaturedIcon ? (
                         <span className="mb-4 flex h-11 w-11 items-center justify-center text-white">
                           <FeaturedIcon className="h-6 w-6" strokeWidth={1.75} aria-hidden />
                         </span>
                       ) : null}
-                      {menu.featured.eyebrow ? (
+                      {featured.eyebrow ? (
                         <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-white/85">
-                          {menu.featured.eyebrow}
+                          {featured.eyebrow}
                         </p>
                       ) : null}
                       <div className="mt-2 h-px w-10 bg-white/70" aria-hidden />
                       <h3 className="mt-3 text-base font-bold leading-snug text-white">
-                        {menu.featured.title}
+                        {featured.title}
                       </h3>
                       <p className="mt-2 text-sm leading-relaxed text-white/70">
-                        {menu.featured.description}
+                        {featured.description}
                       </p>
                     </div>
                     <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-white">
-                      {menu.featured.ctaLabel}
+                      {featured.ctaLabel}
                       <ArrowRight
                         className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
                         aria-hidden

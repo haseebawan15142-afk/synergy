@@ -43,7 +43,7 @@ export const newsletterIssues: NewsletterIssue[] = [
     slug: "cohesity-modern-data",
     excerpt:
       "Consolidate backup, files, and object data on a single platform — with Synergy as your Cohesity delivery partner in Pakistan.",
-    coverUrl: "/images/partners/profile/cohesity.webp",
+    coverUrl: "/brand/cohesity/wordmark.svg",
     topic: "Cohesity",
     href: "/partners/cohesity",
     featured: false,

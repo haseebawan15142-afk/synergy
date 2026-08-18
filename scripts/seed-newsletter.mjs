@@ -86,7 +86,7 @@ const issues = [
     excerpt:
       "Consolidate backup, files, and object data on a single platform — with Synergy as your Cohesity delivery partner in Pakistan.",
     body: "",
-    coverUrl: "/images/partners/profile/cohesity.webp",
+    coverUrl: "/brand/cohesity/wordmark.svg",
     topic: "Cohesity",
     href: "/partners/cohesity",
     featured: false,

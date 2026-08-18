@@ -36,7 +36,8 @@ export default async function ContactPage() {
     };
   });
 
-  const title = settings.contactTitle || DEFAULT_SITE_SETTINGS.contactTitle || "Contact us";
+  const rawTitle = settings.contactTitle || DEFAULT_SITE_SETTINGS.contactTitle || "Contact Us";
+  const title = /^contact us$/i.test(rawTitle.trim()) ? "Contact Us" : rawTitle;
   const description =
     settings.contactDescription ||
     DEFAULT_SITE_SETTINGS.contactDescription ||

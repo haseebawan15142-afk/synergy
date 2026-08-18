@@ -14,10 +14,12 @@ import { ThemeSelector } from "@/components/theme/ThemeToggle";
 import {
   MEGA_MENU_ICON_KEYS,
   navMegaMenus,
+  partnerFeaturedPreview,
+  partnerNavLink,
   type MegaMenuConfig,
 } from "@/lib/content/nav-menus";
 import { resolveCmsNavIcon, withNavIcons } from "@/lib/content/nav-icons";
-import { partners as localPartners, partnerDetailPath } from "@/lib/content/partners";
+import { partners as localPartners } from "@/lib/content/partners";
 import { services as localServices } from "@/lib/content/services";
 import {
   defaultHeaderNav,
@@ -169,20 +171,24 @@ export function Navbar({
           },
         ],
       },
-      "/partners": {
-        ...navMegaMenus["/partners"],
-        columns: [
-          {
-            heading: "Technology principals",
-            links: cmsPartners.slice(0, 5).map((p) => ({
-              label: p.name,
-              href: partnerDetailPath(p),
-              logoUrl: p.logo,
-            })),
-          },
-        ],
-        seeAll: { label: "See all partners", href: "/partners" },
-      },
+      "/partners": (() => {
+        const topPartners = cmsPartners.slice(0, 5);
+        const defaultPartner =
+          topPartners.find((p) => p.slug === "dynatrace") ?? topPartners[0];
+        return {
+          ...navMegaMenus["/partners"],
+          featured: defaultPartner
+            ? partnerFeaturedPreview(defaultPartner)
+            : navMegaMenus["/partners"].featured,
+          columns: [
+            {
+              heading: "Technology principals",
+              links: topPartners.map((p) => partnerNavLink(p)),
+            },
+          ],
+          seeAll: { label: "See all partners", href: "/partners" },
+        };
+      })(),
     };
 
     for (const key of MEGA_MENU_ICON_KEYS) {
