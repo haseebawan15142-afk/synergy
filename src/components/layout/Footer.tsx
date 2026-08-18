@@ -23,9 +23,9 @@ export async function Footer() {
     "inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/5 text-synergy-light transition hover:border-synergy-light/50 hover:bg-synergy/25 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-synergy-light";
 
   return (
-    <footer className="relative mt-auto overflow-hidden bg-gradient-dark text-slate-300">
+    <footer className="site-glass-footer relative mt-auto overflow-hidden border-t border-white/10 bg-[#05030A]/70 text-slate-300 shadow-[0_-8px_32px_rgba(124,58,237,0.12)] backdrop-blur-xl">
       <div
-        className="pointer-events-none absolute inset-0 bg-gradient-to-br from-synergy/20 via-transparent to-accent/10"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-br from-synergy/15 via-transparent to-accent/10"
         aria-hidden
       />
       <div className="page-container relative grid gap-8 py-12 sm:grid-cols-2 sm:gap-10 sm:py-14 lg:grid-cols-4 lg:gap-10 lg:py-16">
@@ -39,17 +39,17 @@ export async function Footer() {
             footerLogoUrl={settings.footerLogoUrl}
             companyName={settings.legalName || settings.companyName}
           />
-          <p className="max-w-md text-sm leading-relaxed text-slate-400">
+          <p className="max-w-md text-sm leading-relaxed text-white/65">
             {settings.addressLine}
             {settings.addressCity ? `, ${settings.addressCity}` : ""}
           </p>
-          <p className="mt-2 text-xs text-slate-500">
+          <p className="mt-2 text-xs text-white/45">
             Offices: Karachi, Islamabad, Lahore, Gilgit · Middle East: Ras Al Khaimah
           </p>
           {phones.length > 0 ? (
-            <p className="mt-3 text-sm text-slate-400">Tel: {phones.join(" · ")}</p>
+            <p className="mt-3 text-sm text-white/65">Tel: {phones.join(" · ")}</p>
           ) : null}
-          {fax ? <p className="mt-1 text-sm text-slate-400">Fax: {fax}</p> : null}
+          {fax ? <p className="mt-1 text-sm text-white/65">Fax: {fax}</p> : null}
           {settings.email ? (
             <p className="mt-2 text-sm">
               <a
@@ -64,7 +64,7 @@ export async function Footer() {
             <h3 className="text-xs font-bold uppercase tracking-widest text-synergy-light">
               Newsletter
             </h3>
-            <p className="mt-2 text-sm text-slate-400">Get updates on IT insights and company news.</p>
+            <p className="mt-2 text-sm text-white/55">Get updates on IT insights and company news.</p>
             <NewsletterForm className="mt-3" />
           </div>
         </div>
@@ -74,7 +74,7 @@ export async function Footer() {
           <ul className="mt-4 space-y-3 text-sm">
             {companyLinks.map((link) => (
               <li key={link.id || link.href}>
-                <Link href={link.href} className="text-slate-400 transition hover:text-white">
+                <Link href={link.href} className="text-white/60 transition hover:text-white">
                   {link.label}
                 </Link>
               </li>
@@ -104,7 +104,7 @@ export async function Footer() {
           </div>
         </div>
       </div>
-      <div className="relative border-t border-white/10 py-6 text-center text-xs text-slate-500">
+      <div className="relative border-t border-white/10 py-6 text-center text-xs text-white/45">
         {settings.copyright ||
           `© ${new Date().getFullYear()} ${settings.legalName}. All rights reserved.`}
       </div>

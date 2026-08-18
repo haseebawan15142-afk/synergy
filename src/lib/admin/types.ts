@@ -422,26 +422,26 @@ export type SeoPageDoc = {
   updatedAt?: TimestampLike;
 };
 
-/** Matches design-tokens brand (site look before event presets). */
+/** Digital UI brand palette. */
 export const DEFAULT_THEME: ThemeTokens = {
-  primary: "#357c3c",
-  secondary: "#2a813e",
-  accent: "#14b8a6",
-  text: "#0f172a",
-  textMuted: "#64748b",
-  buttonBg: "#357c3c",
+  primary: "#7C3AED",
+  secondary: "#C026D3",
+  accent: "#FF6A00",
+  text: "#F5F0FF",
+  textMuted: "#C9C3D6",
+  buttonBg: "#7C3AED",
   buttonText: "#ffffff",
-  background: "#f8fafc",
-  surface: "#ffffff",
-  border: "#e2e8f0",
-  borderRadius: "0.75rem",
-  shadow: "0 10px 30px rgba(15, 23, 42, 0.08)",
+  background: "#05030A",
+  surface: "#12101C",
+  border: "#3A2A58",
+  borderRadius: "1rem",
+  shadow: "0 16px 48px rgba(124, 58, 237, 0.22)",
   fontFamily: "Inter, system-ui, sans-serif",
   fontSizeBase: "16px",
   containerWidth: "80rem",
   spacing: "1rem",
   animationsEnabled: true,
-  darkModeDefault: "system",
+  darkModeDefault: "dark",
 };
 
 export const MEDIA_FOLDERS = [

@@ -270,7 +270,8 @@ export function HeroVideoBackground({
     return heroFallbackPoster;
   }, [playlist]);
 
-  const overlay = <div className="pointer-events-none absolute inset-0 bg-ink/55" aria-hidden />;
+  /* Always black — never `ink` (dark theme ink is near-white and washes the video). */
+  const overlay = <div className="pointer-events-none absolute inset-0 bg-black/40" aria-hidden />;
 
   if (!playlistReady && !playlist.length) {
     return (

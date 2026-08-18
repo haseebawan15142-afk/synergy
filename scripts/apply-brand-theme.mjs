@@ -1,18 +1,14 @@
 /**
- * Restore / apply the current Synergy brand theme (violet / magenta palette).
- *
- * Usage: npm run cms:restore-default-theme
- *    or: node scripts/restore-default-theme.mjs
+ * Push the digital brand palette into Firestore `theme/tokens`.
+ * Usage: node scripts/apply-brand-theme.mjs
  */
-
 import { readFileSync, existsSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { cert, getApps, initializeApp } from "firebase-admin/app";
 import { getFirestore, FieldValue } from "firebase-admin/firestore";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const root = resolve(__dirname, "..");
+const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
 function loadEnvFile(filePath) {
   if (!existsSync(filePath)) return;
@@ -41,90 +37,55 @@ const projectId =
 const clientEmail = process.env.FIREBASE_ADMIN_CLIENT_EMAIL;
 const privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, "\n");
 
+if (!projectId || !clientEmail || !privateKey) {
+  console.error("Missing Firebase Admin credentials in .env.local");
+  process.exit(1);
+}
+
 if (!getApps().length) {
   initializeApp({ credential: cert({ projectId, clientEmail, privateKey }) });
 }
 
-const db = getFirestore();
-
-/** Modern Synergy brand palette. */
-const BRAND_THEME = {
+/** Full digital palette from brand brief. */
+const THEME = {
   primary: "#7C3AED",
   secondary: "#C026D3",
-  accent: "#FF2DAA",
-  text: "#05030A",
-  textMuted: "#6B6385",
+  accent: "#FF6A00",
+  text: "#F5F0FF",
+  textMuted: "#C9C3D6",
   buttonBg: "#7C3AED",
   buttonText: "#ffffff",
-  background: "#F5F0FF",
-  surface: "#ffffff",
-  border: "#E4D9F7",
-  borderRadius: "0.875rem",
-  shadow: "0 12px 36px rgba(124, 58, 237, 0.14)",
+  background: "#05030A",
+  surface: "#12101C",
+  border: "#3A2A58",
+  borderRadius: "1rem",
+  shadow: "0 16px 48px rgba(124, 58, 237, 0.22)",
   fontFamily: "Inter, system-ui, sans-serif",
   fontSizeBase: "16px",
   containerWidth: "80rem",
   spacing: "1rem",
   animationsEnabled: true,
-  darkModeDefault: "system",
+  darkModeDefault: "dark",
 };
 
-const current = await db.collection("theme").doc("tokens").get();
-console.log("Before:", {
-  primary: current.data()?.primary,
-  accent: current.data()?.accent,
-});
-
-await db.collection("theme").doc("previousTokens").set(
-  { ...(current.data() || {}), updatedAt: FieldValue.serverTimestamp() },
-  { merge: true },
-);
-
+const db = getFirestore();
 await db.collection("theme").doc("tokens").set(
-  { ...BRAND_THEME, updatedAt: FieldValue.serverTimestamp() },
-  { merge: true },
-);
-
-await db.collection("theme").doc("originalBaseline").set(
   {
-    ...BRAND_THEME,
-    kind: "baseline",
-    label: "Modern Synergy violet / magenta brand",
+    ...THEME,
+    activePresetId: FieldValue.delete(),
     updatedAt: FieldValue.serverTimestamp(),
   },
   { merge: true },
 );
-
 await db.collection("themePresets").doc("default").set(
   {
     kind: "preset",
-    name: "Default / Modern Brand",
+    name: "Default / Digital Brand",
     eventKey: "default",
     isDefault: true,
-    tokens: BRAND_THEME,
-    startDate: "",
-    endDate: "",
+    tokens: THEME,
     updatedAt: FieldValue.serverTimestamp(),
   },
   { merge: true },
 );
-
-await db.collection("theme").doc("activePreset").set(
-  {
-    presetId: "default",
-    eventKey: "default",
-    activatedAt: new Date().toISOString(),
-    updatedAt: FieldValue.serverTimestamp(),
-  },
-  { merge: true },
-);
-
-const after = await db.collection("theme").doc("tokens").get();
-console.log("After (modern brand):", {
-  primary: after.data()?.primary,
-  secondary: after.data()?.secondary,
-  accent: after.data()?.accent,
-  buttonBg: after.data()?.buttonBg,
-  background: after.data()?.background,
-});
-console.log("Done. Hard-refresh the public site.");
+console.log("Theme updated:", THEME.primary, THEME.accent, THEME.background);

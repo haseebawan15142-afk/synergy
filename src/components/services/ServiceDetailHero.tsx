@@ -19,8 +19,8 @@ export function ServiceDetailHero({ title, summary, heroImage }: ServiceDetailHe
           sizes="100vw"
           className="object-cover object-center"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-ink/90 via-ink/75 to-ink/45" />
-        <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-ink/30" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/75 to-black/45" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30" />
       </div>
 
       <div className="relative z-10 page-container flex min-h-[min(52vh,520px)] flex-col justify-end py-14 sm:py-16 lg:py-20">

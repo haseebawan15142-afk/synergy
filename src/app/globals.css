@@ -6,44 +6,44 @@
 
 @layer base {
   :root {
-    --c-surface: 248 250 252;
-    --c-surface-muted: 241 245 249;
+    --c-surface: 245 240 255;
+    --c-surface-muted: 235 228 255;
     --c-surface-elevated: 255 255 255;
-    --c-ink: 15 23 42;
-    --c-ink-secondary: 30 41 59;
-    --c-ink-body: 51 65 85;
-    --c-ink-muted: 71 85 105;
-    --c-border: 226 232 240;
-    --c-border-strong: 203 213 225;
-    --c-synergy-muted: 220 252 231;
-    --c-accent-soft: 204 251 241;
-    --shadow-soft: 0 4px 24px -4px rgb(15 23 42 / 0.08);
-    --shadow-card: 0 8px 32px -8px rgb(53 124 60 / 0.12);
-    --mesh-hero: radial-gradient(at 40% 20%, rgb(220 252 231 / 0.9) 0px, transparent 50%),
-      radial-gradient(at 80% 0%, rgb(204 251 241 / 0.8) 0px, transparent 45%),
-      radial-gradient(at 0% 50%, rgb(241 245 249 / 1) 0px, transparent 50%);
-    --grid-line: rgb(226 232 240 / 0.5);
+    --c-ink: 5 3 10;
+    --c-ink-secondary: 26 18 40;
+    --c-ink-body: 61 53 88;
+    --c-ink-muted: 107 99 133;
+    --c-border: 228 217 247;
+    --c-border-strong: 203 184 240;
+    --c-synergy-muted: 237 228 255;
+    --c-accent-soft: 255 227 244;
+    --shadow-soft: 0 4px 24px -4px rgb(124 58 237 / 0.1);
+    --shadow-card: 0 8px 32px -8px rgb(124 58 237 / 0.16);
+    --mesh-hero: radial-gradient(at 40% 20%, rgb(237 228 255 / 0.95) 0px, transparent 50%),
+      radial-gradient(at 80% 0%, rgb(255 227 244 / 0.85) 0px, transparent 45%),
+      radial-gradient(at 0% 50%, rgb(245 240 255 / 1) 0px, transparent 50%);
+    --grid-line: rgb(228 217 247 / 0.55);
   }
 
   .dark {
     color-scheme: dark;
-    --c-surface: 11 18 32;
-    --c-surface-muted: 15 23 42;
-    --c-surface-elevated: 30 41 59;
-    --c-ink: 248 250 252;
-    --c-ink-secondary: 226 232 240;
-    --c-ink-body: 203 213 225;
-    --c-ink-muted: 148 163 184;
-    --c-border: 51 65 85;
-    --c-border-strong: 71 85 105;
-    --c-synergy-muted: 20 83 45;
-    --c-accent-soft: 19 78 74;
-    --shadow-soft: 0 4px 24px -4px rgb(0 0 0 / 0.45);
-    --shadow-card: 0 8px 32px -8px rgb(0 0 0 / 0.5);
-    --mesh-hero: radial-gradient(at 40% 20%, rgb(53 124 60 / 0.25) 0px, transparent 50%),
-      radial-gradient(at 80% 0%, rgb(20 184 166 / 0.15) 0px, transparent 45%),
-      radial-gradient(at 0% 50%, rgb(15 23 42 / 1) 0px, transparent 50%);
-    --grid-line: rgb(51 65 85 / 0.6);
+    --c-surface: 5 3 10;
+    --c-surface-muted: 10 8 17;
+    --c-surface-elevated: 18 16 28;
+    --c-ink: 245 240 255;
+    --c-ink-secondary: 235 228 255;
+    --c-ink-body: 201 195 214;
+    --c-ink-muted: 155 141 184;
+    --c-border: 58 42 88;
+    --c-border-strong: 91 63 138;
+    --c-synergy-muted: 26 11 58;
+    --c-accent-soft: 58 26 8;
+    --shadow-soft: 0 4px 28px -4px rgb(0 0 0 / 0.55);
+    --shadow-card: 0 12px 40px -8px rgb(124 58 237 / 0.28);
+    --mesh-hero: radial-gradient(at 85% 10%, rgb(124 58 237 / 0.35) 0px, transparent 45%),
+      radial-gradient(at 10% 90%, rgb(255 106 0 / 0.16) 0px, transparent 42%),
+      radial-gradient(at 50% 50%, rgb(192 38 211 / 0.1) 0px, transparent 55%);
+    --grid-line: rgb(124 58 237 / 0.18);
   }
 
   html {
@@ -121,21 +121,141 @@
   }
 
   .glass-card {
-    @apply border border-white/50 bg-white/55 shadow-soft backdrop-blur-2xl;
+    @apply relative overflow-hidden border border-synergy/30 bg-surface-elevated/70 shadow-card backdrop-blur-xl;
+  }
+
+  .glass-card::after {
+    content: "";
+    position: absolute;
+    left: 10%;
+    right: 10%;
+    bottom: 0;
+    height: 2px;
+    border-radius: 9999px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgb(255 106 0 / 0.25),
+      #ff6a00,
+      #c026d3,
+      #7c3aed,
+      rgb(124 58 237 / 0.2),
+      transparent
+    );
+    box-shadow: 0 0 14px rgb(255 106 0 / 0.45);
+    pointer-events: none;
   }
 
   .dark .glass-card {
-    @apply border-white/10 bg-slate-900/45;
+    @apply border-synergy/35 bg-white/[0.04];
+  }
+
+  /* Reference-image digital panels (grids, cards, strips) */
+  .digital-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-card, 1rem);
+    border: 1px solid rgb(124 58 237 / 0.38);
+    background:
+      linear-gradient(165deg, rgb(255 255 255 / 0.07) 0%, rgb(124 58 237 / 0.08) 48%, rgb(5 3 10 / 0.55) 100%),
+      rgb(18 16 28 / 0.85);
+    box-shadow:
+      0 0 0 1px rgb(255 45 170 / 0.06),
+      0 16px 40px -12px rgb(0 0 0 / 0.55),
+      inset 0 1px 0 rgb(255 255 255 / 0.06);
+    backdrop-filter: blur(14px);
+    transition:
+      border-color 0.25s ease,
+      box-shadow 0.25s ease,
+      transform 0.25s ease;
+  }
+
+  .digital-card::before {
+    content: "";
+    position: absolute;
+    inset: auto 0 0 0;
+    height: 42%;
+    background:
+      radial-gradient(ellipse 80% 70% at 50% 120%, rgb(124 58 237 / 0.35), transparent 70%),
+      radial-gradient(ellipse 60% 50% at 20% 100%, rgb(255 106 0 / 0.16), transparent 65%);
+    pointer-events: none;
+    opacity: 0.9;
+  }
+
+  .digital-card::after {
+    content: "";
+    position: absolute;
+    left: 8%;
+    right: 8%;
+    bottom: 0;
+    height: 2px;
+    border-radius: 9999px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      #ff6a00 22%,
+      #c026d3 50%,
+      #7c3aed 78%,
+      transparent 100%
+    );
+    box-shadow: 0 0 16px rgb(255 106 0 / 0.55);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .digital-card:hover {
+    border-color: rgb(192 38 211 / 0.55);
+    box-shadow:
+      0 0 0 1px rgb(255 45 170 / 0.14),
+      0 20px 48px -10px rgb(124 58 237 / 0.35),
+      inset 0 1px 0 rgb(255 255 255 / 0.08);
+  }
+
+  .digital-strip {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-card, 1rem);
+    border: 1px solid rgb(124 58 237 / 0.35);
+    background: linear-gradient(90deg, rgb(18 16 28 / 0.95), rgb(124 58 237 / 0.12), rgb(18 16 28 / 0.95));
+    box-shadow: 0 12px 36px -12px rgb(0 0 0 / 0.5);
+  }
+
+  .site-nebula {
+    background-color: var(--color-surface);
+    background-image:
+      radial-gradient(ellipse 70% 45% at 100% -5%, rgb(124 58 237 / 0.32), transparent 55%),
+      radial-gradient(ellipse 55% 40% at -5% 100%, rgb(255 45 170 / 0.14), transparent 50%),
+      radial-gradient(ellipse 50% 35% at 55% 40%, rgb(192 38 211 / 0.08), transparent 60%);
+    background-attachment: fixed;
+  }
+
+  .site-glass-header,
+  .site-glass-footer {
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+  }
+
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .site-glass-header:not([class*="bg-transparent"]),
+    .site-glass-footer {
+      background-color: rgb(5 3 10 / 0.92) !important;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .site-nebula {
+      background-attachment: scroll;
+    }
   }
 
   .text-gradient-live {
     background-image: linear-gradient(
       105deg,
-      #86efac 0%,
-      #4ade80 22%,
+      #a78bfa 0%,
+      #7c3aed 22%,
       var(--color-accent) 50%,
-      var(--color-synergy) 78%,
-      #86efac 100%
+      var(--color-synergy-dark) 78%,
+      #a78bfa 100%
     );
     background-size: 250% auto;
     -webkit-background-clip: text;
@@ -179,8 +299,7 @@
   }
 
   /*
-   * Careers hero: green flash clipped to the letters (not a box overlay).
-   * White text with a sharp brand-green band sweeping through the glyphs.
+   * Careers / hero shimmer: violet → magenta flash clipped to the letters.
    */
   .heading-shimmer-synergy {
     overflow: visible;
@@ -189,13 +308,13 @@
       105deg,
       #ffffff 0%,
       #ffffff 42%,
-      #dcfce7 45.5%,
-      #86efac 47%,
-      #22c55e 49%,
-      #357c3c 50.5%,
-      #15803d 52%,
-      #14b8a6 54%,
-      #4ade80 56%,
+      #f5f0ff 45.5%,
+      #e9d5ff 47%,
+      #c084fc 49%,
+      #7c3aed 50.5%,
+      #c026d3 52%,
+      #ff2daa 54%,
+      #a78bfa 56%,
       #ffffff 59%,
       #ffffff 100%
     );
@@ -205,7 +324,7 @@
     background-clip: text;
     -webkit-text-fill-color: transparent;
     /* Continuous forward/back — no pause; return ~0.5× forward speed */
-    animation: textShimmerGreen 12s linear infinite;
+    animation: textShimmerBrand 12s linear infinite;
   }
 
   .heading-shimmer-synergy::after {
@@ -226,7 +345,7 @@
       90deg,
       var(--color-synergy),
       var(--color-accent),
-      #4ade80,
+      var(--color-synergy-dark),
       var(--color-synergy)
     );
     background-size: 200% 100%;
@@ -256,8 +375,8 @@
     top: 8%;
     background: radial-gradient(
       circle at 40% 40%,
-      rgb(74 222 128 / 0.32) 0%,
-      rgb(74 222 128 / 0.08) 55%,
+      rgb(124 58 237 / 0.34) 0%,
+      rgb(124 58 237 / 0.08) 55%,
       transparent 72%
     );
   }
@@ -269,8 +388,8 @@
     top: 22%;
     background: radial-gradient(
       circle at 50% 45%,
-      rgb(20 184 166 / 0.26) 0%,
-      rgb(20 184 166 / 0.06) 55%,
+      rgb(255 45 170 / 0.28) 0%,
+      rgb(255 45 170 / 0.07) 55%,
       transparent 72%
     );
     animation-delay: -6s;
@@ -283,8 +402,8 @@
     bottom: -8%;
     background: radial-gradient(
       circle at 45% 50%,
-      rgb(53 124 60 / 0.2) 0%,
-      rgb(53 124 60 / 0.05) 55%,
+      rgb(192 38 211 / 0.22) 0%,
+      rgb(192 38 211 / 0.06) 55%,
       transparent 72%
     );
     animation-delay: -12s;
@@ -301,11 +420,11 @@
   }
 
   .glass-panel {
-    @apply border border-white/50 bg-white/55 text-ink-body shadow-soft backdrop-blur-2xl;
+    @apply relative overflow-hidden border border-synergy/30 bg-surface-elevated/75 text-ink-body shadow-card backdrop-blur-xl;
   }
 
   .dark .glass-panel {
-    @apply border-white/10 bg-slate-900/45 text-ink-body;
+    @apply border-synergy/35 bg-white/[0.04] text-ink-body;
   }
 
   .prose {
@@ -360,7 +479,7 @@
  * Continuous ping-pong: forward 1/3 of cycle, return 2/3 (0.5× speed).
  * No holds at either end.
  */
-@keyframes textShimmerGreen {
+@keyframes textShimmerBrand {
   0% {
     background-position: 100% 50%;
   }
@@ -411,7 +530,7 @@
     --spot-y: 40%;
     background: radial-gradient(
       520px circle at var(--spot-x) var(--spot-y),
-      rgb(74 222 128 / 0.14),
+      rgb(124 58 237 / 0.16),
       transparent 62%
     );
     transition: background 0.35s ease;

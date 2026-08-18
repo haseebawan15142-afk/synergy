@@ -123,15 +123,9 @@ export function MegaMenu({ label, href, menu, active, onMedia }: MegaMenuProps) 
         aria-controls={open ? `${menuId}-panel` : undefined}
         className={cn(
           "relative flex items-center gap-1 rounded-full px-4 py-2 text-sm font-medium transition-colors xl:px-5",
-          onMedia
-            ? active || open
-              ? "bg-white/15 text-white"
-              : "text-white/90 hover:bg-white/10 hover:text-white"
-            : active || open
-              ? "bg-synergy-muted text-synergy-dark dark:text-synergy-glow"
-              : "text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-ink-body dark:hover:bg-surface-muted dark:hover:text-ink",
-          (active || open) &&
-            "after:absolute after:inset-x-4 after:-bottom-0.5 after:h-0.5 after:rounded-full after:bg-synergy",
+          active || open
+            ? "text-white after:absolute after:inset-x-4 after:-bottom-0.5 after:h-0.5 after:rounded-full after:bg-gradient-cta after:shadow-[0_0_10px_rgba(255,45,170,0.65)]"
+            : "text-white/85 hover:bg-white/10 hover:text-white",
         )}
       >
         {label}
@@ -169,7 +163,7 @@ export function MegaMenu({ label, href, menu, active, onMedia }: MegaMenuProps) 
                 className="overflow-hidden rounded-2xl border border-white/15 shadow-card"
                 style={{
                   background:
-                    "linear-gradient(145deg, #0d2818 0%, #1a4d2a 42%, #357c3c 78%, #2d6a34 100%)",
+                    "linear-gradient(145deg, #05030A 0%, #2e1065 42%, #7C3AED 78%, #C026D3 100%)",
                 }}
               >
                 <div className="grid lg:grid-cols-[minmax(0,1.35fr)_minmax(14rem,0.65fr)]">

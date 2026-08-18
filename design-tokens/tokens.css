@@ -1,32 +1,34 @@
 /**
- * Synergy Computers design tokens — modern refresh (logo green retained)
+ * Synergy Computers — digital brand palette
+ * #05030A · #0A0811 · #12101C · #7C3AED · #5B21B6 · #C026D3 · #FF6A00 · #FFB52E · #F5F0FF · #C9C3D6
  */
 
 :root {
   --color-white: #ffffff;
-  --color-surface: #f8fafc;
-  --color-surface-muted: #f1f5f9;
+  --color-surface: #f5f0ff;
+  --color-surface-muted: #ebe4ff;
   --color-surface-elevated: #ffffff;
 
-  --color-ink: #0f172a;
-  --color-ink-secondary: #1e293b;
-  --color-ink-body: #334155;
-  --color-ink-muted: #475569;
-  --color-border: #e2e8f0;
-  --color-border-strong: #cbd5e1;
+  --color-ink: #05030a;
+  --color-ink-secondary: #1a1228;
+  --color-ink-body: #3d3558;
+  --color-ink-muted: #6b6385;
+  --color-border: #e4d9f7;
+  --color-border-strong: #cbb8f0;
 
-  --color-synergy: #357c3c;
-  --color-synergy-dark: #2a813e;
-  --color-synergy-light: #4ade80;
-  --color-synergy-muted: #dcfce7;
+  --color-synergy: #7c3aed;
+  --color-synergy-dark: #5b21b6;
+  --color-synergy-light: #a78bfa;
+  --color-synergy-muted: #ede4ff;
   --color-on-synergy: #ffffff;
-  /* Space-separated RGB for Tailwind opacity modifiers (bg-synergy/20, etc.) */
-  --c-synergy-channels: 53 124 60;
-  --c-synergy-dark-channels: 42 129 62;
-  --c-accent-channels: 20 184 166;
+  --c-synergy-channels: 124 58 237;
+  --c-synergy-dark-channels: 91 33 182;
+  --c-accent-channels: 255 106 0;
 
-  --color-accent: #14b8a6;
-  --color-accent-soft: #ccfbf1;
+  --color-accent: #ff6a00;
+  --color-accent-soft: #ffe8d6;
+  --color-magenta: #c026d3;
+  --color-amber: #ffb52e;
 
   --color-canvas: var(--color-surface);
   --radius-card: 1rem;
@@ -34,16 +36,16 @@
 
 html.dark {
   color-scheme: dark;
-  --color-surface: #0b1220;
-  --color-surface-muted: #0f172a;
-  --color-surface-elevated: #1e293b;
-  --color-ink: #f8fafc;
-  --color-ink-secondary: #e2e8f0;
-  --color-ink-body: #cbd5e1;
-  --color-ink-muted: #94a3b8;
-  --color-border: #334155;
-  --color-border-strong: #475569;
-  --color-synergy-muted: #14532d;
-  --color-accent-soft: #134e4a;
+  --color-surface: #05030a;
+  --color-surface-muted: #0a0811;
+  --color-surface-elevated: #12101c;
+  --color-ink: #f5f0ff;
+  --color-ink-secondary: #ebe4ff;
+  --color-ink-body: #c9c3d6;
+  --color-ink-muted: #9b8db8;
+  --color-border: #3a2a58;
+  --color-border-strong: #5b3f8a;
+  --color-synergy-muted: #1a0b3a;
+  --color-accent-soft: #3a1a08;
   --color-canvas: var(--color-surface);
 }

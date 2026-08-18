@@ -12,7 +12,7 @@ export function PageHeader({ title, description, className }: PageHeaderProps) {
   return (
     <div
       className={cn(
-        "relative overflow-hidden border-b border-border/60 bg-surface-elevated/80 section-y-tight",
+        "relative overflow-hidden border-b border-synergy/20 bg-surface-elevated/40 section-y-tight",
         className,
       )}
     >

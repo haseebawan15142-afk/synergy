@@ -224,16 +224,15 @@ export function Navbar({
   // SSR: trust server `overHero` (usePathname is wrong in this layout on Vercel).
   // After hydration: trust client pathname so in-app navigations stay correct.
   const isHome = hydrated ? pathname === "/" : overHero || pathname === "/";
-  // Transparent sticky bar over hero video so media can fill the viewport
+  // Glass digital header (reference mock): translucent so page content stays visible underneath
   const overMedia = isHome && !scrolled && !open;
+  const glassNav = true;
 
   const headerClass = cn(
-    "fixed inset-x-0 top-0 z-50 border-b transition-[background-color,border-color,box-shadow,backdrop-filter] duration-300",
+    "site-glass-header fixed inset-x-0 top-0 z-50 border-b transition-[background-color,border-color,box-shadow,backdrop-filter] duration-300",
     overMedia
-      ? "border-transparent bg-transparent shadow-none"
-      : // Explicit white solid bar after scroll (readable dark links below).
-        // Avoid relying on CMS ink tokens that can leave light text on white.
-        "border-slate-200/80 bg-white/95 shadow-soft backdrop-blur-md dark:border-border dark:bg-surface-elevated/95",
+      ? "border-transparent bg-transparent shadow-none backdrop-blur-0"
+      : "border-white/10 bg-[#05030A]/70 shadow-[0_8px_32px_rgba(124,58,237,0.12)] backdrop-blur-xl",
   );
 
   return (
@@ -249,7 +248,7 @@ export function Navbar({
           <Link href="/" className="flex shrink-0 items-center gap-2 rounded-xl transition hover:opacity-90">
             <CmsBrandLogo
               variant="header"
-              theme={overMedia ? "dark" : "light"}
+              theme={overMedia ? "dark" : "dark"}
               logoUrl={logoUrl}
               darkLogoUrl={darkLogoUrl}
               footerLogoUrl={footerLogoUrl}
@@ -271,7 +270,7 @@ export function Navbar({
                   href={item.href}
                   menu={menu}
                   active={active}
-                  onMedia={overMedia}
+                  onMedia={glassNav}
                 />
               );
             }
@@ -283,13 +282,9 @@ export function Navbar({
                 active={active}
                 className={cn(
                   "relative rounded-full px-4 py-2 text-sm font-medium transition-colors xl:px-5",
-                  overMedia
-                    ? active
-                      ? "bg-white/15 text-white"
-                      : "text-white/90 hover:bg-white/10 hover:text-white"
-                    : active
-                      ? "bg-synergy-muted text-synergy-dark dark:text-synergy-glow"
-                      : "text-slate-700 hover:bg-slate-100 hover:text-slate-900 dark:text-ink-body dark:hover:bg-surface-muted dark:hover:text-ink",
+                  active
+                    ? "text-white after:absolute after:inset-x-4 after:-bottom-0.5 after:h-0.5 after:rounded-full after:bg-gradient-cta after:shadow-[0_0_10px_rgba(255,45,170,0.65)]"
+                    : "text-white/85 hover:bg-white/10 hover:text-white",
                 )}
               >
                 {item.label}
@@ -299,42 +294,29 @@ export function Navbar({
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
-          <ThemeSelector
-            className={
-              overMedia
-                ? "[&_button]:border-white/25 [&_button]:bg-white/10 [&_button]:text-white [&_button]:hover:bg-white/15"
-                : undefined
-            }
-          />
+          <ThemeSelector className="[&_button]:border-white/20 [&_button]:bg-white/5 [&_button]:text-white [&_button]:hover:bg-white/10 [&_button]:hover:border-synergy/40" />
           <Button
             href="/contact"
             size="default"
-            className={cn(
-              "whitespace-nowrap rounded-lg px-5 font-semibold tracking-wide shadow-card xl:px-7",
-              overMedia && "ring-1 ring-white/20",
-            )}
+            className="!bg-gradient-cta whitespace-nowrap rounded-full px-5 font-semibold tracking-wide text-white shadow-[0_8px_28px_rgba(124,58,237,0.35)] hover:brightness-110 xl:px-7"
           >
             Contact Us
+            <span className="ml-1.5" aria-hidden>
+              →
+            </span>
           </Button>
         </div>
 
         <div className="flex items-center gap-1.5 lg:hidden">
           <ThemeSelector
             className={cn(
-              "[&_button]:min-h-10 [&_button]:min-w-10 [&_button]:px-2.5 [&_span.hidden]:hidden",
-              overMedia &&
-                "[&_button]:border-white/25 [&_button]:bg-white/10 [&_button]:text-white [&_button]:hover:bg-white/15",
+              "[&_button]:min-h-10 [&_button]:min-w-10 [&_button]:border-white/20 [&_button]:bg-white/5 [&_button]:px-2.5 [&_button]:text-white [&_span.hidden]:hidden",
             )}
           />
           <button
             ref={menuButtonRef}
             type="button"
-            className={cn(
-              "inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border shadow-soft",
-              overMedia
-                ? "border-white/25 bg-white/10 text-white"
-                : "border-slate-200 bg-white text-slate-800 shadow-soft dark:border-border dark:bg-surface-elevated dark:text-ink",
-            )}
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-white/20 bg-white/5 text-white shadow-soft"
             aria-expanded={open}
             aria-controls="mobile-nav"
             aria-haspopup="dialog"
@@ -440,7 +422,7 @@ export function Navbar({
                               className="overflow-hidden border-t border-white/15"
                               style={{
                                 background:
-                                  "linear-gradient(145deg, #0d2818 0%, #1a4d2a 45%, #357c3c 100%)",
+                                  "linear-gradient(145deg, #05030A 0%, #2e1065 45%, #7C3AED 100%)",
                               }}
                             >
                               <div className="divide-y divide-white/10">

@@ -19,8 +19,7 @@ type BrandLogoProps = {
 };
 
 /**
- * Header/footer brand mark — Website Settings only.
- * Never falls back to `/public/brand/*`. Missing/broken CMS logo → company name text.
+ * Header/footer brand mark — CMS URLs first, then bundled Synergy logo.
  */
 export function BrandLogo({
   variant = "header",

@@ -6,7 +6,7 @@ import { careersHeroBackground } from "@/lib/content/careers";
 
 export function CareersHero() {
   return (
-    <div className="relative isolate flex min-h-[520px] flex-col justify-center overflow-hidden bg-ink py-20 sm:min-h-[600px] sm:py-24 lg:min-h-[680px]">
+    <div className="relative isolate flex min-h-[520px] flex-col justify-center overflow-hidden bg-black py-20 sm:min-h-[600px] sm:py-24 lg:min-h-[680px]">
       <Image
         src={careersHeroBackground}
         alt=""
@@ -17,13 +17,13 @@ export function CareersHero() {
         aria-hidden
       />
       {/* Keep headline readable over the photo */}
-      <div className="pointer-events-none absolute inset-0 bg-ink/70" aria-hidden />
+      <div className="pointer-events-none absolute inset-0 bg-black/55" aria-hidden />
       <div
-        className="pointer-events-none absolute inset-0 bg-gradient-to-r from-ink/85 via-ink/55 to-ink/30"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-black/30"
         aria-hidden
       />
       <div
-        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/50 via-transparent to-ink/20"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/20"
         aria-hidden
       />
 

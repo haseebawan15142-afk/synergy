@@ -34,11 +34,11 @@ export async function HeroSection() {
               landingPlaylist={eventVideos ? null : { videos: landingVideos }}
             />
             <div
-              className="absolute inset-0 z-[2] bg-gradient-to-r from-ink/92 via-ink/78 to-ink/45 lg:to-ink/25"
+              className="absolute inset-0 z-[2] bg-gradient-to-r from-black/85 via-black/55 to-black/25 lg:to-black/15"
               aria-hidden
             />
             <div
-              className="absolute inset-0 z-[2] bg-gradient-to-t from-ink/70 via-ink/20 to-transparent"
+              className="absolute inset-0 z-[2] bg-gradient-to-t from-black/70 via-black/20 to-transparent"
               aria-hidden
             />
           </>

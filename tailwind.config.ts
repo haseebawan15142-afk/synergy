@@ -29,9 +29,9 @@ const config: Config = {
         synergy: {
           DEFAULT: "rgb(var(--c-synergy-channels) / <alpha-value>)",
           dark: "rgb(var(--c-synergy-dark-channels) / <alpha-value>)",
-          light: "#4ADE80",
+          light: "#A78BFA",
           muted: "rgb(var(--c-synergy-muted) / <alpha-value>)",
-          glow: "#86EFAC",
+          glow: "#C084FC",
         },
         accent: {
           DEFAULT: "rgb(var(--c-accent-channels) / <alpha-value>)",
@@ -56,8 +56,9 @@ const config: Config = {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "mesh-hero": "var(--mesh-hero)",
         "gradient-brand":
-          "linear-gradient(135deg, var(--color-synergy) 0%, var(--color-accent) 100%)",
-        "gradient-dark": "linear-gradient(180deg, #0F172A 0%, #1E293B 100%)",
+          "linear-gradient(135deg, #7C3AED 0%, #C026D3 45%, #FF6A00 100%)",
+        "gradient-dark": "linear-gradient(180deg, #05030A 0%, #0A0811 55%, #12101C 100%)",
+        "gradient-cta": "linear-gradient(90deg, #7C3AED 0%, #C026D3 50%, #FF6A00 100%)",
       },
       animation: {
         "fade-up": "fadeUp 0.6s ease-out forwards",

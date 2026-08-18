@@ -13,22 +13,22 @@ function clean(url?: string | null) {
 }
 
 /**
- * Resolve header/footer logo from Website Settings only.
- * No bundled `/public` brand mark — empty means the UI should show text.
+ * Resolve header/footer logo from Website Settings, with the previous
+ * Synergy mark as local fallback (never the digital ChatGPT logo).
  */
 export function resolveBrandLogoSrc(input: LogoResolveInput): string {
   const logo = clean(input.logoUrl);
   const dark = clean(input.darkLogoUrl);
   const footer = clean(input.footerLogoUrl);
+  const localFallback = "/brand/logo.png";
 
   if (input.variant === "footer") {
-    return footer || dark || logo;
+    return footer || dark || logo || localFallback;
   }
-  // Dark/transparent nav (over hero): prefer dark/white mark, then footer white, then light logo.
   if (input.theme === "dark") {
-    return dark || footer || logo;
+    return dark || footer || logo || localFallback;
   }
-  return logo || dark || footer;
+  return logo || dark || footer || localFallback;
 }
 
 export function resolveFaviconUrl(settings?: Pick<SiteSettings, "faviconUrl"> | null) {

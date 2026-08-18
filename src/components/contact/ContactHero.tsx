@@ -27,13 +27,13 @@ export function ContactHero({ title, description, children }: ContactHeroProps) 
         aria-hidden
       />
       {/* Light veil — keep office + logo wall readable for visitors */}
-      <div className="pointer-events-none absolute inset-0 bg-ink/25" aria-hidden />
+      <div className="pointer-events-none absolute inset-0 bg-black/20" aria-hidden />
       <div
-        className="pointer-events-none absolute inset-0 bg-gradient-to-r from-ink/70 via-ink/35 to-transparent lg:via-ink/20"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/70 via-black/35 to-transparent lg:via-black/20"
         aria-hidden
       />
       <div
-        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-ink/45 via-transparent to-ink/20"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-black/20"
         aria-hidden
       />
 

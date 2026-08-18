@@ -30,7 +30,7 @@ export function MotionCard({ children, className, reveal = true }: MotionCardPro
       variants={reveal ? fadeUp : undefined}
       whileHover={{
         ...cardHover,
-        boxShadow: "0 20px 40px -12px rgb(34 197 94 / 0.18)",
+        boxShadow: "0 20px 48px -12px rgb(124 58 237 / 0.32)",
       }}
       whileTap={{ scale: 0.995 }}
       animate={reveal ? undefined : cardRest}
