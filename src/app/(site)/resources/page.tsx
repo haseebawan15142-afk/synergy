@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { ResourcesIndex } from "@/components/resources/ResourcesIndex";
-import { PageHeader } from "@/components/ui/PageHeader";
+import { ResourcesHero } from "@/components/resources/ResourcesHero";
 import { siteConfig } from "@/lib/content/site";
 import { fetchPublishedBlogs } from "@/lib/cms/public-server";
 
@@ -21,10 +21,7 @@ export default async function ResourcesPage() {
 
   return (
     <>
-      <PageHeader
-        title="Blog"
-        description="Latest news and insights on services, partners, and enterprise technology in Pakistan."
-      />
+      <ResourcesHero />
       <Suspense fallback={<div className="page-container section-y-tight text-sm text-ink-muted">Loading…</div>}>
         <ResourcesIndex posts={posts} />
       </Suspense>
