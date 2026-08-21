@@ -136,6 +136,14 @@ export function WebsiteSettingsForm() {
         .filter((link) => Boolean(link.url));
 
       const heroVideos = normalizeLandingHeroVideos(form.heroVideos);
+      const slotsWithMissingUrl = (form.heroVideos || []).filter(
+        (clip) => !String(clip.mp4 || "").trim(),
+      );
+      if (slotsWithMissingUrl.length && !(form.heroVideos || []).some((c) => c.mp4)) {
+        toast.message(
+          "No hero video URL yet — upload an MP4 and wait until the URL field fills, then Save again.",
+        );
+      }
 
       await saveSiteSettings(
         {
@@ -166,8 +174,8 @@ export function WebsiteSettingsForm() {
 
       toast.success(
         heroVideos.length
-          ? `Settings saved — ${heroVideos.length} hero clip(s) on the homepage`
-          : "Settings saved — hero clips cleared on the homepage",
+          ? `Settings saved — ${heroVideos.length} hero clip(s) live on the homepage`
+          : "Settings saved — homepage hero has no clips (upload MP4 + wait for URL, then Save)",
       );
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Save failed");

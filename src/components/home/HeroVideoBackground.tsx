@@ -271,7 +271,7 @@ export function HeroVideoBackground({
     };
   }, [mode, playlistReady, playlistKey, visibleLayer]);
 
-  // Landing: play each clip fully once, then crossfade to the next.
+  // Landing: CMS display length controls how long each clip stays on screen.
   useEffect(() => {
     if (!playOnceThenNext || mode !== "video" || !playlistReady) return;
 
@@ -290,37 +290,47 @@ export function HeroVideoBackground({
       advanceToNext();
     };
 
-    const scheduleFromDuration = () => {
+    const scheduleFromCmsDuration = () => {
       if (cancelled || switchingRef.current || advanced) return;
       clearAdvanceTimer();
 
       const clip = playlistRef.current[currentIndexRef.current];
+      const adminMs = clipDurationMs(clip, fallbackDurationSec);
       const mediaMs =
         Number.isFinite(video.duration) && video.duration > 0 && video.duration !== Infinity
           ? video.duration * 1000
-          : clipDurationMs(clip, fallbackDurationSec);
+          : adminMs;
 
-      const waitMs = Math.max(500, mediaMs - Math.min(transitionMs, 400));
+      // Admin duration wins (e.g. 5s). Never wait longer than the file itself.
+      const displayMs = Math.min(adminMs, mediaMs);
+      const waitMs = Math.max(400, displayMs - Math.min(transitionMs, 400));
       advanceTimerRef.current = window.setTimeout(goNext, waitMs);
     };
 
-    const onEnded = () => goNext();
     const onTimeUpdate = () => {
+      if (cancelled || advanced) return;
+      const clip = playlistRef.current[currentIndexRef.current];
+      const adminSec = clipDurationMs(clip, fallbackDurationSec) / 1000;
+      if (video.currentTime >= adminSec - 0.12) {
+        goNext();
+        return;
+      }
       const d = video.duration;
-      if (!Number.isFinite(d) || d <= 0 || d === Infinity) return;
-      if (video.currentTime >= d - 0.25) goNext();
+      if (Number.isFinite(d) && d > 0 && d !== Infinity && video.currentTime >= d - 0.2) {
+        goNext();
+      }
     };
 
-    video.addEventListener("ended", onEnded);
+    video.addEventListener("ended", goNext);
     video.addEventListener("timeupdate", onTimeUpdate);
-    video.addEventListener("loadedmetadata", scheduleFromDuration);
-    scheduleFromDuration();
+    video.addEventListener("loadedmetadata", scheduleFromCmsDuration);
+    scheduleFromCmsDuration();
 
     return () => {
       cancelled = true;
-      video.removeEventListener("ended", onEnded);
+      video.removeEventListener("ended", goNext);
       video.removeEventListener("timeupdate", onTimeUpdate);
-      video.removeEventListener("loadedmetadata", scheduleFromDuration);
+      video.removeEventListener("loadedmetadata", scheduleFromCmsDuration);
       clearAdvanceTimer();
     };
   }, [

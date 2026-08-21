@@ -66,7 +66,10 @@ export function HeroVideoSlotsEditor({
                 })
               }
             />
-            <p className="mt-1 text-[11px] text-zinc-500">1–60 seconds before switching to the next clip.</p>
+            <p className="mt-1 text-[11px] text-zinc-500">
+              On-screen time before the next clip (1–60s). Shorter than the file length is OK — the
+              hero will cut at this value.
+            </p>
           </Field>
           <div className="mt-4 grid gap-4 md:grid-cols-2">
             <VideoUrlField
