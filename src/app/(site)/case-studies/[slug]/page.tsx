@@ -1,19 +1,23 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";import { caseStudies, getCaseStudy } from "@/lib/content/case-studies";
+import { notFound } from "next/navigation";
+import { fetchCaseStudies, fetchCaseStudyBySlug } from "@/lib/cms/public";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/Button";
 
 type Props = { params: Promise<{ slug: string }> };
 
+export const revalidate = 60;
+
 export async function generateStaticParams() {
-  return caseStudies.map((c) => ({ slug: c.slug }));
+  const studies = await fetchCaseStudies();
+  return studies.map((c) => ({ slug: c.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const study = getCaseStudy(slug);
+  const study = await fetchCaseStudyBySlug(slug);
   if (!study) return {};
   return {
     title: study.headline,
@@ -24,7 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CaseStudyPage({ params }: Props) {
   const { slug } = await params;
-  const study = getCaseStudy(slug);
+  const study = await fetchCaseStudyBySlug(slug);
   if (!study) notFound();
 
   return (

@@ -44,7 +44,6 @@ export const siteConfig = {
       ],
     },
     { label: "Services", href: "/services" },
-    { label: "Industries", href: "/industries" },
     { label: "Partners", href: "/partners" },
     { label: "Insights", href: "/resources" },
     { label: "Careers", href: "/careers" },

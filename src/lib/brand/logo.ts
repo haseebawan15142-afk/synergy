@@ -13,22 +13,21 @@ function clean(url?: string | null) {
 }
 
 /**
- * Resolve header/footer logo from Website Settings, with the previous
- * Synergy mark as local fallback (never the digital ChatGPT logo).
+ * Resolve header/footer logo from Website Settings only.
+ * Empty CMS fields mean text brand — no bundled fallback.
  */
 export function resolveBrandLogoSrc(input: LogoResolveInput): string {
   const logo = clean(input.logoUrl);
   const dark = clean(input.darkLogoUrl);
   const footer = clean(input.footerLogoUrl);
-  const localFallback = "/brand/logo.png";
 
   if (input.variant === "footer") {
-    return footer || dark || logo || localFallback;
+    return footer || dark || logo;
   }
   if (input.theme === "dark") {
-    return dark || footer || logo || localFallback;
+    return dark || footer || logo;
   }
-  return logo || dark || footer || localFallback;
+  return logo || dark || footer;
 }
 
 export function resolveFaviconUrl(settings?: Pick<SiteSettings, "faviconUrl"> | null) {

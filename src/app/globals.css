@@ -528,10 +528,11 @@
   .hero-spotlight {
     --spot-x: 50%;
     --spot-y: 40%;
+    /* Soft accent only — avoid a purple haze over hero media */
     background: radial-gradient(
-      520px circle at var(--spot-x) var(--spot-y),
-      rgb(124 58 237 / 0.16),
-      transparent 62%
+      420px circle at var(--spot-x) var(--spot-y),
+      rgb(124 58 237 / 0.06),
+      transparent 70%
     );
     transition: background 0.35s ease;
   }

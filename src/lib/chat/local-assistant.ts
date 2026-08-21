@@ -6,7 +6,6 @@ import { caseStudies } from "@/lib/content/case-studies";
 import { ceoMessage } from "@/lib/content/ceo-message";
 import { dynatracePartner } from "@/lib/content/dynatrace-partner";
 import { problemCards } from "@/lib/content/problems";
-import { industries } from "@/lib/content/industries";
 import { partners as localPartners } from "@/lib/content/partners";
 import { services } from "@/lib/content/services";
 import { siteConfig } from "@/lib/content/site";
@@ -44,11 +43,11 @@ function scoreOverlap(query: string, corpus: string): number {
   return hits;
 }
 
-const FALLBACK_REPLY = `I'm Synergy Assistant for ${siteConfig.legalName}. I answer questions about our IT services, technology partners, industries, and how to contact us in Pakistan.
+const FALLBACK_REPLY = `I'm Synergy Assistant for ${siteConfig.legalName}. I answer questions about our IT services, technology partners, case studies, and how to contact us in Pakistan.
 
 Try asking:
 • "What IT services do you offer?"
-• "Do you provide backup and cloud support?"
+• "Do you provide backup and data resilience support?"
 • "How can I contact your Karachi office?"
 
 Email: ${siteConfig.email} | Phone: ${siteConfig.phones[0]} | /contact`;
@@ -68,7 +67,7 @@ export async function replyFromLocalKnowledge(userMessage: string): Promise<Loca
   if (includesAny(q, ["hello", "hi", "hey", "salam", "assalam", "good morning", "good evening"])) {
     return {
       matched: true,
-      reply: `Hello! I'm Synergy Assistant for ${siteConfig.legalName} — Pakistan's enterprise IT partner for 40+ years.\n\nI can help with our services, technology partners, the industries we serve, and how to reach the team for a quote. What would you like to know?`,
+      reply: `Hello! I'm Synergy Assistant for ${siteConfig.legalName} — Pakistan's enterprise IT partner for 40+ years.\n\nI can help with our services, technology partners, and how to reach the team for a quote. What would you like to know?`,
     };
   }
 
@@ -77,7 +76,7 @@ export async function replyFromLocalKnowledge(userMessage: string): Promise<Loca
   ) {
     return {
       matched: true,
-      reply: `I'm Synergy Assistant — the official helper for ${siteConfig.legalName}. I answer questions about Synergy's services, partners, industries, and contact details using information from this website. For project quotes, our team at ${siteConfig.email} can help.`,
+      reply: `I'm Synergy Assistant — the official helper for ${siteConfig.legalName}. I answer questions about Synergy's services, partners, case studies, and contact details using information from this website. For project quotes, our team at ${siteConfig.email} can help.`,
     };
   }
 
@@ -144,7 +143,7 @@ export async function replyFromLocalKnowledge(userMessage: string): Promise<Loca
     const lines = services.map((s) => `• ${s.title} — ${s.summary}`);
     return {
       matched: true,
-      reply: `${siteConfig.name} offers these IT services:\n\n${lines.join("\n")}\n\nFull list: /services — tell me which area you need (e.g. backup, cloud, managed IT).`,
+      reply: `${siteConfig.name} offers these IT services:\n\n${lines.join("\n")}\n\nFull list: /services — tell me which area you need (e.g. field support, infrastructure, data resilience, operations).`,
     };
   }
 
@@ -174,45 +173,30 @@ export async function replyFromLocalKnowledge(userMessage: string): Promise<Loca
   }
 
   if (includesAny(q, ["industry", "industries", "sector", "sectors"])) {
-    const lines = industries.map((i) => `• ${i.title} — ${i.summary}`);
     return {
       matched: true,
-      reply: `Synergy serves these sectors in Pakistan:\n\n${lines.join("\n")}\n\nDetails: /industries`,
+      reply: `Synergy serves enterprises across banking, telecom, healthcare, education, government, and other regulated sectors in Pakistan — with infrastructure, security, and managed IT.\n\nExplore services: /services\nCase studies: /case-studies\nContact: ${siteConfig.email}`,
     };
-  }
-
-  for (const industry of industries) {
-    const keys = [
-      industry.slug.replace(/-/g, " "),
-      industry.title.toLowerCase(),
-      ...industry.title.toLowerCase().split(/\s+/).filter((w) => w.length > 3),
-    ];
-    if (includesAny(q, keys)) {
-      return {
-        matched: true,
-        reply: `${industry.title}\n\n${industry.summary}\n\nSynergy provides IT infrastructure, security, and support tailored to this sector. More: /industries/${industry.slug}`,
-      };
-    }
   }
 
   if (includesAny(q, ["bank", "banking", "finance", "financial"])) {
     return {
       matched: true,
-      reply: `Synergy supports banking and financial institutions with secure, available infrastructure, data protection, and managed operations — backed by 40+ years serving enterprise clients in Pakistan. Contact ${siteConfig.email} to discuss your environment.`,
+      reply: `Synergy supports banking and financial institutions with secure, available infrastructure, data protection, and managed operations — backed by 40+ years serving enterprise clients in Pakistan. See /case-studies or contact ${siteConfig.email}.`,
     };
   }
 
   if (includesAny(q, ["health", "healthcare", "hospital", "medical", "clinic"])) {
     return {
       matched: true,
-      reply: `Our healthcare sector work focuses on secure, reliable systems for care delivery. Synergy provides infrastructure, backup, and support scoped to your compliance needs. See /industries/healthcare or contact ${siteConfig.email}.`,
+      reply: `Our healthcare work focuses on secure, reliable systems for care delivery. Synergy provides infrastructure, backup, and support scoped to your compliance needs. See /case-studies or contact ${siteConfig.email}.`,
     };
   }
 
   if (includesAny(q, ["education", "school", "university", "college", "lab"])) {
     return {
       matched: true,
-      reply: `Synergy supports education institutions with device lifecycle, labs, networking, and reliable IT support. See /industries/education or /contact for assistance.`,
+      reply: `Synergy supports education institutions with device lifecycle, labs, networking, and reliable IT support. See /services or /contact for assistance.`,
     };
   }
 
@@ -302,11 +286,11 @@ export async function replyFromLocalKnowledge(userMessage: string): Promise<Loca
     };
   }
 
-  if (includesAny(q, ["case study", "case studies", "client success", "success stor"])) {
+  if (includesAny(q, ["case study", "case studies", "success stor"])) {
     const lines = caseStudies.map((c) => `• ${c.client}: ${c.headline}`);
     return {
       matched: true,
-      reply: `Selected client outcomes:\n\n${lines.join("\n")}\n\nDetails on the homepage Client Success section, or ask about a specific industry.`,
+      reply: `Selected client outcomes:\n\n${lines.join("\n")}\n\nMore: /case-studies`,
     };
   }
 
@@ -327,23 +311,19 @@ export async function replyFromLocalKnowledge(userMessage: string): Promise<Loca
   const topicReplies: { terms: string[]; reply: string }[] = [
     {
       terms: ["backup", "recovery", "data availability", "veritas", "cohesity", "restore", "ransomware"],
-      reply: `Synergy provides data backup & recovery and data availability solutions with leading data-protection partners.\n\nService: /services/data-backup-recovery\nContact: ${siteConfig.email}`,
+      reply: `Synergy provides Data Resilience & Continuity solutions with leading data-protection partners.\n\nService: /services/data-backup-recovery\nContact: ${siteConfig.email}`,
     },
     {
-      terms: ["cloud", "microsoft", "365", "m365", "azure", "office 365", "teams", "sharepoint"],
-      reply: `Synergy helps with Microsoft 365 & cloud — migration, collaboration, security baselines, and governance.\n\nService: /services/microsoft-365-cloud\nContact: /contact`,
-    },
-    {
-      terms: ["managed", "maintenance", "24", "sla", "monitoring", "noc", "outsourc"],
-      reply: `Managed IT & maintenance — SLA-backed 24×7 support across your infrastructure.\n\nService: /services/managed-it\nPhone: ${siteConfig.phones[0]}`,
+      terms: ["managed", "maintenance", "24", "sla", "monitoring", "noc", "outsourc", "operations"],
+      reply: `Synergy supports reliable day-to-day IT operations through Precision Field Support and Intelligent Infrastructure programs.\n\nServices: /services\nPhone: ${siteConfig.phones[0]}`,
     },
     {
       terms: ["on site", "onsite", "on-site", "engineer", "field", "dispatch"],
-      reply: `On-site IT support — Synergy engineers at your location for deployment, troubleshooting, and project delivery.\n\nService: /services/on-site-it-support\nBranches nationwide.`,
+      reply: `Precision Field Support — Synergy engineers at your location for deployment, troubleshooting, and project delivery.\n\nService: /services/on-site-it-support\nBranches nationwide.`,
     },
     {
       terms: ["network", "infrastructure", "wifi", "lan", "wan", "switch", "router", "data center", "datacenter"],
-      reply: `Network & infrastructure — design, modernization, and management from strategy through deployment.\n\nService: /services/network-infrastructure\nContact: ${siteConfig.email}`,
+      reply: `Intelligent Infrastructure — design, modernization, and management from strategy through deployment.\n\nService: /services/network-infrastructure\nContact: ${siteConfig.email}`,
     },
     {
       terms: ["security", "utimaco", "firewall", "cyber", "encryption", "hsm"],

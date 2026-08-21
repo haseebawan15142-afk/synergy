@@ -351,20 +351,32 @@ export async function uploadMediaFile(
   },
 ): Promise<MediaAsset> {
   let uploadFile = file;
-  const forIcon = folder === "icons" || folder === "logos";
+  const forLogo = folder === "logos";
+  const forIcon = folder === "icons";
+  const stripPlate =
+    forLogo || folder === "clients" || folder === "partners" || folder.startsWith("partners/");
 
   if (isAcceptableImageUpload(file) && shouldConvertToWebp(file)) {
     options?.onPhase?.("converting");
     options?.onProgress?.(5);
     try {
-      uploadFile = await convertImageForFirebase(file, { forIcon });
+      uploadFile = await convertImageForFirebase(file, {
+        forIcon,
+        forLogo: forLogo || folder === "clients" || folder === "partners",
+        removeBackground: stripPlate,
+        liftDarkText: forLogo,
+      });
     } catch {
       uploadFile = file;
     }
   } else if (isAcceptableImageUpload(file)) {
-    // SVG / already optimal — still normalize MIME via converter path
     try {
-      uploadFile = await convertImageForFirebase(file, { forIcon });
+      uploadFile = await convertImageForFirebase(file, {
+        forIcon,
+        forLogo: forLogo || folder === "clients" || folder === "partners",
+        removeBackground: stripPlate,
+        liftDarkText: forLogo,
+      });
     } catch {
       uploadFile = file;
     }

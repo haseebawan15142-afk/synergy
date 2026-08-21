@@ -174,6 +174,23 @@ export type ClientDoc = {
   updatedAt?: TimestampLike;
 };
 
+export type CaseStudyDoc = {
+  id?: string;
+  client: string;
+  slug: string;
+  industry: string;
+  headline: string;
+  summary: string;
+  imageUrl: string;
+  metrics: string[];
+  body: string[];
+  sortOrder: number;
+  active: boolean;
+  status?: "published" | "draft";
+  createdAt?: TimestampLike;
+  updatedAt?: TimestampLike;
+};
+
 export type GalleryItemDoc = {
   id?: string;
   albumId?: string;

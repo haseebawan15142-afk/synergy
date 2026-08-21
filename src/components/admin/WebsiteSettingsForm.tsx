@@ -158,7 +158,7 @@ export function WebsiteSettingsForm() {
         createdAt: serverTimestamp(),
       });
 
-      toast.success("Settings saved");
+      toast.success("Settings saved — public site cache cleared");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Save failed");
     } finally {
@@ -396,8 +396,10 @@ export function WebsiteSettingsForm() {
       <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
         <h2 className="text-sm font-semibold">Landing page hero videos</h2>
         <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-          Default home hero playlist (up to 6 clips). Set each clip’s display length in seconds. Upload any video
-          format — it converts to MP4 in the media library. Event themes still override this playlist when activated.
+          Default home hero playlist (up to 6 clips). Upload any video format — it converts to web MP4.
+          Click <strong>Save settings</strong> after uploading so the public homepage picks up the new
+          clips. If an event theme is active with its own videos, those override this playlist until you
+          deactivate the theme.
         </p>
         <div className="mt-4">
           <HeroVideoSlotsEditor
@@ -412,7 +414,8 @@ export function WebsiteSettingsForm() {
         <h2 className="text-sm font-semibold">Brand media</h2>
         <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
           Upload once here — saved to Firebase and used site-wide for header, footer, and favicon.
-          Empty fields show the company name as text (no built-in /public logo fallback).
+          Logo uploads automatically remove a solid background so the mark sits cleanly on the navbar.
+          Empty fields show the company name as text.
         </p>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <MediaUrlField

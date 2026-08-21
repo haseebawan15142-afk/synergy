@@ -21,12 +21,11 @@ export function ProblemsSection() {
     );
     return services.map((service) => {
       const local = problemBySlug[service.slug];
-      // CMS owns title/summary/image; local problemCards only fill gaps for legacy copy.
       return {
         slug: service.slug,
-        label: local?.label || service.title,
-        problem: service.title || local?.problem || "",
-        solution: service.summary || local?.solution || "",
+        badge: local?.label || service.title,
+        title: service.title,
+        summary: service.summary || local?.solution || "",
         image: service.image,
       };
     });
@@ -59,7 +58,7 @@ export function ProblemsSection() {
                   >
                     <Image
                       src={card.image}
-                      alt={card.label}
+                      alt={card.title}
                       fill
                       sizes="(max-width: 640px) 100vw, (max-width: 1280px) 50vw, 33vw"
                       className="object-cover transition duration-500 group-hover:scale-[1.03]"
@@ -69,14 +68,18 @@ export function ProblemsSection() {
                       aria-hidden
                     />
                     <span className="absolute left-4 top-4 rounded-md bg-surface-elevated/95 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wider text-synergy shadow-sm">
-                      {card.label}
+                      {card.badge}
                     </span>
                   </Link>
                 ) : null}
 
                 <div className="flex flex-1 flex-col bg-slate-950 p-5 sm:p-6">
-                  <h3 className="text-base font-semibold text-white sm:text-lg">{card.problem}</h3>
-                  <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-300">{card.solution}</p>
+                  <h3 className="text-base font-semibold text-white sm:text-lg">
+                    <Link href={`/services/${card.slug}`} className="transition hover:text-synergy-light">
+                      {card.title}
+                    </Link>
+                  </h3>
+                  <p className="mt-3 flex-1 text-sm leading-relaxed text-slate-300">{card.summary}</p>
                   <Link
                     href={`/services/${card.slug}`}
                     className="mt-5 inline-flex min-h-10 items-center text-sm font-medium text-synergy-light transition hover:text-white"

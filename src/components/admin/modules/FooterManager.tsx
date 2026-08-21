@@ -1,9 +1,95 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import type { NavItemDoc } from "@/lib/admin/types";
 import { getById, upsertSingleton } from "@/lib/admin/crud";
 import { COLLECTIONS, DOCS } from "@/lib/firebase/collections";
+import { publishAdminCmsChange } from "@/lib/cms/publish-admin-change";
 import { AdminPageSkeleton } from "@/components/admin/AdminSkeleton";
-import { AdminPageHeader, Card, Field, PrimaryButton, SecondaryButton, inputClass } from "@/components/admin/ui";
-export function FooterManager(){const [items,setItems]=useState<NavItemDoc[]>([]),[loading,setLoading]=useState(true);useEffect(()=>{getById<{items?:NavItemDoc[]}>(COLLECTIONS.navigation,DOCS.navigationFooter).then(x=>setItems(x?.items||[])).finally(()=>setLoading(false))},[]);if(loading)return <AdminPageSkeleton/>;return <div className="space-y-6"><AdminPageHeader title="Footer" description="Manage footer navigation links." actions={<PrimaryButton onClick={async()=>{try{await upsertSingleton(COLLECTIONS.navigation,DOCS.navigationFooter,{items});toast.success("Footer saved")}catch{toast.error("Save failed")}}}>Save footer</PrimaryButton>}/><Card className="space-y-4">{items.map((item,i)=><div key={item.id} className="grid gap-3 border-b pb-3 md:grid-cols-3"><Field label="Label"><input className={inputClass} value={item.label} onChange={e=>setItems(items.map((x,n)=>n===i?{...x,label:e.target.value}:x))}/></Field><Field label="URL"><input className={inputClass} value={item.href} onChange={e=>setItems(items.map((x,n)=>n===i?{...x,href:e.target.value}:x))}/></Field><div className="flex items-end"><SecondaryButton onClick={()=>setItems(items.filter((_,n)=>n!==i))}>Remove</SecondaryButton></div></div>)}<SecondaryButton onClick={()=>setItems([...items,{id:crypto.randomUUID(),label:"New link",href:"/"}])}>Add link</SecondaryButton></Card></div>}
+import {
+  AdminPageHeader,
+  Card,
+  Field,
+  PrimaryButton,
+  SecondaryButton,
+  inputClass,
+} from "@/components/admin/ui";
+
+export function FooterManager() {
+  const [items, setItems] = useState<NavItemDoc[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    getById<{ items?: NavItemDoc[] }>(COLLECTIONS.navigation, DOCS.navigationFooter)
+      .then((x) => setItems(x?.items || []))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <AdminPageSkeleton />;
+
+  return (
+    <div className="space-y-6">
+      <AdminPageHeader
+        title="Footer"
+        description="Manage footer navigation links."
+        actions={
+          <PrimaryButton
+            disabled={saving}
+            onClick={async () => {
+              setSaving(true);
+              try {
+                await upsertSingleton(COLLECTIONS.navigation, DOCS.navigationFooter, { items });
+                await publishAdminCmsChange(COLLECTIONS.navigation, ["/"]);
+                toast.success("Footer saved — public site refreshed");
+              } catch {
+                toast.error("Save failed");
+              } finally {
+                setSaving(false);
+              }
+            }}
+          >
+            {saving ? "Saving…" : "Save footer"}
+          </PrimaryButton>
+        }
+      />
+      <Card className="space-y-4">
+        {items.map((item, i) => (
+          <div key={item.id} className="grid gap-3 border-b pb-3 md:grid-cols-3">
+            <Field label="Label">
+              <input
+                className={inputClass}
+                value={item.label}
+                onChange={(e) =>
+                  setItems(items.map((x, n) => (n === i ? { ...x, label: e.target.value } : x)))
+                }
+              />
+            </Field>
+            <Field label="URL">
+              <input
+                className={inputClass}
+                value={item.href}
+                onChange={(e) =>
+                  setItems(items.map((x, n) => (n === i ? { ...x, href: e.target.value } : x)))
+                }
+              />
+            </Field>
+            <div className="flex items-end">
+              <SecondaryButton onClick={() => setItems(items.filter((_, n) => n !== i))}>
+                Remove
+              </SecondaryButton>
+            </div>
+          </div>
+        ))}
+        <SecondaryButton
+          onClick={() =>
+            setItems([...items, { id: crypto.randomUUID(), label: "New link", href: "/" }])
+          }
+        >
+          Add link
+        </SecondaryButton>
+      </Card>
+    </div>
+  );
+}

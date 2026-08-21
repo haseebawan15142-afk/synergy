@@ -33,5 +33,8 @@ export async function saveSiteSettings(
     { merge: true },
   );
   invalidateCmsCache("settings");
-  void requestPublicCmsRevalidate(["cms-settings"]);
+  const ok = await requestPublicCmsRevalidate(["cms-settings"], ["/"]);
+  if (!ok && typeof window !== "undefined") {
+    console.warn("[cms] Public revalidate failed after settings save — hard-refresh the site");
+  }
 }

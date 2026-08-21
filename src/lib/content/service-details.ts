@@ -65,7 +65,7 @@ export const serviceDetails: ServiceDetail[] = [
       "Synergy designs and implements data availability solutions with leading protection platforms. We align backup policies, retention, and restore paths to your RPO/RTO targets — then help you validate them through practical drills.",
     benefits:
       "Clear recovery paths, stronger cyber resilience, and fewer surprises during incidents — backed by local expertise across banking, telecom, utilities, and enterprise environments in Pakistan.",
-    heroImage: "/images/services/heroes/data-backup-recovery.webp",
+    heroImage: "/images/services/heroes/data-backup-recovery-hero.png",
     capabilities: [
       {
         title: "Backup architecture",
@@ -105,15 +105,15 @@ export const serviceDetails: ServiceDetail[] = [
   },
   {
     slug: "network-infrastructure",
-    headline: "Build networks that scale with your business",
-    lead: "Modernize connectivity, security, and infrastructure foundations for reliable enterprise operations.",
+    headline: "Build intelligent infrastructure that scales",
+    lead: "Modernize connectivity, security, and systems foundations for reliable enterprise operations.",
     challenge:
-      "Legacy networks struggle with growth, cloud adoption, and security expectations. Fragmented designs create outages, slow troubleshooting, and limited visibility across sites.",
+      "Legacy networks struggle with growth, security expectations, and multi-site complexity. Fragmented designs create outages, slow troubleshooting, and limited visibility across locations.",
     approach:
       "We design and deliver network and infrastructure programs from assessment through deployment — aligning switching, routing, wireless, and security controls to your operating model and vendor standards.",
     benefits:
       "More predictable performance, clearer ownership, and infrastructure that is easier to operate as your estate expands across branches and data centers.",
-    heroImage: "/images/services/heroes/network-infrastructure.webp",
+    heroImage: "/images/services/heroes/network-infrastructure-hero.png",
     capabilities: [
       {
         title: "Network design & refresh",
@@ -154,14 +154,14 @@ export const serviceDetails: ServiceDetail[] = [
   {
     slug: "on-site-it-support",
     headline: "Put skilled engineers where the work happens",
-    lead: "On-site deployment, troubleshooting, and operational support when remote-only help is not enough.",
+    lead: "Precision field deployment, troubleshooting, and operational support when remote-only help is not enough.",
     challenge:
       "Critical incidents and project cutovers often need hands on site. Delayed field response stretches downtime and puts delivery timelines at risk.",
     approach:
       "Synergy provides certified engineers for on-premises work — from installation and break-fix to project execution — coordinated through our Karachi HQ and branch presence.",
     benefits:
       "Faster resolution for location-bound issues, cleaner handovers, and practical support that respects how enterprise environments actually run.",
-    heroImage: "/images/services/heroes/on-site-it-support.webp",
+    heroImage: "/images/services/heroes/on-site-it-support-hero.png",
     capabilities: [
       {
         title: "Deployment & rollout",
@@ -196,102 +196,6 @@ export const serviceDetails: ServiceDetail[] = [
       {
         title: "Flexible engagement",
         description: "Project-based or ongoing field support matched to your need.",
-      },
-    ],
-  },
-  {
-    slug: "microsoft-365-cloud",
-    headline: "Adopt cloud collaboration with governance that lasts",
-    lead: "Practical Microsoft 365 and cloud programs focused on security baselines, adoption, and measurable outcomes.",
-    challenge:
-      "Cloud rollouts often stall when licensing, identity, security, and user adoption are treated as separate projects. Without governance, sprawl and risk grow quickly.",
-    approach:
-      "We help you plan and deliver Microsoft 365 and cloud initiatives with clear baselines for identity, collaboration, and security — sequenced so teams can actually use what you deploy.",
-    benefits:
-      "A cloud estate that is easier to govern, safer by default, and aligned to how your organization works day to day.",
-    heroImage: "/images/services/heroes/microsoft-365-cloud.webp",
-    capabilities: [
-      {
-        title: "Tenant readiness",
-        description: "Identity, licensing, and baseline configuration for a clean foundation.",
-      },
-      {
-        title: "Migration & coexistence",
-        description: "Mailbox, file, and collaboration moves planned around business continuity.",
-      },
-      {
-        title: "Security baselines",
-        description: "Practical controls for access, devices, and data protection.",
-      },
-      {
-        title: "Adoption support",
-        description: "Enablement that helps teams use the platform with confidence.",
-      },
-    ],
-    outcomes: [
-      {
-        title: "Clearer governance",
-        description: "Less sprawl and stronger ownership of cloud services.",
-      },
-      {
-        title: "Secure collaboration",
-        description: "Controls that protect data without blocking productive work.",
-      },
-      {
-        title: "Measurable rollout",
-        description: "Milestones tied to readiness, adoption, and operational health.",
-      },
-      {
-        title: "Sustainable operations",
-        description: "A platform your IT team can manage after go-live.",
-      },
-    ],
-  },
-  {
-    slug: "managed-it",
-    headline: "Keep operations stable with SLA-backed support",
-    lead: "24×7 maintenance and managed services that reduce firefighting and protect uptime across your IT estate.",
-    challenge:
-      "Internal teams get trapped in alert noise and reactive support. Without a structured maintenance model, preventable issues become recurring outages.",
-    approach:
-      "Synergy delivers managed IT and third-party maintenance with clear SLAs — monitoring, patching discipline, and escalation paths that free your staff for higher-value work.",
-    benefits:
-      "More predictable operations, faster response, and a support partner accountable for day-to-day reliability.",
-    heroImage: "/images/services/heroes/managed-it.webp",
-    capabilities: [
-      {
-        title: "24×7 support coverage",
-        description: "Round-the-clock response models aligned to enterprise expectations.",
-      },
-      {
-        title: "Preventive maintenance",
-        description: "Health checks and patching cadence that reduce avoidable incidents.",
-      },
-      {
-        title: "Escalation & ownership",
-        description: "Clear paths from first response through vendor coordination.",
-      },
-      {
-        title: "Cost-effective SLAs",
-        description: "Support packages designed for sustained operations, not one-off tickets.",
-      },
-    ],
-    outcomes: [
-      {
-        title: "Fewer surprises",
-        description: "Proactive care that catches issues before users feel them.",
-      },
-      {
-        title: "Faster response",
-        description: "Defined SLAs and escalation when incidents do occur.",
-      },
-      {
-        title: "Team focus",
-        description: "Your staff spends less time firefighting and more time delivering.",
-      },
-      {
-        title: "Trusted partnership",
-        description: "A local support organization that stays engaged after go-live.",
       },
     ],
   },

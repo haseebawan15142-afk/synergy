@@ -687,8 +687,9 @@ export function ThemePresetGallery({ onThemeChanged }: Props) {
                 <h3 className="text-sm font-semibold text-ink">Event hero videos (max 3)</h3>
                 <p className="mt-1 text-xs text-ink-muted">
                   When this theme is active, the home hero loops these clips with a smooth crossfade.
-                  Set each clip’s display length in seconds. Poster is optional. Leave videos empty to
-                  keep Website Settings landing videos.
+                  Set each clip’s display length in seconds. Upload any video format — it converts to web
+                  MP4 automatically. Poster is optional. Leave videos empty to keep Website Settings
+                  landing videos.
                 </p>
               </div>
               <HeroVideoSlotsEditor

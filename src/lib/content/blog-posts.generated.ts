@@ -37,7 +37,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "legacyUrl": "https://synergy.net.pk/blog-observability-implementation-partner-pakistan-dynatrace",
     "image": "",
     "category": "Observability",
-    "relatedServiceSlug": "managed-it"
+    "relatedServiceSlug": "network-infrastructure"
   },
   {
     "slug": "bmc-helix-partner-pakistan-service-desk-recurring-issues",
@@ -46,7 +46,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "legacyUrl": "https://synergy.net.pk/blog-bmc-helix-partner-pakistan-service-desk-recurring-issues",
     "image": "",
     "category": "Managed IT",
-    "relatedServiceSlug": "managed-it"
+    "relatedServiceSlug": "network-infrastructure"
   },
   {
     "slug": "ai-powered-observability-dynatrace-pakistan",
@@ -55,7 +55,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "legacyUrl": "https://synergy.net.pk/blog-ai-powered-observability-dynatrace-pakistan",
     "image": "",
     "category": "Observability",
-    "relatedServiceSlug": "managed-it"
+    "relatedServiceSlug": "network-infrastructure"
   },
   {
     "slug": "supermicro-partner-pakistan-infrastructure-utilization-imbalance",
@@ -226,7 +226,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "legacyUrl": "https://synergy.net.pk/blog-future-of-managed-it-solution-providers-in-pakistan",
     "image": "",
     "category": "Managed IT",
-    "relatedServiceSlug": "managed-it"
+    "relatedServiceSlug": "network-infrastructure"
   },
   {
     "slug": "how-nutanix-partners-powering-enterprise-cloud-transformation-in-pakistan",
@@ -406,7 +406,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "legacyUrl": "https://synergy.net.pk/blog-how-robotic-process-automation-solutions-deliver-high-roi",
     "image": "",
     "category": "RPA",
-    "relatedServiceSlug": "microsoft-365-cloud"
+    "relatedServiceSlug": "network-infrastructure"
   },
   {
     "slug": "understanding-the-roi-of-robotic-process-automation-solutions",
@@ -415,7 +415,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "legacyUrl": "https://synergy.net.pk/blog-understanding-the-roi-of-robotic-process-automation-solutions",
     "image": "",
     "category": "RPA",
-    "relatedServiceSlug": "microsoft-365-cloud"
+    "relatedServiceSlug": "network-infrastructure"
   },
   {
     "slug": "why-businesses-in-pakistan-need-a-reliable-infrastructure-solutions-provider",
@@ -460,7 +460,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "legacyUrl": "https://synergy.net.pk/blog-hidden-risks-in-robotic-process-automation-solutions",
     "image": null,
     "category": "RPA",
-    "relatedServiceSlug": "microsoft-365-cloud"
+    "relatedServiceSlug": "network-infrastructure"
   },
   {
     "slug": "robotic-process-automation-solutions-fail",
@@ -469,7 +469,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "legacyUrl": "https://synergy.net.pk/blog-robotic-process-automation-solutions-fail",
     "image": null,
     "category": "RPA",
-    "relatedServiceSlug": "microsoft-365-cloud"
+    "relatedServiceSlug": "network-infrastructure"
   },
   {
     "slug": "branch-out-your-business-with-data-availability-solutions-that-drive-success",
@@ -487,7 +487,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "legacyUrl": "https://synergy.net.pk/blog-why-robotic-process-automation-solutions-are-non-negotiable",
     "image": null,
     "category": "RPA",
-    "relatedServiceSlug": "microsoft-365-cloud"
+    "relatedServiceSlug": "network-infrastructure"
   },
   {
     "slug": "your-go-to-infrastructure-solutions-provider",
@@ -505,7 +505,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "legacyUrl": "https://synergy.net.pk/blog-robotic-process-automation-solutions-1",
     "image": null,
     "category": "RPA",
-    "relatedServiceSlug": "microsoft-365-cloud"
+    "relatedServiceSlug": "network-infrastructure"
   },
   {
     "slug": "infrastructure-solutions-provider",
@@ -523,7 +523,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "legacyUrl": "https://synergy.net.pk/blog-troubleshooting-robotic-process-automation-solutions",
     "image": null,
     "category": "RPA",
-    "relatedServiceSlug": "microsoft-365-cloud"
+    "relatedServiceSlug": "network-infrastructure"
   },
   {
     "slug": "what-are-data-availability-solutions",
@@ -541,7 +541,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "legacyUrl": "https://synergy.net.pk/blog-step-into-a-smarter-future-with-rpa",
     "image": null,
     "category": "RPA",
-    "relatedServiceSlug": "microsoft-365-cloud"
+    "relatedServiceSlug": "network-infrastructure"
   },
   {
     "slug": "reforming-business-efficiency-with-robotic-process-automation-solutions",
@@ -550,7 +550,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "legacyUrl": "https://synergy.net.pk/blog-reforming-business-efficiency-with-robotic-process-automation-solutions",
     "image": null,
     "category": "RPA",
-    "relatedServiceSlug": "microsoft-365-cloud"
+    "relatedServiceSlug": "network-infrastructure"
   },
   {
     "slug": "how-data-availability-solutions-safeguard-your-critical-assets",
@@ -676,7 +676,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "legacyUrl": "https://synergy.net.pk/blog-robotic-process-automation",
     "image": null,
     "category": "RPA",
-    "relatedServiceSlug": "microsoft-365-cloud"
+    "relatedServiceSlug": "network-infrastructure"
   },
   {
     "slug": "robotic-process-automation-solutions-revolutionize-operations",
@@ -685,7 +685,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "legacyUrl": "https://synergy.net.pk/blog-robotic-process-automation-solutions-revolutionize-operations",
     "image": null,
     "category": "RPA",
-    "relatedServiceSlug": "microsoft-365-cloud"
+    "relatedServiceSlug": "network-infrastructure"
   },
   {
     "slug": "comprehensive-security-solutions-for-business-protection",
@@ -766,7 +766,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "legacyUrl": "https://synergy.net.pk/blog-robotic-process-automation-solutions",
     "image": null,
     "category": "RPA",
-    "relatedServiceSlug": "microsoft-365-cloud"
+    "relatedServiceSlug": "network-infrastructure"
   },
   {
     "slug": "demystifying-robotic-process-automation-solutions",
@@ -775,7 +775,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "legacyUrl": "https://synergy.net.pk/blog-demystifying-robotic-process-automation-solutions",
     "image": null,
     "category": "RPA",
-    "relatedServiceSlug": "microsoft-365-cloud"
+    "relatedServiceSlug": "network-infrastructure"
   },
   {
     "slug": "the-real-impact-of-data-availability",
@@ -820,7 +820,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "legacyUrl": "https://synergy.net.pk/blog-revolutionizing-efficiency-exploring-robotic-process-automation-solutions",
     "image": null,
     "category": "RPA",
-    "relatedServiceSlug": "microsoft-365-cloud"
+    "relatedServiceSlug": "network-infrastructure"
   },
   {
     "slug": "dell-partners-in-pakistan-revolutionizing-it-landscapes",
@@ -883,7 +883,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "legacyUrl": "https://synergy.net.pk/blog-revolutionizing-workflows-robotic-process-automation-solutions",
     "image": null,
     "category": "RPA",
-    "relatedServiceSlug": "microsoft-365-cloud"
+    "relatedServiceSlug": "network-infrastructure"
   },
   {
     "slug": "enterprise-application-provider",
@@ -964,7 +964,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "legacyUrl": "https://synergy.net.pk/blog-dynatrace-partners-in-pakistan",
     "image": null,
     "category": "Observability",
-    "relatedServiceSlug": "managed-it"
+    "relatedServiceSlug": "network-infrastructure"
   },
   {
     "slug": "ddn-products-in-pakistan",
@@ -1045,7 +1045,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "legacyUrl": "https://synergy.net.pk/blog-automation-anywhere-in-pakistan",
     "image": null,
     "category": "RPA",
-    "relatedServiceSlug": "microsoft-365-cloud"
+    "relatedServiceSlug": "network-infrastructure"
   },
   {
     "slug": "credence-partners-in-pakistan",
@@ -1189,7 +1189,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "legacyUrl": "https://synergy.net.pk/dynatrace-partner-in-pakistan",
     "image": null,
     "category": "Observability",
-    "relatedServiceSlug": "managed-it"
+    "relatedServiceSlug": "network-infrastructure"
   },
   {
     "slug": "red-hat-partners-in-pakistan",
@@ -1306,7 +1306,7 @@ export const blogPostsGenerated: BlogPostMeta[] = [
     "legacyUrl": "https://synergy.net.pk/blog-the-automation-anywhere-partner-program-in-pakistan",
     "image": null,
     "category": "RPA",
-    "relatedServiceSlug": "microsoft-365-cloud"
+    "relatedServiceSlug": "network-infrastructure"
   },
   {
     "slug": "dell-technologies-partners-driving-growth-in-pakistan",

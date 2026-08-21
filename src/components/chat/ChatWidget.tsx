@@ -16,11 +16,11 @@ type Message = {
 };
 
 const WELCOME_CONTENT =
-  "Hi — I'm Synergy Assistant for Synergy Computers (Pvt.) Ltd.\n\nAsk me about our IT services, technology partners, industries we serve in Pakistan, or how to get in touch for a quote.";
+  "Hi — I'm Synergy Assistant for Synergy Computers (Pvt.) Ltd.\n\nAsk me about our IT services, technology partners, case studies, or how to get in touch for a quote.";
 
 const QUICK_REPLIES = [
   "What services do you offer?",
-  "Which industries do you serve?",
+  "Who are your partners?",
   "Get a quote",
   "Contact info",
 ];

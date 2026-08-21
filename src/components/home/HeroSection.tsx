@@ -24,7 +24,6 @@ export async function HeroSection() {
         className="min-h-svh border-b border-border/40"
         backdrop={
           <>
-            <div className="absolute inset-0 bg-grid-subtle opacity-20" aria-hidden />
             <HeroVideoBackground
               eventPlaylist={
                 eventVideos
@@ -33,12 +32,9 @@ export async function HeroSection() {
               }
               landingPlaylist={eventVideos ? null : { videos: landingVideos }}
             />
+            {/* Left-only text shade — no full musky wash over the video */}
             <div
-              className="absolute inset-0 z-[2] bg-gradient-to-r from-black/85 via-black/55 to-black/25 lg:to-black/15"
-              aria-hidden
-            />
-            <div
-              className="absolute inset-0 z-[2] bg-gradient-to-t from-black/70 via-black/20 to-transparent"
+              className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-r from-black/50 via-black/15 to-transparent lg:from-black/40 lg:via-transparent"
               aria-hidden
             />
           </>

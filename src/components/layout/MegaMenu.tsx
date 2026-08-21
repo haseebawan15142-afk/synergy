@@ -205,7 +205,7 @@ export function MegaMenu({ label, href, menu, active, onMedia }: MegaMenuProps) 
                                     <span
                                       className={cn(
                                         "flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden text-white transition",
-                                        link.logoUrl && "rounded-md bg-white/95 p-1",
+                                        link.logoUrl && "rounded-md bg-transparent p-0.5",
                                       )}
                                     >
                                       {link.logoUrl ? (
@@ -267,7 +267,7 @@ export function MegaMenu({ label, href, menu, active, onMedia }: MegaMenuProps) 
                     <div>
                       {featured.image ? (
                         featured.imageContain ? (
-                          <div className="mb-4 flex h-16 items-center rounded-lg bg-white px-4 py-3 ring-1 ring-white/15 sm:h-[4.5rem] sm:px-5 sm:py-4">
+                          <div className="mb-4 flex h-16 items-center rounded-lg bg-transparent px-2 py-2 ring-1 ring-white/15 sm:h-[4.5rem] sm:px-3 sm:py-3">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               key={featured.image}
@@ -302,6 +302,22 @@ export function MegaMenu({ label, href, menu, active, onMedia }: MegaMenuProps) 
                       <p className="mt-2 text-sm leading-relaxed text-white/70">
                         {featured.description}
                       </p>
+                      {featured.features?.length ? (
+                        <ul className="mt-4 space-y-2">
+                          {featured.features.map((feature) => (
+                            <li
+                              key={feature}
+                              className="flex items-start gap-2 text-[0.8rem] leading-snug text-white/80"
+                            >
+                              <span
+                                className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-synergy shadow-[0_0_8px_rgba(124,58,237,0.8)]"
+                                aria-hidden
+                              />
+                              <span>{feature}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
                     </div>
                     <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-white">
                       {featured.ctaLabel}

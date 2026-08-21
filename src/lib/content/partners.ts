@@ -28,7 +28,7 @@ export const partners: Partner[] = [
   {
     name: "Veritas",
     slug: "veritas",
-    logo: "/images/partners/veritas.webp",
+    logo: "/images/partner-logos/veritas.webp",
     href: "https://www.veritas.com/",
     heroImageUrl: "/images/partners/hero/veritas.webp",
     category: "Data Protection",
@@ -51,7 +51,7 @@ export const partners: Partner[] = [
   {
     name: "Dynatrace",
     slug: "dynatrace",
-    logo: "/brand/dynatrace/wordmark.svg",
+    logo: "/images/partner-logos/dynatrace.webp",
     href: "https://www.dynatrace.com/",
     heroImageUrl: "/images/partners/hero/dynatrace.webp",
     category: "Observability",
@@ -74,7 +74,7 @@ export const partners: Partner[] = [
   {
     name: "Utimaco",
     slug: "utimaco",
-    logo: "/images/partners/utimaco.webp",
+    logo: "/images/partner-logos/utimaco.webp",
     href: "https://utimaco.com/",
     heroImageUrl: "/images/partners/hero/utimaco.webp",
     category: "Security",
@@ -97,7 +97,7 @@ export const partners: Partner[] = [
   {
     name: "Oracle",
     slug: "oracle",
-    logo: "/images/partners/oracle.webp",
+    logo: "/images/partner-logos/oracle.webp",
     href: "https://www.oracle.com/",
     heroImageUrl: "/images/partners/hero/oracle.webp",
     category: "Enterprise Applications",
@@ -120,7 +120,7 @@ export const partners: Partner[] = [
   {
     name: "NetApp",
     slug: "netapp",
-    logo: "/images/partners/netapp.webp",
+    logo: "/images/partner-logos/netapp.webp",
     href: "https://www.netapp.com/",
     heroImageUrl: "/images/partners/hero/netapp.webp",
     category: "Storage",
@@ -143,7 +143,7 @@ export const partners: Partner[] = [
   {
     name: "Hitachi Vantara",
     slug: "hitachi-vantara",
-    logo: "/images/partners/hitachi-vantara.webp",
+    logo: "/images/partner-logos/hitachi-vantara.webp",
     href: "https://www.hitachivantara.com/",
     heroImageUrl: "/images/partners/hero/hitachi-vantara.webp",
     category: "Data Infrastructure",
@@ -166,7 +166,7 @@ export const partners: Partner[] = [
   {
     name: "Infor",
     slug: "infor",
-    logo: "/images/partners/infor.webp",
+    logo: "/images/partner-logos/infor.webp",
     href: "https://www.infor.com/",
     heroImageUrl: "/images/partners/hero/infor.webp",
     category: "ERP",
@@ -189,7 +189,7 @@ export const partners: Partner[] = [
   {
     name: "Dell Technologies",
     slug: "dell-technologies",
-    logo: "/images/partners/dell.webp",
+    logo: "/images/partner-logos/dell.webp",
     href: "https://www.dell.com/",
     heroImageUrl: "/images/partners/hero/dell-technologies.webp",
     category: "Infrastructure",
@@ -212,7 +212,7 @@ export const partners: Partner[] = [
   {
     name: "DDN",
     slug: "ddn",
-    logo: "/images/partners/ddn.webp",
+    logo: "/images/partner-logos/ddn.webp",
     href: "https://www.ddn.com/",
     heroImageUrl: "/images/partners/hero/ddn.webp",
     category: "High-Performance Storage",
@@ -235,7 +235,7 @@ export const partners: Partner[] = [
   {
     name: "Convene",
     slug: "convene",
-    logo: "/images/partners/convene.webp",
+    logo: "/images/partner-logos/convene.webp",
     href: "https://www.azeusconvene.com/",
     heroImageUrl: "/images/partners/hero/convene.webp",
     category: "Board Collaboration",
@@ -258,7 +258,7 @@ export const partners: Partner[] = [
   {
     name: "Innovative",
     slug: "innovative",
-    logo: "/images/partners/innovative.webp",
+    logo: "/images/partner-logos/innovative.webp",
     href: "https://www.iii.com/",
     heroImageUrl: "/images/partners/hero/innovative.webp",
     category: "Library Solutions",
@@ -281,7 +281,7 @@ export const partners: Partner[] = [
   {
     name: "Automation Anywhere",
     slug: "automation-anywhere",
-    logo: "/images/partners/automation-anywhere.webp",
+    logo: "/images/partner-logos/automation-anywhere.webp",
     href: "https://www.automationanywhere.com/",
     heroImageUrl: "/images/partners/hero/automation-anywhere.webp",
     category: "Intelligent Automation",
@@ -305,7 +305,7 @@ export const partners: Partner[] = [
   {
     name: "BMC Helix",
     slug: "bmc-helix",
-    logo: "/images/partners/profile/bmc-helix.webp",
+    logo: "/images/partner-logos/bmc-helix.webp",
     href: "https://www.bmc.com/helix",
     category: "IT Service Management",
     shortDescription:
@@ -323,7 +323,7 @@ export const partners: Partner[] = [
   {
     name: "EnterpriseDB",
     slug: "enterprisedb",
-    logo: "/images/partners/profile/enterprisedb.webp",
+    logo: "/images/partner-logos/enterprisedb.webp",
     href: "https://www.enterprisedb.com/",
     category: "Database",
     shortDescription:
@@ -341,7 +341,7 @@ export const partners: Partner[] = [
   {
     name: "KnowBe4",
     slug: "knowbe4",
-    logo: "/images/partners/profile/knowbe4.webp",
+    logo: "/images/partner-logos/knowbe4.webp",
     href: "https://www.knowbe4.com/",
     category: "Security Awareness",
     shortDescription:
@@ -359,7 +359,7 @@ export const partners: Partner[] = [
   {
     name: "Hexagon",
     slug: "hexagon",
-    logo: "/images/partners/profile/hexagon.webp",
+    logo: "/images/partner-logos/hexagon.webp",
     href: "https://hexagon.com/",
     category: "Enterprise Asset Management",
     shortDescription:
@@ -377,7 +377,7 @@ export const partners: Partner[] = [
   {
     name: "Nutanix",
     slug: "nutanix",
-    logo: "/images/partners/profile/nutanix.svg",
+    logo: "/images/partner-logos/nutanix.webp",
     href: "https://www.nutanix.com/",
     category: "Hybrid Cloud",
     shortDescription:
@@ -395,7 +395,7 @@ export const partners: Partner[] = [
   {
     name: "Cohesity",
     slug: "cohesity",
-    logo: "/brand/cohesity/wordmark.svg",
+    logo: "/images/partner-logos/cohesity.webp",
     href: "https://www.cohesity.com/",
     category: "Data Security",
     shortDescription:
@@ -413,7 +413,7 @@ export const partners: Partner[] = [
   {
     name: "Pure Storage",
     slug: "pure-storage",
-    logo: "/images/partners/profile/pure-storage.webp",
+    logo: "/images/partner-logos/pure-storage.webp",
     href: "https://www.purestorage.com/",
     category: "All-Flash Storage",
     shortDescription:
@@ -431,7 +431,7 @@ export const partners: Partner[] = [
   {
     name: "Proxmox",
     slug: "proxmox",
-    logo: "/images/partners/profile/proxmox.webp",
+    logo: "/images/partner-logos/proxmox.webp",
     href: "https://www.proxmox.com/",
     category: "Virtualization",
     shortDescription:
@@ -449,7 +449,7 @@ export const partners: Partner[] = [
   {
     name: "Lenovo",
     slug: "lenovo",
-    logo: "/images/partners/profile/lenovo.svg",
+    logo: "/images/partner-logos/lenovo.webp",
     href: "https://www.lenovo.com/",
     category: "Infrastructure",
     shortDescription:
@@ -467,7 +467,7 @@ export const partners: Partner[] = [
   {
     name: "Red Hat",
     slug: "red-hat",
-    logo: "/images/partners/profile/red-hat.webp",
+    logo: "/images/partner-logos/red-hat.webp",
     href: "https://www.redhat.com/",
     category: "Open Source Platform",
     shortDescription:
@@ -485,7 +485,7 @@ export const partners: Partner[] = [
   {
     name: "Fujitsu",
     slug: "fujitsu",
-    logo: "/images/partners/profile/fujitsu.webp",
+    logo: "/images/partner-logos/fujitsu.webp",
     href: "https://www.fujitsu.com/",
     category: "Infrastructure",
     shortDescription:
@@ -503,7 +503,7 @@ export const partners: Partner[] = [
   {
     name: "IBM",
     slug: "ibm",
-    logo: "/images/partners/profile/ibm.svg",
+    logo: "/images/partner-logos/ibm.webp",
     href: "https://www.ibm.com/",
     category: "Enterprise Computing",
     shortDescription:
@@ -521,7 +521,7 @@ export const partners: Partner[] = [
   {
     name: "Supermicro",
     slug: "supermicro",
-    logo: "/images/partners/profile/supermicro.webp",
+    logo: "/images/partner-logos/supermicro.webp",
     href: "https://www.supermicro.com/",
     category: "Infrastructure",
     shortDescription:
@@ -539,7 +539,7 @@ export const partners: Partner[] = [
   {
     name: "Cisco",
     slug: "cisco",
-    logo: "/images/partners/profile/cisco.webp",
+    logo: "/images/partner-logos/cisco.webp",
     href: "https://www.cisco.com/",
     category: "Networking",
     shortDescription:
@@ -557,7 +557,7 @@ export const partners: Partner[] = [
   {
     name: "Arctera",
     slug: "arctera",
-    logo: "/images/partners/profile/arctera.webp",
+    logo: "/images/partner-logos/arctera.webp",
     href: "https://www.arctera.io/",
     category: "Data Resilience",
     shortDescription:

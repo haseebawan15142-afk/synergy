@@ -12,42 +12,26 @@ export type Service = {
 export const services: Service[] = [
   {
     slug: "on-site-it-support",
-    title: "On-site IT support",
+    title: "Precision Field Support",
     summary:
-      "Expert engineers at your location for deployment, troubleshooting, and operational support across your IT estate.",
-    image: "/images/services/on-site-it-support.webp",
+      "Certified engineers on location for deployment, break-fix, and high-stakes project delivery across your estate.",
+    image: "/images/services/on-site-it-support.png",
     icon: "headset",
   },
   {
     slug: "network-infrastructure",
-    title: "Network & infrastructure",
+    title: "Intelligent Infrastructure",
     summary:
-      "Design, transformation, and management of networks and infrastructure — from strategy to workplace solutions.",
-    image: "/images/services/network-infrastructure.webp",
+      "Modern network and systems architecture — designed, transformed, and optimized for reliable enterprise scale.",
+    image: "/images/services/network-infrastructure.png",
     icon: "network",
   },
   {
     slug: "data-backup-recovery",
-    title: "Data backup & recovery",
+    title: "Data Resilience & Continuity",
     summary:
-      "Data availability and protection solutions to keep critical workloads resilient and recoverable.",
-    image: "/images/services/data-backup-recovery.webp",
+      "Protection and recovery architectures that keep critical workloads recoverable when disruption hits.",
+    image: "/images/services/data-backup-recovery.png",
     icon: "databaseBackup",
-  },
-  {
-    slug: "microsoft-365-cloud",
-    title: "Microsoft 365 & cloud",
-    summary:
-      "Cloud and collaboration setup, migration, and governance aligned to your business objectives.",
-    image: "/images/services/microsoft-365-cloud.webp",
-    icon: "cloud",
-  },
-  {
-    slug: "managed-it",
-    title: "Managed IT & maintenance",
-    summary:
-      "24×7 third-party support and maintenance across your infrastructure — SLA-backed and cost-effective.",
-    image: "/images/services/managed-it.webp",
-    icon: "serverCog",
   },
 ];

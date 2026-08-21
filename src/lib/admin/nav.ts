@@ -18,6 +18,7 @@ import {
   PanelTop,
   Settings,
   UserCircle,
+  FolderKanban,
 } from "lucide-react";
 
 export type AdminNavItem = {
@@ -37,6 +38,7 @@ export const adminNavItems: AdminNavItem[] = [
   { label: "Services", href: "/admin/services", icon: Briefcase, phase: 4, implemented: true },
   { label: "Partners", href: "/admin/partners", icon: Handshake, phase: 4, implemented: true },
   { label: "Clients", href: "/admin/clients", icon: Building2, phase: 4, implemented: true },
+  { label: "Case Studies", href: "/admin/case-studies", icon: FolderKanban, phase: 4, implemented: true },
   { label: "Careers", href: "/admin/careers", icon: ClipboardList, phase: 5, implemented: true },
   { label: "Newsletter", href: "/admin/newsletter", icon: Newspaper, phase: 5, implemented: true },
   { label: "Media", href: "/admin/media", icon: ImageIcon, phase: 2, implemented: true },

@@ -1,18 +1,19 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { invalidateCmsCache } from "@/lib/cms/cache";
 
 /**
  * Show local fallback immediately for fast first paint, then swap to CMS
- * data when Firestore responds. Empty arrays from a successful CMS read are
- * respected (so admin deletes show on the site).
+ * data when Firestore responds. Refetches on window focus so admin changes
+ * appear without a full hard reload.
  */
 export function useCmsList<T>(fallback: T[], loader: () => Promise<T[]>) {
   const [items, setItems] = useState<T[]>(fallback);
   const fallbackRef = useRef(fallback);
   fallbackRef.current = fallback;
 
-  useEffect(() => {
+  const load = useCallback(() => {
     let cancelled = false;
     loader()
       .then((next) => {
@@ -28,6 +29,27 @@ export function useCmsList<T>(fallback: T[], loader: () => Promise<T[]>) {
       cancelled = true;
     };
   }, [loader]);
+
+  useEffect(() => load(), [load]);
+
+  useEffect(() => {
+    const onFocus = () => {
+      invalidateCmsCache();
+      load();
+    };
+    const onVisible = () => {
+      if (document.visibilityState === "visible") {
+        invalidateCmsCache();
+        load();
+      }
+    };
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [load]);
 
   return items;
 }

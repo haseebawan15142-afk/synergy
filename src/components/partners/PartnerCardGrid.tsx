@@ -60,7 +60,7 @@ export function PartnerCardGrid({
               <Reveal key={href} delay={Math.min(index * 0.04, 0.24)} as="li">
                 <Link href={href} className="digital-card group flex h-full flex-col p-5 sm:p-6">
                   <div className="relative z-[1] flex items-start justify-between gap-3">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-white/10 bg-white px-2 py-2 shadow-soft">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-xl border border-white/10 bg-transparent px-1.5 py-1.5">
                       {partner.logo ? (
                         partner.logo.toLowerCase().endsWith(".svg") ||
                         fallback?.toLowerCase().endsWith(".svg") ? (
@@ -68,7 +68,7 @@ export function PartnerCardGrid({
                             src={partner.logo}
                             fallbackSrc={fallback}
                             alt={partner.name}
-                            className="max-h-9 w-auto max-w-full object-contain"
+                            className="max-h-10 w-auto max-w-full object-contain"
                           />
                         ) : (
                           <ResilientImage
@@ -77,7 +77,7 @@ export function PartnerCardGrid({
                             alt={partner.name}
                             width={120}
                             height={48}
-                            className="max-h-9 w-auto max-w-full object-contain"
+                            className="max-h-10 w-auto max-w-full object-contain"
                           />
                         )
                       ) : (

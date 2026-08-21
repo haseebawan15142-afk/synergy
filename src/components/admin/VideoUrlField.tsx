@@ -38,27 +38,18 @@ export function VideoUrlField({
   async function handleFile(file: File | undefined) {
     if (!file) return;
     if (!isAcceptableVideoUpload(file)) {
-      toast.error("Please choose a video file (MP4, MOV, WebM, AVI, MKV, …)");
+      toast.error("Please choose a video file (any format: MP4, MOV, WebM, AVI, MKV, …)");
       return;
     }
     setUploading(true);
     setProgress(0);
     setPhase("converting");
     try {
-      let uploadFile = file;
-      try {
-        uploadFile = await convertVideoForFirebase(file, {
-          onProgress: (pct) => setProgress(Math.min(50, pct)),
-        });
-        toast.message("Converted to web MP4 (720p, faststart)");
-      } catch (convertErr) {
-        if (file.type === "video/mp4" || file.type === "video/webm") {
-          toast.message("Using original video (convert skipped)");
-          uploadFile = file;
-        } else {
-          throw convertErr;
-        }
-      }
+      // Always convert → required hero format (H.264 MP4, scaled, faststart, no audio).
+      const uploadFile = await convertVideoForFirebase(file, {
+        onProgress: (pct) => setProgress(Math.min(50, pct)),
+      });
+      toast.message("Converted to web MP4 (H.264, faststart)");
 
       setPhase("poster");
       setProgress(55);
@@ -125,7 +116,7 @@ export function VideoUrlField({
             : phase === "poster"
               ? `Creating poster… ${progress}%`
               : `Uploading… ${progress}%`
-          : "Any video → MP4 + auto poster (instant first paint)"}
+          : "Any format accepted → auto-converts to MP4 + poster"}
       </label>
       <MediaPicker
         open={open}

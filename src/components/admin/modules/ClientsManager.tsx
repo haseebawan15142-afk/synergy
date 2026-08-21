@@ -20,7 +20,7 @@ export function ClientsManager() {
   return (
     <CrudManager<ClientDoc>
       title="Clients"
-      description="Homepage Selected Clientele. Upload a logo, keep Active ON — when Firebase has active clients, the site uses only those (not local defaults)."
+      description="Homepage Selected Clientele. Upload high-quality transparent logos only. Active ON replaces local defaults — never keep old solid-white / low-quality marks."
       collection={COLLECTIONS.clients}
       fields={fields}
       empty="No clients"

@@ -81,12 +81,12 @@ export function resolveNavIconKey(href: string, label = ""): NavIconKey {
   const text = label.toLowerCase();
 
   // Services by slug
-  if (path.includes("on-site-it-support") || text.includes("on-site")) return "headset";
+  if (path.includes("on-site-it-support") || text.includes("on-site") || text.includes("field"))
+    return "headset";
   if (path.includes("network-infrastructure") || text.includes("network")) return "network";
-  if (path.includes("data-backup") || text.includes("backup")) return "databaseBackup";
-  if (path.includes("microsoft-365") || text.includes("cloud") || text.includes("microsoft"))
-    return "cloud";
-  if (path.includes("managed-it") || text.includes("managed")) return "serverCog";
+  if (path.includes("data-backup") || text.includes("backup") || text.includes("recovery") || text.includes("resilience"))
+    return "databaseBackup";
+  if (path.includes("managed-it") || text.includes("managed") || text.includes("operations")) return "serverCog";
 
   // Industries
   if (path.includes("banking") || text.includes("bank")) return "landmark";

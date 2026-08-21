@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import { ClientSuccess } from "@/components/home/ClientSuccess";
 import { ClienteleMarquee } from "@/components/home/ClienteleMarquee";
 import { PartnershipsMarquee } from "@/components/home/PartnershipsMarquee";
-import { CtaBand, IndustriesGrid } from "@/components/home/IndustriesGrid";
+import { CtaBand } from "@/components/home/CtaBand";
 import { HeroSection } from "@/components/home/HeroSection";
 import { ProblemsSection } from "@/components/home/ProblemsSection";
 import { RecentUpdatesSection } from "@/components/home/RecentUpdatesSection";
@@ -27,9 +26,7 @@ export default function HomePage() {
       <StorySection />
       <ProblemsSection />
       <PartnershipsMarquee />
-      <ClientSuccess />
       <RecentUpdatesSection />
-      <IndustriesGrid />
       <CtaBand />
     </>
   );

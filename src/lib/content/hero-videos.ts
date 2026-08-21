@@ -28,7 +28,7 @@ export function clipDurationMs(
 }
 
 /**
- * Landing page hero videos — plays one after another with crossfade.
+ * Landing page hero videos — each clip plays once, then smooth crossfade to the next (cycles).
  * Run `npm run optimize:videos` after replacing source files.
  * Oversized WebM siblings were removed (MP4 is smaller); optional `webm` omitted.
  */
@@ -58,10 +58,10 @@ export const heroVideos: HeroVideo[] = [
 /** Primary poster for mobile / slow connections (first clip). */
 export const heroFallbackPoster = heroVideos[0]?.poster ?? "/videos/hero/landing-01-poster.webp";
 
-/** How long each hero clip stays visible before switching (ms) */
+/** Fallback duration if a clip never fires `ended` (ms) — landing prefers full play-once. */
 export const heroVideoIntervalMs = 8000;
 
-/** Crossfade between hero clips (ms) */
+/** Smooth crossfade between landing hero clips (ms) */
 export const heroVideoTransitionMs = 1200;
 
 /** Event-theme hero: switch every 3s with a smooth crossfade */

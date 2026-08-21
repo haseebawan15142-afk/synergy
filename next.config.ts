@@ -33,6 +33,30 @@ const nextConfig = {
   serverExternalPackages: ["ffmpeg-static", "firebase-admin", "isomorphic-dompurify", "jsdom"],
   poweredByHeader: false,
   compress: true,
+  async redirects() {
+    return [
+      {
+        source: "/services/microsoft-365-cloud",
+        destination: "/services",
+        permanent: true,
+      },
+      {
+        source: "/services/managed-it",
+        destination: "/services",
+        permanent: true,
+      },
+      {
+        source: "/industries",
+        destination: "/services",
+        permanent: true,
+      },
+      {
+        source: "/industries/:slug",
+        destination: "/services",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

@@ -19,7 +19,7 @@ type BrandLogoProps = {
 };
 
 /**
- * Header/footer brand mark — CMS URLs first, then bundled Synergy logo.
+ * Header/footer brand mark from Website Settings (CMS). Empty → text brand.
  */
 export function BrandLogo({
   variant = "header",
@@ -44,33 +44,31 @@ export function BrandLogo({
 
   const label = clean(companyName) || siteConfig.legalName;
   const showImage = hasBrandLogoSrc(imageSrc) && !broken;
-  const markHeight = variant === "footer" ? 44 : undefined;
 
   return (
     <div
-      className={cn("flex min-w-0 items-center gap-2 sm:gap-3", className)}
+      className={cn(
+        "flex min-w-0 items-center gap-2 sm:gap-3",
+        variant === "header" && "h-11 sm:h-12 lg:h-14",
+        className,
+      )}
       aria-label={label}
     >
       {showImage ? (
         <Image
           src={imageSrc}
           alt=""
-          width={480}
+          width={640}
           height={160}
           priority={variant === "header"}
           unoptimized
           onError={() => setBroken(true)}
           className={cn(
             "w-auto shrink-0 object-contain object-left",
-            variant === "header" && "h-9 sm:h-10 lg:h-11",
-            variant === "footer" && "h-12 max-h-12",
-            "max-w-[11rem] sm:max-w-[13rem] lg:max-w-[15rem]",
+            variant === "header" &&
+              "h-10 max-h-10 w-auto max-w-[13.5rem] sm:h-11 sm:max-h-11 sm:max-w-[16rem] lg:h-12 lg:max-h-12 lg:max-w-[18rem]",
+            variant === "footer" && "h-12 max-h-12 max-w-[16rem]",
           )}
-          style={
-            variant === "footer"
-              ? { height: markHeight, maxHeight: markHeight }
-              : undefined
-          }
         />
       ) : (
         <div className="flex min-w-0 flex-col justify-center">

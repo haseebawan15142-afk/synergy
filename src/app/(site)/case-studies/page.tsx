@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { caseStudies } from "@/lib/content/case-studies";
+import { fetchCaseStudies } from "@/lib/cms/public-server";
 import { siteConfig } from "@/lib/content/site";
 
 export const metadata: Metadata = {
@@ -14,7 +14,9 @@ export const metadata: Metadata = {
 
 export const revalidate = 60;
 
-export default function CaseStudiesPage() {
+export default async function CaseStudiesPage() {
+  const studies = await fetchCaseStudies();
+
   return (
     <>
       <PageHeader
@@ -22,7 +24,7 @@ export default function CaseStudiesPage() {
         description="Outcomes from enterprise and institutional engagements across Pakistan."
       />
       <ul className="page-container section-y-tight grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {caseStudies.map((study) => (
+        {studies.map((study) => (
           <li key={study.slug}>
             <Link
               href={`/case-studies/${study.slug}`}

@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { caseStudies } from "@/lib/content/case-studies";
-import { industries } from "@/lib/content/industries";
 import {
+  fetchCaseStudies,
   fetchPartners,
   fetchPublishedBlogs,
   fetchServices,
@@ -19,7 +19,6 @@ const staticPaths: {
   { path: "/", changeFrequency: "daily", priority: 1 },
   { path: "/about", changeFrequency: "weekly", priority: 0.8 },
   { path: "/services", changeFrequency: "weekly", priority: 0.9 },
-  { path: "/industries", changeFrequency: "weekly", priority: 0.8 },
   { path: "/partners", changeFrequency: "weekly", priority: 0.8 },
   { path: "/resources", changeFrequency: "daily", priority: 0.8 },
   { path: "/case-studies", changeFrequency: "monthly", priority: 0.7 },
@@ -48,10 +47,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   // CMS reads can fail in local/SSR environments; keep local content + other CMS lists independent.
-  const [blogsResult, servicesResult, partnersResult] = await Promise.allSettled([
+  const [blogsResult, servicesResult, partnersResult, caseStudiesResult] = await Promise.allSettled([
     fetchPublishedBlogs(200),
     fetchServices(),
     fetchPartners(),
+    fetchCaseStudies(),
   ]);
 
   if (blogsResult.status === "fulfilled") {
@@ -92,17 +92,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
   }
 
-  for (const industry of industries) {
-    if (!isPublicSlug(industry.slug)) continue;
-    entries.push({
-      url: `${base}/industries/${encodeURIComponent(industry.slug)}`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.6,
-    });
-  }
-
-  for (const study of caseStudies) {
+  const studies =
+    caseStudiesResult.status === "fulfilled" ? caseStudiesResult.value : caseStudies;
+  for (const study of studies) {
     if (!isPublicSlug(study.slug)) continue;
     entries.push({
       url: `${base}/case-studies/${encodeURIComponent(study.slug)}`,

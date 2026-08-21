@@ -162,11 +162,11 @@ export function Navbar({
           : navMegaMenus["/services"].featured,
         columns: [
           {
-            heading: "Infrastructure & Support",
+            heading: "Enterprise Infrastructure",
             links: withNavIcons(serviceLeft.map(serviceLink)),
           },
           {
-            heading: "Cloud & Data",
+            heading: "Managed Operations",
             links: withNavIcons(serviceRight.map(serviceLink)),
           },
         ],
@@ -238,62 +238,65 @@ export function Navbar({
   return (
     <>
     <header className={headerClass}>
-      <div className="page-container relative flex items-center justify-between gap-3 py-2.5 sm:gap-4 sm:py-3 lg:gap-8">
-        <motion.div
-          initial={reduce ? false : { opacity: 0.92 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, ease: motionEase }}
-          className="min-w-0 shrink"
-        >
-          <Link href="/" className="flex shrink-0 items-center gap-2 rounded-xl transition hover:opacity-90">
-            <CmsBrandLogo
-              variant="header"
-              theme={overMedia ? "dark" : "dark"}
-              logoUrl={logoUrl}
-              darkLogoUrl={darkLogoUrl}
-              footerLogoUrl={footerLogoUrl}
-              companyName={companyName}
-            />
-          </Link>
-        </motion.div>
+      <div className="page-container relative flex items-center justify-between gap-3 py-2.5 sm:gap-4 sm:py-3">
+        <div className="flex min-w-0 flex-1 items-center gap-8 lg:gap-10 xl:gap-12">
+          <motion.div
+            initial={reduce ? false : { opacity: 0.92 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, ease: motionEase }}
+            className="min-w-0 shrink-0"
+          >
+            <Link href="/" className="flex min-w-0 shrink-0 items-center rounded-xl transition hover:opacity-90">
+              <CmsBrandLogo
+                variant="header"
+                theme="dark"
+                className="[&_img]:!max-w-[11.5rem] sm:[&_img]:!max-w-[13rem] lg:[&_img]:!max-w-[14.5rem]"
+                logoUrl={logoUrl}
+                darkLogoUrl={darkLogoUrl}
+                footerLogoUrl={footerLogoUrl}
+                companyName={companyName}
+              />
+            </Link>
+          </motion.div>
 
-        <nav className="hidden items-center gap-1.5 lg:flex xl:gap-2" aria-label="Primary">
-          {headerNav.map((item) => {
-            const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
-            const menu = menus[item.href];
+          <nav className="hidden min-w-0 items-center gap-1.5 lg:flex xl:gap-2" aria-label="Primary">
+            {headerNav.map((item) => {
+              const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
+              const menu = menus[item.href];
 
-            if (menu) {
+              if (menu) {
+                return (
+                  <MegaMenu
+                    key={item.id || item.href}
+                    label={item.label}
+                    href={item.href}
+                    menu={menu}
+                    active={active}
+                    onMedia={glassNav}
+                  />
+                );
+              }
+
               return (
-                <MegaMenu
+                <NavLinkMotion
                   key={item.id || item.href}
-                  label={item.label}
                   href={item.href}
-                  menu={menu}
                   active={active}
-                  onMedia={glassNav}
-                />
+                  className={cn(
+                    "relative rounded-full px-4 py-2 text-sm font-medium transition-colors xl:px-5",
+                    active
+                      ? "text-white after:absolute after:inset-x-4 after:-bottom-0.5 after:h-0.5 after:rounded-full after:bg-gradient-cta after:shadow-[0_0_10px_rgba(255,45,170,0.65)]"
+                      : "text-white/85 hover:bg-white/10 hover:text-white",
+                  )}
+                >
+                  {item.label}
+                </NavLinkMotion>
               );
-            }
+            })}
+          </nav>
+        </div>
 
-            return (
-              <NavLinkMotion
-                key={item.id || item.href}
-                href={item.href}
-                active={active}
-                className={cn(
-                  "relative rounded-full px-4 py-2 text-sm font-medium transition-colors xl:px-5",
-                  active
-                    ? "text-white after:absolute after:inset-x-4 after:-bottom-0.5 after:h-0.5 after:rounded-full after:bg-gradient-cta after:shadow-[0_0_10px_rgba(255,45,170,0.65)]"
-                    : "text-white/85 hover:bg-white/10 hover:text-white",
-                )}
-              >
-                {item.label}
-              </NavLinkMotion>
-            );
-          })}
-        </nav>
-
-        <div className="hidden items-center gap-3 lg:flex">
+        <div className="hidden shrink-0 items-center gap-3 lg:flex">
           <ThemeSelector className="[&_button]:border-white/20 [&_button]:bg-white/5 [&_button]:text-white [&_button]:hover:bg-white/10 [&_button]:hover:border-synergy/40" />
           <Button
             href="/contact"
@@ -307,7 +310,7 @@ export function Navbar({
           </Button>
         </div>
 
-        <div className="flex items-center gap-1.5 lg:hidden">
+        <div className="flex shrink-0 items-center gap-1.5 lg:hidden">
           <ThemeSelector
             className={cn(
               "[&_button]:min-h-10 [&_button]:min-w-10 [&_button]:border-white/20 [&_button]:bg-white/5 [&_button]:px-2.5 [&_button]:text-white [&_span.hidden]:hidden",
@@ -443,7 +446,7 @@ export function Navbar({
                                     <span
                                       className={cn(
                                         "flex h-8 w-8 items-center justify-center overflow-hidden text-white",
-                                        link.logoUrl && "rounded-md bg-white/95 p-0.5",
+                                        link.logoUrl && "rounded-md bg-transparent p-0.5",
                                       )}
                                     >
                                       {link.logoUrl ? (

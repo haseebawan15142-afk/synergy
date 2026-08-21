@@ -44,6 +44,7 @@ import { blogPosts as localBlogs, type BlogPostMeta } from "@/lib/content/blog-p
 import { jobOpenings as localJobs } from "@/lib/content/careers";
 import { partners as localPartners, type Partner } from "@/lib/content/partners";
 import { clients as localClients, type ClientLogo } from "@/lib/content/clients";
+import { caseStudies as localCaseStudies, type CaseStudy } from "@/lib/content/case-studies";
 import {
   newsletterIssues as localNewsletterIssues,
   type NewsletterIssue,
@@ -60,10 +61,9 @@ import {
   type OfficeLocation,
 } from "@/lib/content/company-profile";
 import { siteConfig } from "@/lib/content/site";
-import { isRemoteStorageUrl } from "@/lib/media/asset-url";
+import { cleanAssetUrl, isRemoteStorageUrl, resolveResilientAssetUrl } from "@/lib/media/asset-url";
 import { cachedCms } from "@/lib/cms/cache";
 import { queryCmsDocs, readCmsDoc } from "@/lib/cms/firestore-bridge";
-import { resolveResilientAssetUrl } from "@/lib/media/asset-url";
 
 function firebaseReady() {
   return Boolean(process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID);
@@ -365,7 +365,7 @@ export async function fetchLandingHeroVideos(): Promise<HeroVideo[]> {
       return resolveLandingHeroVideos(settings.heroVideos);
     },
     () => resolveLandingHeroVideos(null),
-    60_000,
+    5_000,
   );
 }
 
@@ -383,7 +383,7 @@ function parsePipeRows(value: unknown): { title: string; description: string }[]
 
 export async function fetchServices(): Promise<Service[]> {
   return cmsRead(
-    "services:v7",
+    "services:v15",
     async () => {
       if (!firebaseReady()) return localServices;
       const docs = await queryCmsDocs(COLLECTIONS.services);
@@ -404,6 +404,10 @@ export async function fetchServices(): Promise<Service[]> {
           if (!title) return null;
           const slug = String(x.slug || d.id).trim();
           const local = localBySlug.get(slug.toLowerCase());
+          // Cloud + retired managed-IT catalog entries
+          if (slug.toLowerCase() === "microsoft-365-cloud") return null;
+          if (slug.toLowerCase() === "managed-it") return null;
+          if (/cloud/i.test(title) && !local) return null;
           const image = resolveResilientAssetUrl(
             String(x.imageUrl || x.bannerUrl || x.heroImageUrl || "").trim(),
             local?.image,
@@ -415,8 +419,11 @@ export async function fetchServices(): Promise<Service[]> {
           );
           return {
             slug,
-            title,
-            summary: String(x.shortDescription || x.description || local?.summary || ""),
+            // CMS owns catalog copy when present; local seed is fallback only.
+            title: title || local?.title || "",
+            summary: String(
+              x.shortDescription || x.description || local?.summary || "",
+            ).trim(),
             image,
             icon: icon || undefined,
             iconUrl: iconUrl || undefined,
@@ -432,7 +439,7 @@ export async function fetchServices(): Promise<Service[]> {
       return localServices;
     },
     () => localServices,
-    30_000,
+    5_000,
   );
 }
 
@@ -440,7 +447,7 @@ export async function fetchServiceBySlug(
   slug: string,
 ): Promise<{ service: Service; detail: ServiceDetail } | null> {
   const needle = slug.trim().toLowerCase();
-  if (!needle) return null;
+  if (!needle || needle === "microsoft-365-cloud" || needle === "managed-it") return null;
 
   const localService = localServices.find((s) => s.slug.toLowerCase() === needle) ?? null;
   const localDetail = getServiceDetail(needle);
@@ -533,7 +540,7 @@ export async function fetchServiceBySlug(
 
 export async function fetchClients(): Promise<ClientLogo[]> {
   return cmsRead(
-    "clients:v3",
+    "clients:v5",
     async () => {
       if (!firebaseReady()) return localClients;
       const snap = await getDocs(collection(getFirebaseDb(), COLLECTIONS.clients));
@@ -574,7 +581,94 @@ export async function fetchClients(): Promise<ClientLogo[]> {
       return localClients;
     },
     () => localClients,
+    5_000,
   );
+}
+
+function parseStringList(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value.map((item) => String(item).trim()).filter(Boolean);
+  }
+  return String(value ?? "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+}
+
+/** Case studies for homepage + /case-studies — CMS-first with local fallback. */
+export async function fetchCaseStudies(): Promise<CaseStudy[]> {
+  return cmsRead(
+    "caseStudies:v1",
+    async () => {
+      if (!firebaseReady()) return localCaseStudies;
+      const snap = await getDocs(collection(getFirebaseDb(), COLLECTIONS.caseStudies));
+      if (snap.empty) return localCaseStudies;
+
+      const localBySlug = new Map(localCaseStudies.map((c) => [c.slug.toLowerCase(), c]));
+
+      type Row = CaseStudy & { sortOrder: number };
+      const fromCms = snap.docs
+        .map((d): Row | null => {
+          const x = d.data();
+          if (x.active === false) return null;
+          const status = x.status ? String(x.status) : "published";
+          if (status !== "published") return null;
+
+          const client = String(x.client || x.title || "").trim();
+          const headline = String(x.headline || x.title || "").trim();
+          if (!client || !headline) return null;
+
+          const slug =
+            String(x.slug || d.id).trim() ||
+            client
+              .toLowerCase()
+              .replace(/[^a-z0-9]+/g, "-")
+              .replace(/^-+|-+$/g, "");
+          const local = localBySlug.get(slug.toLowerCase());
+          const image = resolveResilientAssetUrl(
+            String(x.imageUrl || x.image || x.coverUrl || "").trim(),
+            local?.image,
+          );
+          if (!image) return null;
+
+          const metrics = parseStringList(x.metrics);
+          const body = parseStringList(x.body);
+          const baseMetrics = metrics.length ? metrics : [...(local?.metrics ?? [])];
+          if (!baseMetrics.length) return null;
+          const m0 = baseMetrics[0] || "";
+          const m1 = baseMetrics[1] || m0;
+          const m2 = baseMetrics[2] || m1;
+
+          return {
+            slug,
+            client,
+            image,
+            industry: String(x.industry || local?.industry || "Enterprise").trim(),
+            headline,
+            summary: String(x.summary || x.shortDescription || local?.summary || "").trim(),
+            metrics: [m0, m1, m2],
+            body: body.length ? body : local?.body || [],
+            sortOrder: typeof x.sortOrder === "number" ? x.sortOrder : Number.MAX_SAFE_INTEGER,
+          };
+        })
+        .filter((c): c is Row => c !== null)
+        .sort((a, b) => a.sortOrder - b.sortOrder || a.client.localeCompare(b.client));
+
+      if (fromCms.length > 0) {
+        return fromCms.map(({ sortOrder: _s, ...study }) => study);
+      }
+      return localCaseStudies;
+    },
+    () => localCaseStudies,
+    30_000,
+  );
+}
+
+export async function fetchCaseStudyBySlug(slug: string): Promise<CaseStudy | null> {
+  const needle = slug.trim().toLowerCase();
+  if (!needle) return null;
+  const all = await fetchCaseStudies();
+  return all.find((c) => c.slug.toLowerCase() === needle) ?? null;
 }
 
 /** Default header items when CMS primary nav is empty (matches siteConfig.nav). */
@@ -588,11 +682,15 @@ export function defaultHeaderNav(): NavItemDoc[] {
 
 export async function fetchHeaderNav(): Promise<NavItemDoc[]> {
   return cmsRead(
-    "navigation:header:v1",
+    "navigation:header:v3",
     async () => {
       if (!firebaseReady()) return defaultHeaderNav();
       const cms = await fetchNav(DOCS.navigationPrimary);
-      const items = cms?.filter((item) => !item.hidden && item.label && item.href) || [];
+      const items =
+        cms
+          ?.filter((item) => !item.hidden && item.label && item.href)
+          .filter((item) => !/^\/industries(\/|$)/i.test(item.href.trim()))
+          .filter((item) => !/^industries$/i.test(item.label.trim())) || [];
       return items.length ? items : defaultHeaderNav();
     },
     defaultHeaderNav,
@@ -904,7 +1002,7 @@ function withPartnerFallbacks(partner: Partner): Partner {
 
 export async function fetchPartners(): Promise<Partner[]> {
   return cmsRead(
-    "partners:v6",
+    "partners:v10",
     async () => {
       if (!firebaseReady()) {
         return localPartners.map(withPartnerFallbacks);
@@ -963,7 +1061,7 @@ export async function fetchPartners(): Promise<Partner[]> {
       return localPartners.map(withPartnerFallbacks);
     },
     () => localPartners.map(withPartnerFallbacks),
-    30_000,
+    5_000,
   );
 }
 

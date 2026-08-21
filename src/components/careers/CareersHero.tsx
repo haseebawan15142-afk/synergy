@@ -16,14 +16,9 @@ export function CareersHero() {
         className="object-cover object-center"
         aria-hidden
       />
-      {/* Keep headline readable over the photo */}
-      <div className="pointer-events-none absolute inset-0 bg-black/55" aria-hidden />
+      {/* Left-only text shade — keep photo sharp */}
       <div
-        className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-black/30"
-        aria-hidden
-      />
-      <div
-        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/20"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/50 via-black/20 to-transparent"
         aria-hidden
       />
 

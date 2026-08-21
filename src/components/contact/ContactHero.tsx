@@ -2,7 +2,7 @@ import Image from "next/image";
 import { Reveal } from "@/components/motion/Reveal";
 import { PremiumTitle } from "@/components/effects/PremiumTitle";
 
-export const contactHeroBackground = "/images/contact/hero-background.webp";
+export const contactHeroBackground = "/images/contact/hero-background.png";
 
 type ContactHeroProps = {
   title: string;
@@ -23,17 +23,12 @@ export function ContactHero({ title, description, children }: ContactHeroProps) 
         fill
         priority
         sizes="100vw"
-        className="object-cover object-[28%_center] sm:object-center"
+        className="object-cover object-[62%_center] sm:object-[58%_center]"
         aria-hidden
       />
-      {/* Light veil — keep office + logo wall readable for visitors */}
-      <div className="pointer-events-none absolute inset-0 bg-black/20" aria-hidden />
+      {/* Left-only text shade — keep team + skyline sharp on the right */}
       <div
-        className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/70 via-black/35 to-transparent lg:via-black/20"
-        aria-hidden
-      />
-      <div
-        className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-black/20"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black/55 via-black/20 to-transparent lg:via-transparent"
         aria-hidden
       />
 

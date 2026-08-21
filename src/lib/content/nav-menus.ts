@@ -1,5 +1,4 @@
 import { services } from "@/lib/content/services";
-import { industries } from "@/lib/content/industries";
 import { partnerDetailPath, partners } from "@/lib/content/partners";
 import { dynatracePartner } from "@/lib/content/dynatrace-partner";
 import { getRecentBlogPosts } from "@/lib/content/blog-posts";
@@ -15,6 +14,8 @@ export type MegaMenuFeatured = {
   /** Use for logos/wordmarks (e.g. Dynatrace) instead of photo-style object-cover. */
   imageContain?: boolean;
   icon?: string;
+  /** Modern capability bullets shown in the partners featured panel */
+  features?: string[];
 };
 
 export type MegaMenuLink = {
@@ -47,9 +48,6 @@ const half = <T,>(arr: T[]): [T[], T[]] => {
 const [servicesLeft, servicesRight] = half(services);
 const featuredService = services[0];
 
-const [industriesLeft, industriesRight] = half(industries);
-const featuredIndustry = industries.find((i) => i.slug === "healthcare") ?? industries[0];
-
 const recentPost = getRecentBlogPosts(1)[0];
 
 /** Featured panel payload for a partner row in the Partners mega menu. */
@@ -60,7 +58,10 @@ export function partnerFeaturedPreview(partner: {
   category?: string;
   shortDescription?: string;
   taglines?: string[];
+  keySolutions?: string[];
 }): MegaMenuFeatured {
+  const modernFeatures = (partner.keySolutions || []).slice(0, 4);
+
   if (partner.slug === "dynatrace") {
     return {
       eyebrow: dynatracePartner.badge,
@@ -71,6 +72,14 @@ export function partnerFeaturedPreview(partner: {
       image: dynatracePartner.logo,
       imageContain: true,
       icon: "handshake",
+      features: modernFeatures.length
+        ? modernFeatures
+        : [
+            "AI-powered full-stack observability",
+            "Automated root-cause analysis",
+            "Digital experience monitoring",
+            "Cloud & Kubernetes visibility",
+          ],
     };
   }
 
@@ -85,6 +94,7 @@ export function partnerFeaturedPreview(partner: {
     image: partner.logo,
     imageContain: true,
     icon: "handshake",
+    features: modernFeatures,
   };
 }
 
@@ -95,6 +105,7 @@ export function partnerNavLink(partner: {
   category?: string;
   shortDescription?: string;
   taglines?: string[];
+  keySolutions?: string[];
 }): MegaMenuLink {
   return {
     label: partner.name,
@@ -114,23 +125,12 @@ function serviceLinks(list: typeof services) {
   );
 }
 
-function industryLinks(list: typeof industries) {
-  return withNavIcons(
-    list.map((i) => ({
-      label: i.title,
-      href: `/industries/${i.slug}`,
-      icon: resolveNavIconKey(`/industries/${i.slug}`, i.title),
-    })),
-  );
-}
-
 /** Menus whose Lucide icons are edited in Admin → Navigation → Mega menus. */
-export const MEGA_MENU_ICON_KEYS = ["/about", "/industries", "/resources"] as const;
+export const MEGA_MENU_ICON_KEYS = ["/about", "/resources"] as const;
 export type MegaMenuIconKey = (typeof MEGA_MENU_ICON_KEYS)[number];
 
 export const MEGA_MENU_ICON_SECTION_LABELS: Record<MegaMenuIconKey, string> = {
   "/about": "About (Company)",
-  "/industries": "Industries",
   "/resources": "Insights",
 };
 
@@ -146,12 +146,6 @@ export function defaultMegaMenuIconLinks(): Record<
         { label: "Message from our CEO", href: "/about#ceo-message-heading", icon: "messageSquare" },
         { label: "Board of Directors", href: "/about#board", icon: "users" },
         { label: "Our Accomplishments", href: "/about#accomplishments", icon: "award" },
-      ]),
-    },
-    "/industries": {
-      links: withNavIcons([
-        ...industryLinks(industriesLeft),
-        ...industryLinks(industriesRight),
       ]),
     },
     "/resources": {
@@ -176,33 +170,12 @@ export const navMegaMenus: Record<string, MegaMenuConfig> = {
     },
     columns: [
       {
-        heading: "Infrastructure & Support",
+        heading: "Enterprise Infrastructure",
         links: serviceLinks(servicesLeft),
       },
       {
-        heading: "Cloud & Data",
+        heading: "Managed Operations",
         links: serviceLinks(servicesRight),
-      },
-    ],
-  },
-
-  "/industries": {
-    featured: {
-      eyebrow: "Featured industry",
-      title: featuredIndustry.title,
-      description: featuredIndustry.summary,
-      href: `/industries/${featuredIndustry.slug}`,
-      ctaLabel: "Learn more",
-      icon: "landmark",
-    },
-    columns: [
-      {
-        heading: "Industries",
-        links: industryLinks(industriesLeft),
-      },
-      {
-        heading: "Sectors",
-        links: industryLinks(industriesRight),
       },
     ],
   },

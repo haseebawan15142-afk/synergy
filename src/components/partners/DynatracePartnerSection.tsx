@@ -24,16 +24,16 @@ export async function DynatracePartnerSection() {
             />
 
             <div className="mt-8 flex flex-wrap items-center gap-4 rounded-xl border border-border/80 bg-surface-elevated p-4 shadow-soft sm:p-5">
-              <div className="flex min-w-[160px] flex-1 items-center justify-center rounded-lg border border-border/60 bg-white px-4 py-3">
+              <div className="flex min-w-[160px] flex-1 items-center justify-center rounded-lg border border-border/60 bg-transparent px-4 py-3">
                 <img
                   src={dynatracePartner.logo}
                   alt="Dynatrace"
-                  className="h-9 w-auto object-contain"
+                  className="h-10 w-auto object-contain"
                 />
               </div>              <span className="text-sm text-ink-muted" aria-hidden>
                 ×
               </span>
-              <div className="flex min-w-[180px] flex-1 items-center justify-center rounded-lg border border-border/60 bg-white px-3 py-2.5">
+              <div className="flex min-w-[180px] flex-1 items-center justify-center rounded-lg border border-border/60 bg-transparent px-3 py-2.5">
                 <CmsBrandLogo
                   variant="header"
                   theme="light"
@@ -48,7 +48,7 @@ export async function DynatracePartnerSection() {
             <p className="mt-6 text-sm leading-relaxed text-ink-body sm:text-base">{dynatracePartner.description}</p>
 
             <ul className="mt-6 grid gap-3 sm:grid-cols-2">
-              {dynatracePartner.capabilities.map((capability) => (
+              {dynatracePartner.capabilityCards.map((capability) => (
                 <li
                   key={capability.title}
                   className="rounded-lg border border-border/70 bg-surface-muted/50 px-4 py-3"

@@ -14,7 +14,7 @@ export const COLLECTIONS = {
   leadership: "leadership",
   alumni: "alumni",
   services: "services",
-  industries: "industries",
+  industries: "industries", // reserved / unused on public site
   partners: "partners",
   clients: "clients",
   caseStudies: "caseStudies",
@@ -47,7 +47,7 @@ export const DOCS = {
   activeThemePreset: "activePreset",
   navigationPrimary: "primary",
   navigationFooter: "footer",
-  /** About / Industries / Insights mega-menu link icons */
+  /** About / Insights mega-menu link icons */
   navigationMegaMenus: "megaMenus",
 } as const;
 
@@ -177,7 +177,4 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   contactFormIntro: "Send a message and we'll respond as soon as we can.",
   contactAsideText:
     "Prefer email or phone? Use the form, or explore our offices on the map below and open free OpenStreetMap directions for the exact location.",
-  logoUrl: "/brand/logo.png",
-  darkLogoUrl: "/brand/logo.png",
-  footerLogoUrl: "/brand/logo-footer.png",
 };

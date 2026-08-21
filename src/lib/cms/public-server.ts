@@ -4,6 +4,7 @@ import { cache } from "react";
 import { unstable_cache } from "next/cache";
 import {
   fetchActiveEventHeroVideos as fetchActiveEventHeroVideosUncached,
+  fetchCaseStudies as fetchCaseStudiesUncached,
   fetchFooterNav as fetchFooterNavUncached,
   fetchLandingHeroVideos as fetchLandingHeroVideosUncached,
   fetchNewsletterIssues as fetchNewsletterIssuesUncached,
@@ -26,7 +27,7 @@ import {
  */
 
 export const fetchSiteSettings = cache(
-  unstable_cache(async () => fetchSiteSettingsUncached(), ["cms:settings:site:v5"], {
+  unstable_cache(async () => fetchSiteSettingsUncached(), ["cms:settings:site:v7"], {
     revalidate: 60,
     tags: ["cms-settings"],
   }),
@@ -43,16 +44,23 @@ export const fetchOffices = cache(
 export const fetchPublishedBlogs = cache(async (max = 80) => fetchPublishedBlogsUncached(max));
 
 export const fetchServices = cache(
-  unstable_cache(async () => fetchServicesUncached(), ["cms:services:v3"], {
+  unstable_cache(async () => fetchServicesUncached(), ["cms:services:v10"], {
     revalidate: 60,
     tags: ["cms-services"],
   }),
 );
 
 export const fetchPartners = cache(
-  unstable_cache(async () => fetchPartnersUncached(), ["cms:partners:v3"], {
+  unstable_cache(async () => fetchPartnersUncached(), ["cms:partners:v6"], {
     revalidate: 60,
     tags: ["cms-partners"],
+  }),
+);
+
+export const fetchCaseStudies = cache(
+  unstable_cache(async () => fetchCaseStudiesUncached(), ["cms:caseStudies:v1"], {
+    revalidate: 60,
+    tags: ["cms-case-studies"],
   }),
 );
 
@@ -81,7 +89,7 @@ export const fetchActiveEventHeroVideos = cache(
 export const fetchLandingHeroVideos = cache(
   unstable_cache(
     async () => fetchLandingHeroVideosUncached(),
-    ["cms:settings:landing-hero-videos:v1"],
-    { revalidate: 60, tags: ["cms-settings"] },
+    ["cms:settings:landing-hero-videos:v2"],
+    { revalidate: 10, tags: ["cms-settings"] },
   ),
 );

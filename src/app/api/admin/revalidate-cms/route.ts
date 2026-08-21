@@ -1,6 +1,7 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { requireAdminRequest } from "@/lib/auth/admin-session";
+import { invalidateCmsCache } from "@/lib/cms/cache";
 
 export const runtime = "nodejs";
 
@@ -11,19 +12,25 @@ const ALLOWED_TAGS = new Set([
   "cms-offices",
   "cms-services",
   "cms-partners",
+  "cms-clients",
+  "cms-case-studies",
   "cms-nav",
   "cms-newsletter",
 ]);
 
 /**
  * Bust Next Data Cache / ISR after admin publishes CMS content.
- * Admin browser `invalidateCmsCache` cannot clear the server cache alone.
+ * Also clears the server in-memory `cachedCms` map — browser invalidate
+ * cannot reach the Node process that serves SSR.
  */
 export async function POST(request: Request) {
   const auth = await requireAdminRequest(request);
   if (!auth.ok) return auth.response;
 
-  let tags: string[] = ["cms-theme"];
+  // Critical: public-server loaders call public.ts → cachedCms in this process.
+  invalidateCmsCache();
+
+  let tags: string[] = ["cms-theme", "cms-settings"];
   let paths: string[] = [];
   try {
     const body = (await request.json()) as { tags?: unknown; paths?: unknown };
@@ -40,18 +47,27 @@ export async function POST(request: Request) {
         .slice(0, 20);
     }
   } catch {
-    /* empty body → theme tags */
+    /* empty body → theme + settings */
   }
 
   for (const tag of tags) {
     revalidateTag(tag);
   }
 
-  // Always refresh shell + home; blogs also need /resources.
+  // Always refresh shell + home so landing hero / marquees update.
   revalidatePath("/", "layout");
   revalidatePath("/");
   if (tags.includes("cms-blogs")) {
     revalidatePath("/resources");
+  }
+  if (tags.includes("cms-services")) {
+    revalidatePath("/services");
+  }
+  if (tags.includes("cms-partners")) {
+    revalidatePath("/partners");
+  }
+  if (tags.includes("cms-case-studies")) {
+    revalidatePath("/case-studies");
   }
   for (const path of paths) {
     revalidatePath(path);

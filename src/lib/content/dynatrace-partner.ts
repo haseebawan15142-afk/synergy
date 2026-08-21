@@ -1,3 +1,7 @@
+/**
+ * Dynatrace partner landing — content aligned to the approved page mockup.
+ * Other partners keep the generic detail layout until separately approved.
+ */
 export const dynatracePartner = {
   headline: "Pakistan's only Dynatrace partner",
   subheadline:
@@ -24,7 +28,136 @@ export const dynatracePartner = {
   ],
   href: "https://www.dynatrace.com/",
   resourceSlug: "dynatrace-partner-in-pakistan",
-  capabilities: [
+  /** Landing hero (mockup) */
+  hero: {
+    titleLead: "See",
+    titleGradientA: "Everything.",
+    titleMid: "Miss",
+    titleGradientB: "Nothing.",
+    subtitle: "AI-powered observability for modern digital operations.",
+    features: [
+      { label: "AI-Powered", icon: "sparkles" as const },
+      { label: "Real-Time Observability", icon: "activity" as const },
+      { label: "Enterprise Scale", icon: "building" as const },
+    ],
+    primaryCta: { label: "Explore Dynatrace", href: "#capabilities" },
+    secondaryCta: { label: "Talk to an Expert", href: "/contact" },
+  },
+  challenge: {
+    eyebrow: "The Challenge",
+    title: "Digital complexity is growing.",
+    items: [
+      {
+        title: "Applications",
+        description:
+          "Microservices, APIs, and cloud-native stacks make it hard to see where performance breaks.",
+        icon: "code" as const,
+        tone: "purple" as const,
+      },
+      {
+        title: "Infrastructure",
+        description:
+          "Hybrid and multi-cloud environments create blind spots across hosts, containers, and networks.",
+        icon: "server" as const,
+        tone: "blue" as const,
+      },
+      {
+        title: "User Experience",
+        description:
+          "Customers feel every slowdown — but teams often learn too late from tickets, not telemetry.",
+        icon: "user" as const,
+        tone: "pink" as const,
+      },
+    ],
+  },
+  approach: {
+    eyebrow: "Our Approach",
+    title: "Dynatrace technology. Synergy expertise.",
+    steps: [
+      {
+        kind: "dynatrace" as const,
+        title: "Dynatrace",
+        description: "Powerful observability platform.",
+      },
+      {
+        kind: "synergy" as const,
+        title: "Synergy",
+        description: "Implementation, integration & optimization.",
+      },
+      {
+        kind: "business" as const,
+        title: "Your Business",
+        description: "Better performance, smarter decisions.",
+      },
+    ],
+  },
+  capabilities: {
+    eyebrow: "Powerful Capabilities",
+    title: "Comprehensive visibility. Deeper insights.",
+    items: [
+      {
+        title: "Application Performance Monitoring",
+        description: "Trace every transaction end-to-end with precise root-cause analysis.",
+      },
+      {
+        title: "Infrastructure Monitoring",
+        description: "Unify cloud, hybrid, and on-prem signals in one observability layer.",
+      },
+      {
+        title: "Digital Experience Monitoring",
+        description: "Protect customer journeys with real-user and synthetic insights.",
+      },
+      {
+        title: "AI-Powered Analytics",
+        description: "Davis AI detects, prioritizes, and explains issues before they escalate.",
+      },
+      {
+        title: "Smartscape Topology",
+        description: "Auto-discover dependencies across apps, services, and infrastructure.",
+      },
+    ],
+    linkLabel: "Explore all capabilities",
+    linkHref: "/contact",
+  },
+  impact: {
+    eyebrow: "Business Impact",
+    title: "From monitoring to measurable outcomes.",
+    items: [
+      {
+        title: "Faster Resolution",
+        description: "Cut MTTR with AI-guided causation instead of manual war rooms.",
+        icon: "clock" as const,
+        tone: "purple" as const,
+      },
+      {
+        title: "Lower Downtime",
+        description: "Catch degradations early and protect revenue-critical services.",
+        icon: "shield" as const,
+        tone: "blue" as const,
+      },
+      {
+        title: "Better Performance",
+        description: "Optimize apps and infrastructure with continuous, precise telemetry.",
+        icon: "chart" as const,
+        tone: "pink" as const,
+      },
+      {
+        title: "Smarter Decisions",
+        description: "Give leaders clear signals for capacity, risk, and digital investment.",
+        icon: "bulb" as const,
+        tone: "orange" as const,
+      },
+    ],
+  },
+  cta: {
+    title: "Ready to transform your digital operations?",
+    description:
+      "See how Dynatrace and Synergy can drive real impact for your business.",
+    buttonLabel: "Talk to our experts",
+    buttonHref: "/contact",
+  },
+  /** Compact capability cards used on /partners index spotlight */
+  capabilityCards: [
     {
       title: "Application Performance",
       description: "End-to-end visibility across complex applications with AI-driven root cause analysis.",

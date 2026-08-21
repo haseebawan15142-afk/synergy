@@ -52,7 +52,7 @@ export function PartnerDetailHero({ partner }: PartnerDetailHeroProps) {
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(to bottom, rgba(0,0,0,0.55), rgba(0,0,0,0.75))",
+              "linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0.45))",
           }}
         />
       </div>
@@ -60,23 +60,23 @@ export function PartnerDetailHero({ partner }: PartnerDetailHeroProps) {
       <div className="relative z-10 page-container flex min-h-[min(72vh,640px)] flex-col justify-center py-16 sm:py-20">
         <div className="mx-auto w-full max-w-3xl text-center lg:mx-0 lg:max-w-2xl lg:text-left">
           {partner.logo ? (
-            <div className="mx-auto mb-6 inline-flex h-14 min-w-[10rem] items-center justify-center rounded-xl bg-white px-5 py-2.5 shadow-soft lg:mx-0">
+            <div className="mx-auto mb-6 inline-flex h-14 min-w-[10rem] items-center justify-center rounded-xl border border-white/15 bg-transparent px-4 py-2 lg:mx-0">
               {/\.svg(\?|$)/i.test(partner.logo) ||
               (logoFallback ? /\.svg(\?|$)/i.test(logoFallback) : false) ? (
                 <ResilientImg
                   src={partner.logo}
                   fallbackSrc={logoFallback}
                   alt={`${partner.name} logo`}
-                  className="h-9 w-auto max-w-[11rem] object-contain object-left"
+                  className="h-10 w-auto max-w-[12rem] object-contain object-left"
                 />
               ) : (
                 <ResilientImage
                   src={partner.logo}
                   fallbackSrc={logoFallback}
                   alt={`${partner.name} logo`}
-                  width={180}
-                  height={36}
-                  className="h-9 w-auto max-w-[11rem] object-contain object-left"
+                  width={200}
+                  height={40}
+                  className="h-10 w-auto max-w-[12rem] object-contain object-left"
                 />
               )}
             </div>

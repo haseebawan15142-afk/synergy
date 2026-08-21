@@ -3,11 +3,10 @@ import {
   certifications,
   milestones,
 } from "@/lib/content/accomplishments";
-import { caseStudies } from "@/lib/content/case-studies";
+import { caseStudies as localCaseStudies } from "@/lib/content/case-studies";
 import { ceoMessage } from "@/lib/content/ceo-message";
 import { dynatracePartner } from "@/lib/content/dynatrace-partner";
 import { problemCards } from "@/lib/content/problems";
-import { industries } from "@/lib/content/industries";
 import { partners as localPartners } from "@/lib/content/partners";
 import { services } from "@/lib/content/services";
 import { siteConfig } from "@/lib/content/site";
@@ -16,7 +15,7 @@ import {
   companyProfileMeta,
   officeLocationsDetailed,
 } from "@/lib/content/company-profile";
-import { fetchPartners } from "@/lib/cms/public";
+import { fetchCaseStudies, fetchPartners } from "@/lib/cms/public";
 
 /**
  * Builds the chatbot system prompt from website content + live CMS partners.
@@ -33,7 +32,12 @@ export async function buildChatSystemPrompt(userQuery?: string): Promise<string>
   const hasDynatrace = livePartners.some(
     (p) => (p.slug || p.name).toLowerCase().includes("dynatrace"),
   );
-  const industryList = industries.map((i) => `- ${i.title}: ${i.summary}`).join("\n");
+  let liveCaseStudies = localCaseStudies;
+  try {
+    liveCaseStudies = await fetchCaseStudies();
+  } catch {
+    liveCaseStudies = localCaseStudies;
+  }
   const problemList = problemCards
     .map((p) => `- ${p.label}: ${p.problem} → ${p.solution}`)
     .join("\n");
@@ -47,7 +51,7 @@ export async function buildChatSystemPrompt(userQuery?: string): Promise<string>
     .map((c) => `- ${c.name} (${c.issuer})`)
     .join("\n");
 
-  const caseStudyList = caseStudies
+  const caseStudyList = liveCaseStudies
     .map((c) => `- ${c.client} (${c.industry}): ${c.headline}. ${c.summary}`)
     .join("\n");
 
@@ -73,7 +77,7 @@ Tone & style (important):
 - Never sound like a FAQ bot or script.
 
 SCOPE — Stay within Synergy Computers website content:
-- Company profile, leadership, CEO message, accomplishments, services, technology partners, industries, case studies, resources/blog, contact, quotes, and support in Pakistan.
+- Company profile, leadership, CEO message, accomplishments, services, technology partners, case studies, resources/blog, contact, quotes, and support in Pakistan.
 - Partner names below are the CURRENT live list from the website CMS. Do not mention partners that are not listed.
 - If asked about unrelated topics, politely redirect to Synergy services and contact.
 
@@ -83,7 +87,7 @@ Company facts (Company Profile ${companyProfileMeta.foundedYear} / 2026):
 - HQ: ${siteConfig.address.line}, ${siteConfig.address.city}, ${siteConfig.address.country}
 - Offices: ${officeLocationsDetailed.map((o) => `${o.city} (${o.country})`).join("; ")}
 - Email: ${siteConfig.email} | Phones: ${siteConfig.phones.join(", ")} | Fax: ${siteConfig.fax}
-- Key pages: /services, /partners, /industries, /resources, /contact, /about, /about#board, /about#accomplishments
+- Key pages: /services, /partners, /resources, /case-studies, /contact, /about, /about#board, /about#accomplishments
 
 Board of Directors (from Company Profile 2026 /about#board):
 ${boardOfDirectors.map((m) => `- ${m.name}, ${m.title}`).join("\n")}
@@ -108,10 +112,7 @@ ${serviceList}
 Problems we solve:
 ${problemList}
 
-Industries:
-${industryList}
-
-Client success / case studies:
+Client outcomes / case studies:
 ${caseStudyList}
 
 Rules:

@@ -250,20 +250,38 @@ export function MediaUrlField({
         accept={ACCEPT_IMAGE_ATTR}
         label={
           phase === "converting"
-            ? "Converting to WebP…"
+            ? folder === "logos"
+              ? "Removing background…"
+              : "Converting to WebP…"
             : phase === "uploading"
               ? "Uploading to Firebase…"
-              : "Drop image here"
+              : folder === "logos"
+                ? "Drop logo here (bg removed on upload)"
+                : "Drop image here"
         }
-        hint="Any common image format → WebP on Firebase (SVG kept as SVG)"
+        hint={
+          folder === "logos"
+            ? "Logo upload: solid background removed → transparent WebP for navbar"
+            : "Any common image format → WebP on Firebase (SVG kept as SVG)"
+        }
       />
 
       {value ? (
-        <div className="overflow-hidden rounded-xl border border-border bg-surface-muted/40 p-2">
+        <div
+          className={
+            folder === "logos"
+              ? "overflow-hidden rounded-xl border border-border bg-[repeating-conic-gradient(#808080_0%_25%,#c0c0c0_0%_50%)_0_0/16px_16px] p-3"
+              : "overflow-hidden rounded-xl border border-border bg-surface-muted/40 p-2"
+          }
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={value} alt="" className="mx-auto h-24 max-w-full object-contain" />
-          <p className="mt-2 break-all text-center text-[11px] text-ink-muted">
-            {isFirebaseUrl ? "Saved on Firebase Storage ✓" : "External / manual URL"}
+          <p className="mt-2 break-all text-center text-[11px] text-ink-muted mix-blend-difference">
+            {isFirebaseUrl
+              ? folder === "logos"
+                ? "Logo on Firebase (background stripped) ✓"
+                : "Saved on Firebase Storage ✓"
+              : "External / manual URL"}
           </p>
         </div>
       ) : null}

@@ -22,7 +22,6 @@ export const site = {
   vision: "",
   nav: [
     { id: "services", label: "Services", href: "/services" },
-    { id: "industries", label: "Industries", href: "/industries" },
     { id: "partners", label: "Partners", href: "/partners" },
     {
       id: "about",

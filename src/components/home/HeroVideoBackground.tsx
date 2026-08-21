@@ -21,49 +21,6 @@ export type EventHeroSeed = {
   videos: HeroVideo[];
 };
 
-type VideoLayerProps = {
-  clipKey: string;
-  mp4: string;
-  webm?: string;
-  poster?: string;
-  visible: boolean;
-  transitionMs: number;
-  onRef: (el: HTMLVideoElement | null) => void;
-};
-
-function VideoLayer({
-  clipKey,
-  mp4,
-  webm,
-  poster,
-  visible,
-  transitionMs,
-  onRef,
-}: VideoLayerProps) {
-  return (
-    <video
-      key={clipKey}
-      ref={onRef}
-      className={cn(
-        "pointer-events-none absolute inset-0 h-full w-full object-cover",
-        "transition-opacity ease-in-out",
-        visible ? "opacity-100" : "opacity-0",
-      )}
-      style={{ transitionDuration: `${transitionMs}ms` }}
-      muted
-      loop
-      playsInline
-      autoPlay
-      preload="auto"
-      poster={poster || undefined}
-      aria-hidden
-    >
-      {webm ? <source src={webm} type="video/webm" /> : null}
-      <source src={mp4} type="video/mp4" />
-    </video>
-  );
-}
-
 function playlistKeyFor(isEvent: boolean, presetId: string, videos: HeroVideo[]) {
   const fingerprint = videos
     .map((v) => `${v.mp4}@${v.durationSec ?? ""}@${v.poster || ""}`)
@@ -84,6 +41,53 @@ function kickPlay(video: HTMLVideoElement | null) {
   if (video.readyState < 2) {
     video.addEventListener("loadeddata", attempt, { once: true });
     video.addEventListener("canplay", attempt, { once: true });
+  }
+}
+
+function clipSrcOnVideo(video: HTMLVideoElement) {
+  return video.getAttribute("data-mp4") || "";
+}
+
+function assignClip(
+  video: HTMLVideoElement,
+  clip: HeroVideo,
+  { play, restart = false }: { play: boolean; restart?: boolean },
+) {
+  const nextSrc = clip.mp4;
+  if (!nextSrc) return;
+
+  if (clipSrcOnVideo(video) === nextSrc) {
+    if (restart) {
+      try {
+        video.currentTime = 0;
+      } catch {
+        /* ignore */
+      }
+    }
+    if (play) kickPlay(video);
+    else video.pause();
+    return;
+  }
+
+  video.setAttribute("data-mp4", nextSrc);
+  if (clip.poster?.trim()) video.poster = clip.poster.trim();
+
+  while (video.firstChild) video.removeChild(video.firstChild);
+  if (clip.webm) {
+    const webm = document.createElement("source");
+    webm.src = clip.webm;
+    webm.type = "video/webm";
+    video.appendChild(webm);
+  }
+  const mp4 = document.createElement("source");
+  mp4.src = nextSrc;
+  mp4.type = "video/mp4";
+  video.appendChild(mp4);
+  video.load();
+  if (play) kickPlay(video);
+  else {
+    const pauseWhenReady = () => video.pause();
+    video.addEventListener("loadeddata", pauseWhenReady, { once: true });
   }
 }
 
@@ -114,14 +118,15 @@ export function HeroVideoBackground({
   const visibleLayerRef = useRef<0 | 1>(0);
   const currentIndexRef = useRef(0);
   const switchingRef = useRef(false);
+  const playlistRef = useRef<HeroVideo[]>(seededVideos);
   const lastPlaylistKeyRef = useRef(seedKey || "loading");
+  const unlockTimerRef = useRef<number | null>(null);
+  const advanceTimerRef = useRef<number | null>(null);
+  const modeRef = useRef<"poster" | "video">("poster");
 
-  // Poster first paint (instant). Upgrade to video in layout effect — no black "pending" frame.
   const [mode, setMode] = useState<"poster" | "video">("poster");
   const [playlistReady, setPlaylistReady] = useState(hasSeed || seededVideos.length > 0);
   const [visibleLayer, setVisibleLayer] = useState<0 | 1>(0);
-  const [layerIndices, setLayerIndices] = useState<[number, number]>([0, 1]);
-  const [pendingIncoming, setPendingIncoming] = useState<0 | 1 | null>(null);
   const [playlist, setPlaylist] = useState<HeroVideo[]>(seededVideos);
   const [isEventPlaylist, setIsEventPlaylist] = useState(seededIsEvent);
   const [playlistKey, setPlaylistKey] = useState(seedKey || "loading");
@@ -129,6 +134,26 @@ export function HeroVideoBackground({
 
   const transitionMs = isEventPlaylist ? eventHeroVideoTransitionMs : heroVideoTransitionMs;
   const fallbackDurationSec = isEventPlaylist ? 3 : 8;
+  const multiClip = playlist.length > 1;
+  const playOnceThenNext = multiClip && !isEventPlaylist;
+
+  playlistRef.current = playlist;
+  modeRef.current = mode;
+
+  const clearAdvanceTimer = useCallback(() => {
+    if (advanceTimerRef.current != null) {
+      window.clearTimeout(advanceTimerRef.current);
+      advanceTimerRef.current = null;
+    }
+  }, []);
+
+  const unlockSwitch = useCallback(() => {
+    if (unlockTimerRef.current != null) {
+      window.clearTimeout(unlockTimerRef.current);
+      unlockTimerRef.current = null;
+    }
+    switchingRef.current = false;
+  }, []);
 
   const applyPlaylist = useCallback((videos: HeroVideo[], isEvent: boolean, presetId = "default") => {
     const nextKey = playlistKeyFor(isEvent, presetId, videos);
@@ -144,6 +169,63 @@ export function HeroVideoBackground({
       if (clip.mp4) warmHeroVideo(clip.mp4);
     }
   }, []);
+
+  const syncLayersFromIndex = useCallback((index: number, { playActive }: { playActive: boolean }) => {
+    const list = playlistRef.current;
+    if (!list.length) return;
+
+    const active = list[index];
+    const upcoming = list[(index + 1) % list.length];
+    const activeLayer = visibleLayerRef.current;
+    const idleLayer = (activeLayer === 0 ? 1 : 0) as 0 | 1;
+
+    const activeEl = videoRefs.current[activeLayer];
+    const idleEl = videoRefs.current[idleLayer];
+
+    if (active?.mp4 && activeEl) {
+      assignClip(activeEl, active, { play: playActive, restart: true });
+    }
+    if (list.length > 1 && upcoming?.mp4 && idleEl) {
+      assignClip(idleEl, upcoming, { play: false });
+    }
+  }, []);
+
+  const advanceToNext = useCallback(() => {
+    const list = playlistRef.current;
+    if (switchingRef.current || list.length <= 1) return;
+
+    const next = (currentIndexRef.current + 1) % list.length;
+    const outgoing = visibleLayerRef.current;
+    const incoming = (outgoing === 0 ? 1 : 0) as 0 | 1;
+    const nextClip = list[next];
+    if (!nextClip?.mp4) return;
+
+    switchingRef.current = true;
+    clearAdvanceTimer();
+    currentIndexRef.current = next;
+    warmHeroVideo(nextClip.mp4);
+
+    const incomingEl = videoRefs.current[incoming];
+    if (incomingEl) {
+      assignClip(incomingEl, nextClip, { play: true, restart: true });
+    }
+
+    visibleLayerRef.current = incoming;
+    setVisibleLayer(incoming);
+    setVideoRevealed(true);
+
+    const afterNext = list[(next + 1) % list.length];
+
+    if (unlockTimerRef.current != null) window.clearTimeout(unlockTimerRef.current);
+    unlockTimerRef.current = window.setTimeout(() => {
+      const out = videoRefs.current[outgoing];
+      if (out && visibleLayerRef.current !== outgoing) {
+        out.pause();
+        if (afterNext?.mp4) assignClip(out, afterNext, { play: false });
+      }
+      unlockSwitch();
+    }, transitionMs + 80);
+  }, [clearAdvanceTimer, transitionMs, unlockSwitch]);
 
   useLayoutEffect(() => {
     setMode(getHeroPlaybackMode());
@@ -162,116 +244,166 @@ export function HeroVideoBackground({
   useEffect(() => {
     currentIndexRef.current = 0;
     visibleLayerRef.current = 0;
-    switchingRef.current = false;
+    unlockSwitch();
+    clearAdvanceTimer();
     setVisibleLayer(0);
-    setLayerIndices([0, Math.min(1, Math.max(playlist.length - 1, 0))]);
-    setPendingIncoming(null);
-  }, [playlistKey, playlist.length]);
+    // Wait a frame so both <video> nodes exist after playlist swaps.
+    const id = window.requestAnimationFrame(() => {
+      syncLayersFromIndex(0, { playActive: modeRef.current === "video" });
+    });
+    return () => window.cancelAnimationFrame(id);
+  }, [playlistKey, syncLayersFromIndex, clearAdvanceTimer, unlockSwitch]);
 
   useEffect(() => {
     setHeroVideoActive(mode === "video" && playlistReady);
     return () => setHeroVideoActive(false);
   }, [mode, playlistReady]);
 
-  // Mounted → play immediately (hero is always above the fold — no IntersectionObserver gate).
   useEffect(() => {
     if (mode !== "video" || !playlistReady) return;
-    if (pendingIncoming !== null || switchingRef.current) return;
-
-    const layer = visibleLayerRef.current;
-    const video = videoRefs.current[layer];
+    const video = videoRefs.current[visibleLayerRef.current];
     kickPlay(video);
-
     const onPlaying = () => setVideoRevealed(true);
     video?.addEventListener("playing", onPlaying);
-    // Reveal as soon as we have a frame — don't wait for deep buffer.
     video?.addEventListener("loadeddata", onPlaying);
-
     return () => {
       video?.removeEventListener("playing", onPlaying);
       video?.removeEventListener("loadeddata", onPlaying);
     };
-  }, [mode, playlistReady, playlistKey, pendingIncoming, visibleLayer]);
+  }, [mode, playlistReady, playlistKey, visibleLayer]);
 
+  // Landing: play each clip fully once, then crossfade to the next.
   useEffect(() => {
-    if (pendingIncoming === null || mode !== "video" || !playlistReady) return;
+    if (!playOnceThenNext || mode !== "video" || !playlistReady) return;
 
-    const incoming = pendingIncoming;
-    const outgoing = (incoming === 0 ? 1 : 0) as 0 | 1;
+    const layer = visibleLayer;
+    const video = videoRefs.current[layer];
+    if (!video) return;
 
     let cancelled = false;
-    void (async () => {
-      let attempts = 0;
-      while (!videoRefs.current[incoming] && attempts < 40) {
-        await new Promise((r) => window.requestAnimationFrame(r));
-        attempts += 1;
-      }
-      if (cancelled) return;
+    let advanced = false;
 
-      kickPlay(videoRefs.current[incoming]);
-      visibleLayerRef.current = incoming;
-      setVisibleLayer(incoming);
-      setPendingIncoming(null);
-      setVideoRevealed(true);
+    const goNext = () => {
+      if (cancelled || advanced || switchingRef.current) return;
+      if (visibleLayerRef.current !== layer) return;
+      advanced = true;
+      clearAdvanceTimer();
+      advanceToNext();
+    };
 
-      window.setTimeout(() => {
-        const out = videoRefs.current[outgoing];
-        if (out && visibleLayerRef.current !== outgoing) out.pause();
-        switchingRef.current = false;
-      }, transitionMs + 40);
-    })();
+    const scheduleFromDuration = () => {
+      if (cancelled || switchingRef.current || advanced) return;
+      clearAdvanceTimer();
+
+      const clip = playlistRef.current[currentIndexRef.current];
+      const mediaMs =
+        Number.isFinite(video.duration) && video.duration > 0 && video.duration !== Infinity
+          ? video.duration * 1000
+          : clipDurationMs(clip, fallbackDurationSec);
+
+      const waitMs = Math.max(500, mediaMs - Math.min(transitionMs, 400));
+      advanceTimerRef.current = window.setTimeout(goNext, waitMs);
+    };
+
+    const onEnded = () => goNext();
+    const onTimeUpdate = () => {
+      const d = video.duration;
+      if (!Number.isFinite(d) || d <= 0 || d === Infinity) return;
+      if (video.currentTime >= d - 0.25) goNext();
+    };
+
+    video.addEventListener("ended", onEnded);
+    video.addEventListener("timeupdate", onTimeUpdate);
+    video.addEventListener("loadedmetadata", scheduleFromDuration);
+    scheduleFromDuration();
 
     return () => {
       cancelled = true;
+      video.removeEventListener("ended", onEnded);
+      video.removeEventListener("timeupdate", onTimeUpdate);
+      video.removeEventListener("loadedmetadata", scheduleFromDuration);
+      clearAdvanceTimer();
     };
-  }, [pendingIncoming, mode, layerIndices, transitionMs, playlistReady]);
+  }, [
+    playOnceThenNext,
+    mode,
+    playlistReady,
+    playlistKey,
+    visibleLayer,
+    fallbackDurationSec,
+    transitionMs,
+    advanceToNext,
+    clearAdvanceTimer,
+  ]);
 
+  // Event themes: fixed interval cuts.
   useEffect(() => {
+    if (playOnceThenNext) return;
     if (mode !== "video" || !playlistReady || playlist.length <= 1) return;
-    if (pendingIncoming !== null || switchingRef.current) return;
 
-    const waitMs = clipDurationMs(playlist[currentIndexRef.current], fallbackDurationSec);
-    const timer = window.setTimeout(() => {
-      if (switchingRef.current) return;
-
-      const next = (currentIndexRef.current + 1) % playlist.length;
-      const outgoing = visibleLayerRef.current;
-      const incoming = (outgoing === 0 ? 1 : 0) as 0 | 1;
-
-      switchingRef.current = true;
-      currentIndexRef.current = next;
-
-      const nextClip = playlist[next];
-      if (nextClip?.mp4) warmHeroVideo(nextClip.mp4);
-
-      setLayerIndices((layers) => {
-        const updated = [...layers] as [number, number];
-        updated[incoming] = next;
-        return updated;
-      });
-      setPendingIncoming(incoming);
+    clearAdvanceTimer();
+    const waitMs = clipDurationMs(
+      playlistRef.current[currentIndexRef.current],
+      fallbackDurationSec,
+    );
+    advanceTimerRef.current = window.setTimeout(() => {
+      advanceToNext();
     }, waitMs);
 
-    return () => window.clearTimeout(timer);
+    return () => clearAdvanceTimer();
   }, [
+    playOnceThenNext,
     mode,
-    playlist,
+    playlist.length,
     fallbackDurationSec,
     playlistKey,
     playlistReady,
-    pendingIncoming,
     visibleLayer,
+    advanceToNext,
+    clearAdvanceTimer,
   ]);
+
+  useEffect(() => {
+    return () => {
+      clearAdvanceTimer();
+      if (unlockTimerRef.current != null) window.clearTimeout(unlockTimerRef.current);
+    };
+  }, [clearAdvanceTimer]);
+
+  // Stable refs — never re-assign sources on every React render.
+  const setLayer0 = useCallback((el: HTMLVideoElement | null) => {
+    videoRefs.current[0] = el;
+    if (!el || modeRef.current !== "video") return;
+    if (clipSrcOnVideo(el)) return;
+    const list = playlistRef.current;
+    const clip = list[visibleLayerRef.current === 0 ? currentIndexRef.current : (currentIndexRef.current + 1) % Math.max(list.length, 1)];
+    if (clip?.mp4) {
+      assignClip(el, clip, { play: visibleLayerRef.current === 0 });
+    }
+  }, []);
+
+  const setLayer1 = useCallback((el: HTMLVideoElement | null) => {
+    videoRefs.current[1] = el;
+    if (!el || modeRef.current !== "video") return;
+    if (clipSrcOnVideo(el)) return;
+    const list = playlistRef.current;
+    if (list.length < 2) return;
+    const clip =
+      list[
+        visibleLayerRef.current === 1
+          ? currentIndexRef.current
+          : (currentIndexRef.current + 1) % list.length
+      ];
+    if (clip?.mp4) {
+      assignClip(el, clip, { play: visibleLayerRef.current === 1 });
+    }
+  }, []);
 
   const fallbackPoster = useMemo(() => {
     const first = playlist[0]?.poster?.trim();
     if (first) return first;
-    // Always have an instant paint surface (same as default landing) while remote bytes arrive.
     return heroFallbackPoster;
   }, [playlist]);
-
-  /* Always black — never `ink` (dark theme ink is near-white and washes the video). */
-  const overlay = <div className="pointer-events-none absolute inset-0 bg-black/40" aria-hidden />;
 
   if (!playlistReady && !playlist.length) {
     return (
@@ -285,7 +417,6 @@ export function HeroVideoBackground({
           className="object-cover"
           aria-hidden
         />
-        {overlay}
       </div>
     );
   }
@@ -303,16 +434,12 @@ export function HeroVideoBackground({
           aria-hidden
           unoptimized={fallbackPoster.startsWith("http")}
         />
-        {overlay}
       </div>
     );
   }
 
-  const activeClip = playlist[layerIndices[visibleLayer]] ?? playlist[0];
-  const layer0Clip = playlist[layerIndices[0]] ?? playlist[0];
-  const layer1Clip = playlist[layerIndices[1]] ?? playlist[Math.min(1, playlist.length - 1)];
-
-  if (!activeClip || !layer0Clip) {
+  const activeClip = playlist[0];
+  if (!activeClip) {
     return (
       <div className="absolute inset-0">
         <Image
@@ -324,21 +451,17 @@ export function HeroVideoBackground({
           className="object-cover"
           aria-hidden
         />
-        {overlay}
       </div>
     );
   }
 
-  const posterFor = (clip: HeroVideo) => {
-    const p = clip.poster?.trim();
-    if (p) return p;
-    return heroFallbackPoster;
-  };
+  const posterSrc = activeClip.poster?.trim() || heroFallbackPoster;
+  const loopSingle = !playOnceThenNext;
 
   return (
     <div className="absolute inset-0" data-hero-playlist={playlistKey}>
       <Image
-        src={posterFor(activeClip)}
+        src={posterSrc}
         alt=""
         fill
         priority
@@ -348,37 +471,42 @@ export function HeroVideoBackground({
           videoRevealed ? "opacity-0" : "opacity-100",
         )}
         aria-hidden
-        unoptimized={posterFor(activeClip).startsWith("http")}
+        unoptimized={posterSrc.startsWith("http")}
       />
 
-      <VideoLayer
-        clipKey={`l0-${playlistKey}-${layerIndices[0]}`}
-        mp4={layer0Clip.mp4}
-        webm={layer0Clip.webm}
-        poster={posterFor(layer0Clip)}
-        visible={visibleLayer === 0 && videoRevealed}
-        transitionMs={transitionMs}
-        onRef={(el) => {
-          videoRefs.current[0] = el;
-          if (el && visibleLayerRef.current === 0) kickPlay(el);
-        }}
+      <video
+        ref={setLayer0}
+        className={cn(
+          "pointer-events-none absolute inset-0 h-full w-full object-cover",
+          "brightness-[1.06] contrast-[1.05] saturate-[1.08]",
+          "transition-opacity ease-in-out",
+          visibleLayer === 0 && videoRevealed ? "opacity-100" : "opacity-0",
+        )}
+        style={{ transitionDuration: `${transitionMs}ms` }}
+        muted
+        loop={loopSingle}
+        playsInline
+        autoPlay
+        preload="auto"
+        aria-hidden
       />
-      {layer1Clip ? (
-        <VideoLayer
-          clipKey={`l1-${playlistKey}-${layerIndices[1]}`}
-          mp4={layer1Clip.mp4}
-          webm={layer1Clip.webm}
-          poster={posterFor(layer1Clip)}
-          visible={visibleLayer === 1 && videoRevealed}
-          transitionMs={transitionMs}
-          onRef={(el) => {
-            videoRefs.current[1] = el;
-            if (el && (visibleLayerRef.current === 1 || pendingIncoming === 1)) kickPlay(el);
-          }}
+      {multiClip ? (
+        <video
+          ref={setLayer1}
+          className={cn(
+            "pointer-events-none absolute inset-0 h-full w-full object-cover",
+            "brightness-[1.06] contrast-[1.05] saturate-[1.08]",
+            "transition-opacity ease-in-out",
+            visibleLayer === 1 && videoRevealed ? "opacity-100" : "opacity-0",
+          )}
+          style={{ transitionDuration: `${transitionMs}ms` }}
+          muted
+          loop={loopSingle}
+          playsInline
+          preload="auto"
+          aria-hidden
         />
       ) : null}
-
-      {overlay}
     </div>
   );
 }

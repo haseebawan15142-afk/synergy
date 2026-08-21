@@ -25,10 +25,8 @@ export function isRemoteStorageUrl(url: string): boolean {
 
 /**
  * Resolve a CMS media URL for the public site.
- * - Empty CMS → local fallback
- * - Same-origin CMS → keep (already resilient)
- * - Remote (Firebase) + local fallback → prefer local seed/bundle
- * - Remote only (admin-only upload) → keep remote
+ * Admin CMS wins when a URL is set (including Firebase Storage).
+ * Local seed/bundle is only used when CMS is empty (offline / never provisioned).
  */
 export function resolveResilientAssetUrl(
   cmsUrl?: string | null,
@@ -37,8 +35,6 @@ export function resolveResilientAssetUrl(
   const cms = cleanAssetUrl(cmsUrl);
   const local = cleanAssetUrl(localFallback);
 
-  if (!cms) return local;
-  if (isSameOriginAsset(cms)) return cms;
-  if (local && isSameOriginAsset(local)) return local;
-  return cms;
+  if (cms) return cms;
+  return local;
 }

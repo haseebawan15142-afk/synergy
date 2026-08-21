@@ -44,9 +44,10 @@ export function CmsBrandLogo({
     fetchSiteSettings()
       .then((settings) => {
         if (cancelled) return;
-        if (settings.logoUrl) setCmsLogoUrl(settings.logoUrl);
-        if (settings.darkLogoUrl) setCmsDarkLogoUrl(settings.darkLogoUrl);
-        if (settings.footerLogoUrl) setCmsFooterLogoUrl(settings.footerLogoUrl);
+        // Always sync — including empty — so admin “clear logo” is respected.
+        setCmsLogoUrl(settings.logoUrl || "");
+        setCmsDarkLogoUrl(settings.darkLogoUrl || "");
+        setCmsFooterLogoUrl(settings.footerLogoUrl || "");
         const name = settings.legalName || settings.companyName;
         if (name) setCmsCompanyName(name);
       })

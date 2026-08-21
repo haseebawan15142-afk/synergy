@@ -43,7 +43,8 @@ export function PartnershipsMarquee() {
       description={partnershipsIntro}
       rows={rows}
       durationSec={40}
-      className="bg-[#F5F7FA]"
+      backgroundImage="/images/home/partnerships-section-bg.png"
+      className="border-white/10 bg-[#05030A] [&_h2]:text-white [&_p]:text-white/90"
       footerHref="/partners"
       footerLabel="View all partners"
     />

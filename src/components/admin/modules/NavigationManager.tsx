@@ -12,6 +12,7 @@ import {
   type MegaMenuIconKey,
 } from "@/lib/content/nav-menus";
 import { defaultHeaderNav } from "@/lib/cms/public";
+import { publishAdminCmsChange } from "@/lib/cms/publish-admin-change";
 import { AdminPageSkeleton } from "@/components/admin/AdminSkeleton";
 import { NavIconField } from "@/components/admin/NavIconField";
 import {
@@ -34,7 +35,7 @@ const TABS: { id: TabId; label: string; hint: string }[] = [
   {
     id: "megaMenus",
     label: "Mega menus",
-    hint: "Upload custom icons (or pick a preset) for About, Industries, and Insights. Services: Admin → Services. Partners use logos.",
+    hint: "Upload custom icons (or pick a preset) for About and Insights. Services: Admin → Services. Partners use logos.",
   },
   {
     id: DOCS.navigationFooter,
@@ -159,11 +160,15 @@ export function NavigationManager() {
         await upsertSingleton(COLLECTIONS.navigation, DOCS.navigationMegaMenus, {
           menus: megaMenus,
         });
-        toast.success("Mega menu icons saved");
+        await publishAdminCmsChange(COLLECTIONS.navigation, ["/"]);
+        toast.success("Mega menu icons saved — public site refreshed");
       } else {
         await upsertSingleton(COLLECTIONS.navigation, tab, { items });
+        await publishAdminCmsChange(COLLECTIONS.navigation, ["/"]);
         toast.success(
-          tab === DOCS.navigationFooter ? "Footer navigation saved" : "Header navigation saved",
+          tab === DOCS.navigationFooter
+            ? "Footer navigation saved — public site refreshed"
+            : "Header navigation saved — public site refreshed",
         );
       }
     } catch (e) {
