@@ -1,5 +1,5 @@
 import { NewsletterEditions } from "@/components/newsletter/NewsletterEditions";
-import { PageHeader } from "@/components/ui/PageHeader";
+import { NewsletterHero } from "@/components/newsletter/NewsletterHero";
 import { fetchNewsletterIssues } from "@/lib/cms/public-server";
 
 export const metadata = {
@@ -16,10 +16,7 @@ export default async function NewsletterPage() {
 
   return (
     <>
-      <PageHeader
-        title="Newsletter"
-        description="Partner spotlights and technology editions from Synergy Computers — starting with Dynatrace and our data platform partners."
-      />
+      <NewsletterHero />
       <div className="page-container section-y-tight">
         <NewsletterEditions issues={issues} />
       </div>
