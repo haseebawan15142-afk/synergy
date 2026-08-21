@@ -16,10 +16,11 @@ export async function HeroSection() {
 
   const eventVideos = event?.videos?.length ? event.videos : null;
   const first = eventVideos?.[0] || landingVideos[0];
+  const poster = first?.poster?.trim() || heroFallbackPoster || null;
 
   return (
     <>
-      <HeroVideoPreload mp4={first?.mp4} poster={first?.poster || heroFallbackPoster} />
+      <HeroVideoPreload mp4={first?.mp4} poster={poster} />
       <HeroExperienceLayer
         className="min-h-svh border-b border-border/40"
         backdrop={

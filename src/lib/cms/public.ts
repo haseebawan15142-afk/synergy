@@ -17,6 +17,8 @@ import { getFirebaseDb } from "@/lib/firebase/client";
 import { COLLECTIONS, DOCS, DEFAULT_SITE_SETTINGS, type SiteSettings } from "@/lib/firebase/collections";
 import {
   resolveLandingHeroVideos,
+  isPlayableCmsHeroUrl,
+  isLegacyBundledHeroUrl,
   type HeroVideo,
 } from "@/lib/content/hero-videos";
 import { normalizeBannerTextStyle } from "@/lib/content/banner-style";
@@ -338,15 +340,14 @@ export async function fetchActiveEventHeroVideos(): Promise<ActiveEventHeroVideo
           label: String(v?.label || `Event clip ${i + 1}`).trim(),
           durationSec: normalizeClipDurationSec(v?.durationSec, 3),
         }))
-        .filter((v) => Boolean(v.mp4))
+        .filter((v) => isPlayableCmsHeroUrl(v.mp4))
         .slice(0, 3)
         .map((v) => ({
           mp4: v.mp4,
           label: v.label,
           durationSec: v.durationSec,
-          ...(v.webm ? { webm: v.webm } : {}),
-          // Keep poster only when admin set one — never inject default public hero posters.
-          ...(v.poster ? { poster: v.poster } : {}),
+          ...(v.webm && isPlayableCmsHeroUrl(v.webm) ? { webm: v.webm } : {}),
+          ...(v.poster && !isLegacyBundledHeroUrl(v.poster) ? { poster: v.poster } : {}),
         }));
       if (videos.length === 0) return null;
       return { presetId, eventKey, videos };
@@ -776,10 +777,6 @@ export async function fetchLeadership(): Promise<LeadershipMember[]> {
       const snap = await getDocs(collection(getFirebaseDb(), COLLECTIONS.leadership));
       if (snap.empty) return localLeadership;
 
-      const localByName = new Map(
-        localLeadership.map((m) => [m.name.trim().toLowerCase(), m]),
-      );
-
       type LeadershipRow = LeadershipMember & { sortOrder: number };
       const rows = snap.docs
         .map((d): LeadershipRow | null => {
@@ -788,11 +785,8 @@ export async function fetchLeadership(): Promise<LeadershipMember[]> {
           const name = String(x.name || "").trim();
           if (!isUsablePersonName(name)) return null;
           const linkedin = String(x.linkedin || "").trim();
-          const local = localByName.get(name.toLowerCase());
-          const photo = resolveResilientAssetUrl(
-            x.photoUrl ? String(x.photoUrl) : "",
-            local?.photoSrc,
-          );
+          // CMS owns photos — empty photoUrl → initials on the site (not local seed files).
+          const photo = String(x.photoUrl || "").trim();
           return {
             name,
             title: String(x.designation || x.title || "").trim(),

@@ -28,36 +28,12 @@ import {
   isAcceptableImageUpload,
   shouldConvertToWebp,
 } from "@/lib/admin/image-convert";
-import { partners as localPartners } from "@/lib/content/partners";
-import { clients as localClients } from "@/lib/content/clients";
-import { services as localServices } from "@/lib/content/services";
-import { getServiceDetail } from "@/lib/content/service-details";
-import { leadershipTeam as localLeadership } from "@/lib/content/leadership";
-import { officeLocationsDetailed as localOffices } from "@/lib/content/company-profile";
 
 export type MediaLibraryItem = MediaAsset & {
-  /** Referenced by CMS and/or bundled site content (local /images paths) */
+  /** Referenced by live CMS / settings / theme docs (not local seed files) */
   used: boolean;
   /** Present in Firestore media index (false = Storage-only orphan until synced) */
   indexed: boolean;
-};
-
-/**
- * Seed map inverse: Firebase Storage folder → public paths the live site uses.
- * Media Library copies of those files must count as "in use".
- */
-const STORAGE_FOLDER_TO_PUBLIC: Record<string, string[]> = {
-  "partners/hero": ["/images/partners/hero/"],
-  partners: ["/images/partners/profile/", "/images/partners/"],
-  offices: ["/images/offices/"],
-  clients: ["/images/clients/"],
-  "services/heroes": ["/images/services/heroes/"],
-  services: ["/images/services/"],
-  leadership: ["/images/leadership/"],
-  careers: ["/images/careers/"],
-  gallery: ["/images/case-studies/", "/images/dynatrace/"],
-  logos: ["/brand/"],
-  hero: ["/videos/hero/", "/videos/", "/images/hero/"],
 };
 
 function safeName(name: string) {
@@ -193,43 +169,18 @@ export async function syncStorageToMediaIndex(options?: {
 }
 
 /**
- * Collect every media-like URL currently referenced across CMS collections + site settings.
+ * Collect every media URL referenced in live CMS (Firestore only).
+ * Local seed `/images/...` files do NOT mark Firebase Storage copies as "in use".
  */
-/** Bundled public-site assets (non-blog). Blog covers are Firebase-only. */
-function addBundledSiteAssetUrls(used: Set<string>) {
-  for (const partner of localPartners) {
-    if (partner.logo) used.add(partner.logo);
-    if (partner.heroImageUrl) used.add(partner.heroImageUrl);
-  }
-  for (const client of localClients) {
-    if (client.logo) used.add(client.logo);
-  }
-  for (const service of localServices) {
-    if (service.image) used.add(service.image);
-    const detail = getServiceDetail(service.slug);
-    if (detail?.heroImage) used.add(detail.heroImage);
-  }
-  for (const member of localLeadership) {
-    if (member.photoSrc) used.add(member.photoSrc);
-  }
-  for (const office of localOffices) {
-    if (office.landmark?.image) used.add(office.landmark.image);
-    if (office.landmark?.background) used.add(office.landmark.background);
-  }
-}
-
 export async function collectUsedMediaUrls(): Promise<Set<string>> {
   const used = new Set<string>();
   const db = getFirebaseDb();
-
-  addBundledSiteAssetUrls(used);
 
   const collectionsToScan: string[] = [
     COLLECTIONS.settings,
     COLLECTIONS.blogs,
     COLLECTIONS.leadership,
     COLLECTIONS.services,
-    COLLECTIONS.industries,
     COLLECTIONS.partners,
     COLLECTIONS.clients,
     COLLECTIONS.caseStudies,
@@ -242,6 +193,7 @@ export async function collectUsedMediaUrls(): Promise<Set<string>> {
     COLLECTIONS.offices,
     COLLECTIONS.seo,
     COLLECTIONS.theme,
+    COLLECTIONS.themePresets,
     COLLECTIONS.navigation,
   ];
 
@@ -305,22 +257,14 @@ function walkForMediaUrls(value: unknown, out: Set<string>) {
 function assetIsUsed(asset: MediaAsset, used: Set<string>) {
   if (asset.url && used.has(asset.url)) return true;
   if (asset.path && used.has(asset.path)) return true;
-  if (asset.url) {
+  if (asset.url || asset.path) {
     for (const u of used) {
-      if (typeof u === "string" && asset.url && u.includes(encodeURIComponent(asset.path))) return true;
-      if (asset.path && u.includes(asset.path)) return true;
+      if (typeof u !== "string") continue;
+      if (asset.path && (u === asset.path || u.includes(asset.path))) return true;
+      if (asset.url && u === asset.url) return true;
+      if (asset.path && u.includes(encodeURIComponent(asset.path))) return true;
     }
   }
-
-  // Seeded Storage copy of a bundled site file, e.g. partners/logo.webp ↔ /images/partners/...
-  const fileName = (asset.name || asset.path.split("/").pop() || "").trim();
-  if (fileName) {
-    const folder = asset.folder || folderFromPath(asset.path);
-    for (const prefix of STORAGE_FOLDER_TO_PUBLIC[folder] || []) {
-      if (used.has(`${prefix}${fileName}`)) return true;
-    }
-  }
-
   return false;
 }
 

@@ -43,7 +43,10 @@ export function HeroVideoSlotsEditor({
             </p>
             <button
               type="button"
-              onClick={() => onChange(videos.filter((_, i) => i !== index))}
+              onClick={() => {
+                const next = videos.filter((_, i) => i !== index);
+                onChange(next.length ? next : []);
+              }}
               className="text-sm font-medium text-red-600 hover:underline"
             >
               Remove
@@ -101,6 +104,18 @@ export function HeroVideoSlotsEditor({
           Add clip
         </button>
       ) : null}
+      {videos.some((v) => v.mp4) ? (
+        <button
+          type="button"
+          onClick={() => onChange([])}
+          className="ml-2 rounded-lg border border-red-200 px-3 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-950/40"
+        >
+          Clear all clips
+        </button>
+      ) : null}
+      <p className="text-[11px] text-zinc-500">
+        Only Firebase uploads play on the site. After Remove / Clear, click Save so the homepage updates.
+      </p>
     </div>
   );
 }

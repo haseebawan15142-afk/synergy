@@ -142,11 +142,17 @@ export function WebsiteSettingsForm() {
           ...form,
           phones,
           socialLinks,
+          // Always write the array (including []) so Remove/Clear actually clears Firestore.
           heroVideos,
           ...syncLegacySocialFields(socialLinks),
         },
         user?.uid,
       );
+
+      setForm((prev) => ({
+        ...prev,
+        heroVideos: landingHeroSlotsForAdmin(heroVideos),
+      }));
 
       await addDoc(collection(getFirebaseDb(), COLLECTIONS.activities), {
         type: "settings.update",
@@ -158,7 +164,11 @@ export function WebsiteSettingsForm() {
         createdAt: serverTimestamp(),
       });
 
-      toast.success("Settings saved — public site cache cleared");
+      toast.success(
+        heroVideos.length
+          ? `Settings saved — ${heroVideos.length} hero clip(s) on the homepage`
+          : "Settings saved — hero clips cleared on the homepage",
+      );
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Save failed");
     } finally {
@@ -396,10 +406,9 @@ export function WebsiteSettingsForm() {
       <section className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
         <h2 className="text-sm font-semibold">Landing page hero videos</h2>
         <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
-          Default home hero playlist (up to 6 clips). Upload any video format — it converts to web MP4.
-          Click <strong>Save settings</strong> after uploading so the public homepage picks up the new
-          clips. If an event theme is active with its own videos, those override this playlist until you
-          deactivate the theme.
+          Default home hero playlist (up to 6 clips). Only Firebase uploads appear on the site — old
+          local <code className="text-[10px]">/videos/hero/</code> files were removed. Remove or Clear
+          clips, then <strong>Save settings</strong> so the homepage updates immediately.
         </p>
         <div className="mt-4">
           <HeroVideoSlotsEditor

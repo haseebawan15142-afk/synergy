@@ -5,7 +5,6 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { cn } from "@/lib/cn";
 import {
   eventHeroVideoTransitionMs,
-  heroFallbackPoster,
   heroVideoTransitionMs,
   clipDurationMs,
   type HeroVideo,
@@ -401,27 +400,35 @@ export function HeroVideoBackground({
 
   const fallbackPoster = useMemo(() => {
     const first = playlist[0]?.poster?.trim();
-    if (first) return first;
-    return heroFallbackPoster;
+    return first && !first.startsWith("/videos/hero/") ? first : "";
   }, [playlist]);
 
   if (!playlistReady && !playlist.length) {
     return (
-      <div className="absolute inset-0">
-        <Image
-          src={heroFallbackPoster}
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover"
-          aria-hidden
-        />
-      </div>
+      <div
+        className="absolute inset-0 bg-[#05030A]"
+        style={{
+          backgroundImage:
+            "radial-gradient(ellipse 70% 50% at 20% 40%, rgba(124,58,237,0.35), transparent 60%), radial-gradient(ellipse 50% 40% at 80% 70%, rgba(192,38,211,0.2), transparent 55%)",
+        }}
+        aria-hidden
+      />
     );
   }
 
   if (mode === "poster") {
+    if (!fallbackPoster) {
+      return (
+        <div
+          className="absolute inset-0 bg-[#05030A]"
+          style={{
+            backgroundImage:
+              "radial-gradient(ellipse 70% 50% at 20% 40%, rgba(124,58,237,0.35), transparent 60%)",
+          }}
+          aria-hidden
+        />
+      );
+    }
     return (
       <div className="absolute inset-0">
         <Image
@@ -441,38 +448,49 @@ export function HeroVideoBackground({
   const activeClip = playlist[0];
   if (!activeClip) {
     return (
-      <div className="absolute inset-0">
-        <Image
-          src={heroFallbackPoster}
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover"
-          aria-hidden
-        />
-      </div>
+      <div
+        className="absolute inset-0 bg-[#05030A]"
+        style={{
+          backgroundImage:
+            "radial-gradient(ellipse 70% 50% at 20% 40%, rgba(124,58,237,0.35), transparent 60%)",
+        }}
+        aria-hidden
+      />
     );
   }
 
-  const posterSrc = activeClip.poster?.trim() || heroFallbackPoster;
+  const posterSrc = activeClip.poster?.trim() || "";
   const loopSingle = !playOnceThenNext;
 
   return (
     <div className="absolute inset-0" data-hero-playlist={playlistKey}>
-      <Image
-        src={posterSrc}
-        alt=""
-        fill
-        priority
-        sizes="100vw"
-        className={cn(
-          "object-cover transition-opacity duration-300",
-          videoRevealed ? "opacity-0" : "opacity-100",
-        )}
-        aria-hidden
-        unoptimized={posterSrc.startsWith("http")}
-      />
+      {posterSrc ? (
+        <Image
+          src={posterSrc}
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className={cn(
+            "object-cover transition-opacity duration-300",
+            videoRevealed ? "opacity-0" : "opacity-100",
+          )}
+          aria-hidden
+          unoptimized={posterSrc.startsWith("http")}
+        />
+      ) : (
+        <div
+          className={cn(
+            "absolute inset-0 bg-[#05030A] transition-opacity duration-300",
+            videoRevealed ? "opacity-0" : "opacity-100",
+          )}
+          style={{
+            backgroundImage:
+              "radial-gradient(ellipse 70% 50% at 20% 40%, rgba(124,58,237,0.35), transparent 60%)",
+          }}
+          aria-hidden
+        />
+      )}
 
       <video
         ref={setLayer0}

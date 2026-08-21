@@ -28,35 +28,36 @@ export function clipDurationMs(
 }
 
 /**
- * Landing page hero videos — each clip plays once, then smooth crossfade to the next (cycles).
- * Run `npm run optimize:videos` after replacing source files.
- * Oversized WebM siblings were removed (MP4 is smaller); optional `webm` omitted.
+ * Reject legacy bundled public files. Hero playlist is Firebase/CMS only.
  */
-export const heroVideos: HeroVideo[] = [
-  {
-    label: "Landing clip 1",
-    mp4: "/videos/hero/landing-01.mp4",
-    poster: "/videos/hero/landing-01-poster.webp",
-  },
-  {
-    label: "Landing clip 2",
-    mp4: "/videos/hero/landing-02.mp4",
-    poster: "/videos/hero/landing-02-poster.jpg",
-  },
-  {
-    label: "Landing clip 3",
-    mp4: "/videos/hero/landing-03.mp4",
-    poster: "/videos/hero/landing-03-poster.webp",
-  },
-  {
-    label: "Landing clip 4",
-    mp4: "/videos/hero/landing-04.mp4",
-    poster: "/videos/hero/landing-04-poster.webp",
-  },
-];
+export function isLegacyBundledHeroUrl(url: string): boolean {
+  const v = String(url || "").trim().toLowerCase();
+  if (!v) return false;
+  if (/\/videos\/hero\/landing-0[1-4]/i.test(v)) return true;
+  if (v.startsWith("/videos/hero/")) return true;
+  return false;
+}
 
-/** Primary poster for mobile / slow connections (first clip). */
-export const heroFallbackPoster = heroVideos[0]?.poster ?? "/videos/hero/landing-01-poster.webp";
+/** True when the clip can play on the public site (remote CMS / Storage). */
+export function isPlayableCmsHeroUrl(url: string): boolean {
+  const v = String(url || "").trim();
+  if (!v || isLegacyBundledHeroUrl(v)) return false;
+  return (
+    v.startsWith("https://") ||
+    v.startsWith("http://") ||
+    v.includes("firebasestorage") ||
+    v.includes("storage.googleapis")
+  );
+}
+
+/** No bundled playlist — empty until Admin → Website Settings saves clips. */
+export const heroVideos: HeroVideo[] = [];
+
+/**
+ * No local poster file. Components use a CSS backdrop when CMS has no poster.
+ * Kept as empty string so callers never preload a deleted public asset.
+ */
+export const heroFallbackPoster = "";
 
 /** Fallback duration if a clip never fires `ended` (ms) — landing prefers full play-once. */
 export const heroVideoIntervalMs = 8000;
@@ -85,28 +86,33 @@ export function normalizeLandingHeroVideos(
       const label = String(v?.label || `Clip ${i + 1}`).trim();
       const durationSec = normalizeClipDurationSec(v?.durationSec, 8);
       const row: HeroVideo = { mp4, label, durationSec };
-      if (poster) row.poster = poster;
-      if (webm) row.webm = webm;
+      if (poster && !isLegacyBundledHeroUrl(poster)) row.poster = poster;
+      if (webm && isPlayableCmsHeroUrl(webm)) row.webm = webm;
       return row;
     })
-    .filter((v) => Boolean(v.mp4))
+    .filter((v) => isPlayableCmsHeroUrl(v.mp4))
     .slice(0, max);
 }
 
-/** CMS playlist when saved; otherwise bundled landing clips so the hero never goes blank. */
+/**
+ * CMS playlist only. Empty = no hero video (CSS backdrop on the site).
+ * Never re-injects deleted or local public/videos/hero clips.
+ */
 export function resolveLandingHeroVideos(videos?: HeroVideo[] | null): HeroVideo[] {
-  const fromCms = normalizeLandingHeroVideos(videos);
-  return fromCms.length ? fromCms : heroVideos;
+  return normalizeLandingHeroVideos(videos);
 }
 
+/** Admin editor slots — empty when CMS has no clips. */
 export function landingHeroSlotsForAdmin(videos?: HeroVideo[] | null): HeroVideo[] {
   const source = normalizeLandingHeroVideos(videos);
-  const seeded = source.length ? source : heroVideos;
-  return seeded.map((clip, i) => ({
-    mp4: clip.mp4 || "",
-    poster: clip.poster || "",
-    webm: clip.webm || "",
-    label: clip.label || `Clip ${i + 1}`,
-    durationSec: normalizeClipDurationSec(clip.durationSec, 8),
-  }));
+  if (source.length) {
+    return source.map((clip, i) => ({
+      mp4: clip.mp4 || "",
+      poster: clip.poster || "",
+      webm: clip.webm || "",
+      label: clip.label || `Clip ${i + 1}`,
+      durationSec: normalizeClipDurationSec(clip.durationSec, 8),
+    }));
+  }
+  return [{ ...emptyLandingHeroSlot(0) }];
 }

@@ -123,7 +123,7 @@ export function MediaLibraryView() {
     <div>
       <AdminPageHeader
         title="Media Library"
-        description="Firebase Storage catalog by folder. “In use” includes CMS links and bundled site files. Blog covers are Firebase-only. Only delete Unused after review."
+        description="Firebase Storage catalog by folder. “In use” means a CMS/settings/theme document still links this URL. Local seed files no longer mark Storage copies as used. Only delete Unused after review."
         actions={
           <div className="flex flex-wrap gap-2">
             <SecondaryButton type="button" disabled={syncing || loading} onClick={() => void handleSync()}>

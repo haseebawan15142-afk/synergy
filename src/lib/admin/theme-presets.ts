@@ -18,7 +18,7 @@ import { COLLECTIONS, DOCS } from "@/lib/firebase/collections";
 import { invalidateCmsCache } from "@/lib/cms/cache";
 import { requestPublicCmsRevalidate } from "@/lib/cms/revalidate-client";
 import { normalizeBannerTextStyle } from "@/lib/content/banner-style";
-import { normalizeClipDurationSec } from "@/lib/content/hero-videos";
+import { normalizeClipDurationSec, isPlayableCmsHeroUrl, isLegacyBundledHeroUrl } from "@/lib/content/hero-videos";
 
 export const THEME_PRESET_PREFIX = "preset_";
 
@@ -87,11 +87,11 @@ export function normalizeHeroVideos(
       const label = String(v?.label || `Event clip ${i + 1}`).trim();
       const durationSec = normalizeClipDurationSec(v?.durationSec, 3);
       const row: ThemeHeroVideo = { mp4, label, durationSec };
-      if (poster) row.poster = poster;
-      if (webm) row.webm = webm;
+      if (poster && !isLegacyBundledHeroUrl(poster)) row.poster = poster;
+      if (webm && isPlayableCmsHeroUrl(webm)) row.webm = webm;
       return row;
     })
-    .filter((v) => Boolean(v.mp4))
+    .filter((v) => isPlayableCmsHeroUrl(v.mp4))
     .slice(0, 3);
 }
 

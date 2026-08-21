@@ -13,6 +13,8 @@ import {
 import {
   normalizeClipDurationSec,
   resolveLandingHeroVideos,
+  isPlayableCmsHeroUrl,
+  isLegacyBundledHeroUrl,
   type HeroVideo,
 } from "@/lib/content/hero-videos";
 import { invalidateCmsCache } from "@/lib/cms/cache";
@@ -51,10 +53,10 @@ function parseHeroVideos(data: ActivePresetDoc | null): ActiveEventHeroVideos | 
       const webm = String(v?.webm || "").trim();
       const label = String(v?.label || `Event clip ${i + 1}`).trim();
       const durationSec = normalizeClipDurationSec(v?.durationSec, 3);
-      if (!mp4) return null;
+      if (!isPlayableCmsHeroUrl(mp4)) return null;
       const row: HeroVideo = { mp4, label, durationSec };
-      if (webm) row.webm = webm;
-      if (poster) row.poster = poster;
+      if (webm && isPlayableCmsHeroUrl(webm)) row.webm = webm;
+      if (poster && !isLegacyBundledHeroUrl(poster)) row.poster = poster;
       return row;
     })
     .filter((v): v is HeroVideo => Boolean(v))

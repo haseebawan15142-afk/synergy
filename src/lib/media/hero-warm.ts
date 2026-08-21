@@ -1,30 +1,22 @@
-const CACHE_NAME = "synergy-hero-videos-v2";
+const CACHE_PREFIX = "synergy-hero-videos-";
 
-/** Start downloading a hero clip into the Cache API as early as possible. */
+/** Warm a remote hero URL without sticky Cache API (deleted Storage files must not keep playing). */
 export function warmHeroVideo(url: string): void {
-  if (!url || typeof window === "undefined" || !("caches" in window)) return;
-  if (url.startsWith("/")) {
-    // Same-origin — browser HTTP cache + <link rel=preload> is enough.
-    return;
-  }
+  if (!url || typeof window === "undefined") return;
+  if (url.startsWith("/")) return;
 
   void (async () => {
     try {
-      // Drop the previous warm cache so replaced Firebase URLs are not sticky.
-      const keys = await caches.keys();
-      await Promise.all(
-        keys
-          .filter((k) => k.startsWith("synergy-hero-videos-") && k !== CACHE_NAME)
-          .map((k) => caches.delete(k)),
-      );
-
-      const cache = await caches.open(CACHE_NAME);
-      const hit = await cache.match(url);
-      if (hit) return;
-      const res = await fetch(url, { mode: "cors", credentials: "omit", cache: "no-cache" });
-      if (res.ok) await cache.put(url, res.clone());
+      if ("caches" in window) {
+        const keys = await caches.keys();
+        await Promise.all(
+          keys.filter((k) => k.startsWith(CACHE_PREFIX)).map((k) => caches.delete(k)),
+        );
+      }
+      // Fire-and-forget network warm — do not store forever in Cache API.
+      await fetch(url, { mode: "cors", credentials: "omit", cache: "no-store" });
     } catch {
-      /* CORS / offline — preload link still helps */
+      /* CORS / offline — <video preload> still helps */
     }
   })();
 }
