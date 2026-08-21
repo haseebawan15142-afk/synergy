@@ -3,7 +3,7 @@ import { CeoMessageSection } from "@/components/about/CeoMessageSection";
 import { BoardOfDirectorsSection } from "@/components/about/BoardOfDirectorsSection";
 import { ExpertiseSection } from "@/components/about/ExpertiseSection";
 import { AccomplishmentsSection } from "@/components/about/AccomplishmentsSection";
-import { PageHeader } from "@/components/ui/PageHeader";
+import { AboutHero } from "@/components/about/AboutHero";
 import {
   aboutUsFromProfile,
   companyProfileMeta,
@@ -32,7 +32,7 @@ export default async function AboutPage() {
 
   return (
     <>
-      <PageHeader
+      <AboutHero
         title="Driving excellence through technology"
         description={`Synergy Computers (Pvt.) Ltd — ${companyProfileMeta.tagline}. Trusted technology partner in Pakistan since ${companyProfileMeta.foundedYear}.`}
       />
